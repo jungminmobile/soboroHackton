@@ -2,14 +2,10 @@ package com.example.soboroskin.onboarding
 
 import android.content.Intent
 import android.os.Bundle
-import android.view.animation.AlphaAnimation
-import android.view.animation.AnimationSet
-import android.view.animation.TranslateAnimation
-import android.widget.ImageView
-import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.viewpager2.widget.ViewPager2
 import com.example.soboroskin.MainActivity
+import com.example.soboroskin.R
 import com.example.soboroskin.databinding.ActivityOnboardingBinding
 
 class OnboardingActivity : AppCompatActivity() {
@@ -22,21 +18,9 @@ class OnboardingActivity : AppCompatActivity() {
     }
 
     private val pages = listOf(
-        OnboardingPage(
-            titleRes = com.example.soboroskin.R.string.onboarding_title_1,
-            descRes = com.example.soboroskin.R.string.onboarding_desc_1,
-            emoji = "🔬"
-        ),
-        OnboardingPage(
-            titleRes = com.example.soboroskin.R.string.onboarding_title_2,
-            descRes = com.example.soboroskin.R.string.onboarding_desc_2,
-            emoji = "📔"
-        ),
-        OnboardingPage(
-            titleRes = com.example.soboroskin.R.string.onboarding_title_3,
-            descRes = com.example.soboroskin.R.string.onboarding_desc_3,
-            emoji = "✨"
-        )
+        OnboardingPage(R.string.onboarding_title_1, R.string.onboarding_desc_1, "🔬"),
+        OnboardingPage(R.string.onboarding_title_2, R.string.onboarding_desc_2, "📔"),
+        OnboardingPage(R.string.onboarding_title_3, R.string.onboarding_desc_3, "✨")
     )
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -71,28 +55,26 @@ class OnboardingActivity : AppCompatActivity() {
 
     private fun updateDots(position: Int) {
         val dots = listOf(binding.dot1, binding.dot2, binding.dot3)
-        val activeDp = resources.getDimensionPixelSize(com.example.soboroskin.R.dimen.onboarding_dot_active_width)
-        val inactiveDp = resources.getDimensionPixelSize(com.example.soboroskin.R.dimen.onboarding_dot_size)
+        val activeDp = resources.getDimensionPixelSize(R.dimen.onboarding_dot_active_width)
+        val inactiveDp = resources.getDimensionPixelSize(R.dimen.onboarding_dot_size)
 
         dots.forEachIndexed { index, view ->
             val lp = view.layoutParams
             if (index == position) {
                 lp.width = activeDp
-                view.setBackgroundResource(com.example.soboroskin.R.drawable.bg_onboarding_dot_active)
+                view.setBackgroundResource(R.drawable.bg_onboarding_dot_active)
             } else {
                 lp.width = inactiveDp
-                view.setBackgroundResource(com.example.soboroskin.R.drawable.bg_onboarding_dot_inactive)
+                view.setBackgroundResource(R.drawable.bg_onboarding_dot_inactive)
             }
             view.layoutParams = lp
         }
     }
 
     private fun updateButton(position: Int) {
-        if (position == pages.size - 1) {
-            binding.btnNext.text = getString(com.example.soboroskin.R.string.btn_start)
-        } else {
-            binding.btnNext.text = getString(com.example.soboroskin.R.string.btn_next)
-        }
+        binding.btnNext.text = getString(
+            if (position == pages.size - 1) R.string.btn_start else R.string.btn_next
+        )
     }
 
     private fun setupButtons() {
@@ -104,10 +86,7 @@ class OnboardingActivity : AppCompatActivity() {
                 finishOnboarding()
             }
         }
-
-        binding.btnSkip.setOnClickListener {
-            finishOnboarding()
-        }
+        binding.btnSkip.setOnClickListener { finishOnboarding() }
     }
 
     private fun finishOnboarding() {
@@ -123,6 +102,7 @@ class OnboardingActivity : AppCompatActivity() {
             Intent(this, MainActivity::class.java)
                 .addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_NEW_TASK)
         )
+        @Suppress("DEPRECATION")
         overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out)
         finish()
     }

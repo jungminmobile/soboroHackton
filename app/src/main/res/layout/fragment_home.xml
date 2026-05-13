@@ -89,110 +89,119 @@
                         android:text="2024. 01. 15" />
                 </LinearLayout>
 
-                <!-- Scores Grid -->
-                <androidx.gridlayout.widget.GridLayout
+                <!-- Scores 2x2 Grid (LinearLayout 방식) -->
+                <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="16dp"
-                    app:columnCount="2"
-                    app:rowCount="2">
+                    android:orientation="vertical"
+                    android:layout_marginTop="16dp">
 
-                    <!-- Moisture -->
+                    <!-- Row 1: 수분 + 유분 -->
                     <LinearLayout
-                        android:layout_width="0dp"
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:orientation="vertical"
-                        android:padding="8dp"
-                        app:layout_columnWeight="1">
-                        <TextView
-                            android:layout_width="wrap_content"
+                        android:orientation="horizontal">
+
+                        <LinearLayout
+                            android:layout_width="0dp"
                             android:layout_height="wrap_content"
-                            android:text="💧 수분"
-                            android:textSize="13sp"
-                            android:textColor="@color/text_secondary" />
-                        <TextView
-                            android:id="@+id/tv_score_moisture"
-                            android:layout_width="wrap_content"
+                            android:layout_weight="1"
+                            android:orientation="vertical"
+                            android:padding="8dp">
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="💧 수분"
+                                android:textSize="13sp"
+                                android:textColor="@color/text_secondary" />
+                            <TextView
+                                android:id="@+id/tv_score_moisture"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="78점"
+                                android:textSize="20sp"
+                                android:textStyle="bold"
+                                android:textColor="@color/accent_moisture"
+                                android:layout_marginTop="2dp" />
+                        </LinearLayout>
+
+                        <LinearLayout
+                            android:layout_width="0dp"
                             android:layout_height="wrap_content"
-                            android:text="78점"
-                            android:textSize="20sp"
-                            android:textStyle="bold"
-                            android:textColor="@color/accent_moisture"
-                            android:layout_marginTop="2dp" />
+                            android:layout_weight="1"
+                            android:orientation="vertical"
+                            android:padding="8dp">
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="✨ 유분"
+                                android:textSize="13sp"
+                                android:textColor="@color/text_secondary" />
+                            <TextView
+                                android:id="@+id/tv_score_oil"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="45점"
+                                android:textSize="20sp"
+                                android:textStyle="bold"
+                                android:textColor="@color/accent_oil"
+                                android:layout_marginTop="2dp" />
+                        </LinearLayout>
                     </LinearLayout>
 
-                    <!-- Oil -->
+                    <!-- Row 2: 트러블 + 탄력 -->
                     <LinearLayout
-                        android:layout_width="0dp"
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:orientation="vertical"
-                        android:padding="8dp"
-                        app:layout_columnWeight="1">
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="✨ 유분"
-                            android:textSize="13sp"
-                            android:textColor="@color/text_secondary" />
-                        <TextView
-                            android:id="@+id/tv_score_oil"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="45점"
-                            android:textSize="20sp"
-                            android:textStyle="bold"
-                            android:textColor="@color/accent_oil"
-                            android:layout_marginTop="2dp" />
-                    </LinearLayout>
+                        android:orientation="horizontal">
 
-                    <!-- Trouble -->
-                    <LinearLayout
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:orientation="vertical"
-                        android:padding="8dp"
-                        app:layout_columnWeight="1">
-                        <TextView
-                            android:layout_width="wrap_content"
+                        <LinearLayout
+                            android:layout_width="0dp"
                             android:layout_height="wrap_content"
-                            android:text="🔴 트러블"
-                            android:textSize="13sp"
-                            android:textColor="@color/text_secondary" />
-                        <TextView
-                            android:id="@+id/tv_score_trouble"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="30점"
-                            android:textSize="20sp"
-                            android:textStyle="bold"
-                            android:textColor="@color/accent_trouble"
-                            android:layout_marginTop="2dp" />
-                    </LinearLayout>
+                            android:layout_weight="1"
+                            android:orientation="vertical"
+                            android:padding="8dp">
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="🔴 트러블"
+                                android:textSize="13sp"
+                                android:textColor="@color/text_secondary" />
+                            <TextView
+                                android:id="@+id/tv_score_trouble"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="30점"
+                                android:textSize="20sp"
+                                android:textStyle="bold"
+                                android:textColor="@color/accent_trouble"
+                                android:layout_marginTop="2dp" />
+                        </LinearLayout>
 
-                    <!-- Elasticity -->
-                    <LinearLayout
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:orientation="vertical"
-                        android:padding="8dp"
-                        app:layout_columnWeight="1">
-                        <TextView
-                            android:layout_width="wrap_content"
+                        <LinearLayout
+                            android:layout_width="0dp"
                             android:layout_height="wrap_content"
-                            android:text="💜 탄력"
-                            android:textSize="13sp"
-                            android:textColor="@color/text_secondary" />
-                        <TextView
-                            android:id="@+id/tv_score_elasticity"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="65점"
-                            android:textSize="20sp"
-                            android:textStyle="bold"
-                            android:textColor="@color/accent_elasticity"
-                            android:layout_marginTop="2dp" />
+                            android:layout_weight="1"
+                            android:orientation="vertical"
+                            android:padding="8dp">
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="💜 탄력"
+                                android:textSize="13sp"
+                                android:textColor="@color/text_secondary" />
+                            <TextView
+                                android:id="@+id/tv_score_elasticity"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="65점"
+                                android:textSize="20sp"
+                                android:textStyle="bold"
+                                android:textColor="@color/accent_elasticity"
+                                android:layout_marginTop="2dp" />
+                        </LinearLayout>
                     </LinearLayout>
-                </androidx.gridlayout.widget.GridLayout>
+                </LinearLayout>
             </LinearLayout>
 
             <!-- Empty state -->

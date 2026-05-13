@@ -29,8 +29,7 @@
         android:id="@+id/scan_overlay_container"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:visibility="gone"
-        android:translationY="100%">
+        android:visibility="gone">
 
         <androidx.fragment.app.FragmentContainerView
             android:id="@+id/scan_fragment_container"

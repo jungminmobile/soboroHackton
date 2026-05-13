@@ -1,7 +1,7 @@
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
-    id("kotlin-kapt") // kts에서 kapt 플러그인을 활성화하는 올바른 방식
+    alias(libs.plugins.kotlin.kapt)
 }
 
 android {
@@ -40,19 +40,22 @@ android {
 }
 
 dependencies {
-    // 안드로이드 스튜디오 기본 제공 (기존 유지)
+    // 안드로이드 스튜디오 기본 제공
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.appcompat)
     implementation(libs.material)
+
+    // ConstraintLayout
+    implementation("androidx.constraintlayout:constraintlayout:2.1.4")
 
     // Navigation
     implementation("androidx.navigation:navigation-fragment-ktx:2.7.7")
     implementation("androidx.navigation:navigation-ui-ktx:2.7.7")
 
-    // Room (로컬 데이터베이스)
-    implementation("androidx.room:room-runtime:2.6.1")
-    implementation("androidx.room:room-ktx:2.6.1")
-    kapt("androidx.room:room-compiler:2.6.1")
+    // Room 2.7.0 — Kotlin 2.2.x 메타데이터 지원 버전
+    implementation("androidx.room:room-runtime:2.7.0")
+    implementation("androidx.room:room-ktx:2.7.0")
+    kapt("androidx.room:room-compiler:2.7.0")
 
     // CameraX (카메라 제어)
     val camerax_version = "1.3.2"
@@ -71,9 +74,8 @@ dependencies {
     // Coroutines
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3")
 
-    // Glide (이미지 처리)
+    // Glide (kapt compiler 제거 — 기본 이미지 로딩엔 불필요)
     implementation("com.github.bumptech.glide:glide:4.16.0")
-    kapt("com.github.bumptech.glide:compiler:4.16.0")
 
     // MPAndroidChart (차트 시각화)
     implementation("com.github.PhilJay:MPAndroidChart:v3.1.0")
