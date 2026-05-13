@@ -1,0 +1,88 @@
+<resources>
+    <string name="app_name">소보로스킨</string>
+
+    <!-- Bottom Navigation -->
+    <string name="nav_home">홈</string>
+    <string name="nav_diary">기록장</string>
+    <string name="nav_scan">진단</string>
+    <string name="nav_community">커뮤니티</string>
+    <string name="nav_cosmetics">화장품</string>
+
+    <!-- Onboarding -->
+    <string name="onboarding_title_1">AI 피부 진단</string>
+    <string name="onboarding_desc_1">카메라로 피부를 촬영하면\nAI가 상태를 분석해드려요</string>
+    <string name="onboarding_title_2">피부 기록장</string>
+    <string name="onboarding_desc_2">진단 결과와 일상 피부 상태를\n날마다 기록하고 변화를 추적해요</string>
+    <string name="onboarding_title_3">맞춤 화장품 추천</string>
+    <string name="onboarding_desc_3">내 피부 타입에 맞는\n화장품을 추천받아요</string>
+    <string name="btn_next">다음</string>
+    <string name="btn_start">시작하기</string>
+    <string name="btn_skip">건너뛰기</string>
+
+    <!-- Home -->
+    <string name="home_greeting">안녕하세요 👋</string>
+    <string name="home_subtitle">오늘의 피부 상태를 확인해보세요</string>
+    <string name="home_latest_diagnosis">최근 진단 결과</string>
+    <string name="home_no_diagnosis">아직 진단 기록이 없어요\n진단 버튼을 눌러 시작해보세요</string>
+    <string name="home_scan_btn">피부 진단 시작하기</string>
+    <string name="home_tip_title">오늘의 피부 팁</string>
+    <string name="home_quick_record">빠른 기록</string>
+
+    <!-- Scan -->
+    <string name="scan_title">피부 진단</string>
+    <string name="scan_guide">얼굴을 원 안에 맞춰주세요</string>
+    <string name="scan_capture">촬영하기</string>
+    <string name="scan_analyzing">분석 중...</string>
+    <string name="scan_permission_needed">카메라 권한이 필요합니다</string>
+    <string name="scan_permission_btn">권한 허용</string>
+
+    <!-- Scan Result -->
+    <string name="result_title">진단 결과</string>
+    <string name="result_skin_type">피부 타입</string>
+    <string name="result_moisture">수분</string>
+    <string name="result_oil">유분</string>
+    <string name="result_trouble">트러블</string>
+    <string name="result_elasticity">탄력</string>
+    <string name="result_save">기록장에 저장</string>
+    <string name="result_saved">저장되었습니다</string>
+    <string name="result_retry">다시 촬영</string>
+    <string name="result_recommendation">맞춤 추천 보기</string>
+
+    <!-- Diary -->
+    <string name="diary_title">기록장</string>
+    <string name="diary_tab_log">전체 로그</string>
+    <string name="diary_tab_chart">변화 그래프</string>
+    <string name="diary_tab_photo">사진 모아보기</string>
+    <string name="diary_no_record">기록이 없어요\n피부를 진단하거나 기록을 추가해보세요</string>
+    <string name="diary_add_record">기록 추가</string>
+    <string name="diary_ai_diagnosis">AI 진단</string>
+    <string name="diary_manual_record">직접 기록</string>
+
+    <!-- Community -->
+    <string name="community_title">커뮤니티</string>
+    <string name="community_tab_popular">인기</string>
+    <string name="community_tab_recent">최신</string>
+    <string name="community_tab_question">질문</string>
+    <string name="community_write">글쓰기</string>
+    <string name="community_like">좋아요</string>
+    <string name="community_comment">댓글</string>
+
+    <!-- Cosmetics -->
+    <string name="cosmetics_title">화장품 추천</string>
+    <string name="cosmetics_tab_all">전체</string>
+    <string name="cosmetics_tab_toner">토너</string>
+    <string name="cosmetics_tab_serum">세럼</string>
+    <string name="cosmetics_tab_cream">크림</string>
+    <string name="cosmetics_tab_sunscreen">선크림</string>
+    <string name="cosmetics_for_skin_type">내 피부 타입 추천</string>
+
+    <!-- Common -->
+    <string name="btn_close">닫기</string>
+    <string name="btn_cancel">취소</string>
+    <string name="btn_confirm">확인</string>
+    <string name="btn_save">저장</string>
+    <string name="loading">로딩 중...</string>
+    <string name="error_generic">오류가 발생했습니다</string>
+    <string name="score_format">%d점</string>
+    <string name="percent_format">%d%%</string>
+</resources>

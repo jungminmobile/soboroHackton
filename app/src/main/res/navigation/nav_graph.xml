@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/nav_graph"
+    app:startDestination="@id/homeFragment">
+
+    <fragment
+        android:id="@+id/homeFragment"
+        android:name="com.example.soboroskin.ui.home.HomeFragment"
+        android:label="홈"
+        tools:layout="@layout/fragment_home" />
+
+    <fragment
+        android:id="@+id/diaryFragment"
+        android:name="com.example.soboroskin.ui.diary.DiaryFragment"
+        android:label="기록장"
+        tools:layout="@layout/fragment_diary" />
+
+    <fragment
+        android:id="@+id/communityFragment"
+        android:name="com.example.soboroskin.ui.community.CommunityFragment"
+        android:label="커뮤니티"
+        tools:layout="@layout/fragment_community" />
+
+    <fragment
+        android:id="@+id/cosmeticsFragment"
+        android:name="com.example.soboroskin.ui.cosmetics.CosmeticsFragment"
+        android:label="화장품"
+        tools:layout="@layout/fragment_cosmetics" />
+
+</navigation>
