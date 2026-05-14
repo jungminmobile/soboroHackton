@@ -16,6 +16,10 @@ android {
         versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+        ndk {
+            // MediaPipe tasks-vision 0.10.26 only ships arm64-v8a .so files
+            abiFilters += listOf("arm64-v8a")
+        }
     }
 
     buildTypes {
@@ -37,6 +41,27 @@ android {
     buildFeatures {
         viewBinding = true
     }
+
+    aaptOptions {
+        noCompress("tflite")
+    }
+
+    packaging {
+        jniLibs {
+            useLegacyPackaging = false
+        }
+        resources {
+            excludes += "META-INF/LICENSE.md"
+            excludes += "META-INF/LICENSE-notice.md"
+            pickFirsts += "**/libc++_shared.so"
+            pickFirsts += "META-INF/services/org.tensorflow.lite.api.TensorFlowLite"
+        }
+    }
+
+    androidResources {
+        noCompress += "tflite"
+    }
+
 }
 
 dependencies {
@@ -83,4 +108,13 @@ dependencies {
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
+
+    // MediaPipe
+    implementation("com.google.mediapipe:tasks-vision:0.10.26")
+
+    // LiteRT (formerly TFLite) — AcneDetector raw inference, no namespace conflict with MediaPipe
+    implementation("com.google.ai.edge.litert:litert:1.0.1")
+    implementation("com.google.ai.edge.litert:litert-api:1.0.1")
+
 }
+

@@ -93,7 +93,10 @@ class MainActivity : AppCompatActivity() {
         troubleScore: Int,
         elasticityScore: Int,
         aiComment: String,
-        photoPath: String
+        photoPath: String,
+        detections: List<AcneDetection> = emptyList(),
+        imageWidth: Int = 0,
+        imageHeight: Int = 0
     ) {
         val resultFragment = com.example.soboroskin.ui.scan.ScanResultFragment.newInstance(
             skinType = skinType,
@@ -102,7 +105,10 @@ class MainActivity : AppCompatActivity() {
             troubleScore = troubleScore,
             elasticityScore = elasticityScore,
             aiComment = aiComment,
-            photoPath = photoPath
+            photoPath = photoPath,
+            detections = detections,
+            imageWidth = imageWidth,
+            imageHeight = imageHeight
         )
         supportFragmentManager.beginTransaction()
             .setCustomAnimations(android.R.anim.slide_in_left, android.R.anim.slide_out_right)

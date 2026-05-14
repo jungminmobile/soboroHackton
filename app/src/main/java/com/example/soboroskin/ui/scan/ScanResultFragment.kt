@@ -28,6 +28,9 @@ class ScanResultFragment : Fragment() {
         private const val ARG_ELASTICITY = "elasticity"
         private const val ARG_COMMENT = "comment"
         private const val ARG_PHOTO = "photo"
+        private const val ARG_DETECTIONS = "detections"
+        private const val ARG_IMAGE_W = "imageW"
+        private const val ARG_IMAGE_H = "imageH"
 
         fun newInstance(
             skinType: String,
@@ -36,7 +39,10 @@ class ScanResultFragment : Fragment() {
             troubleScore: Int,
             elasticityScore: Int,
             aiComment: String,
-            photoPath: String
+            photoPath: String,
+            detections: List<com.example.soboroskin.AcneDetection> = emptyList(),
+            imageWidth: Int = 0,
+            imageHeight: Int = 0
         ): ScanResultFragment {
             return ScanResultFragment().apply {
                 arguments = Bundle().apply {
@@ -47,6 +53,9 @@ class ScanResultFragment : Fragment() {
                     putInt(ARG_ELASTICITY, elasticityScore)
                     putString(ARG_COMMENT, aiComment)
                     putString(ARG_PHOTO, photoPath)
+                    putSerializable(ARG_DETECTIONS, ArrayList(detections))
+                    putInt(ARG_IMAGE_W, imageWidth)
+                    putInt(ARG_IMAGE_H, imageHeight)
                 }
             }
         }
@@ -70,8 +79,12 @@ class ScanResultFragment : Fragment() {
         val elasticity = arguments?.getInt(ARG_ELASTICITY) ?: 0
         val comment = arguments?.getString(ARG_COMMENT) ?: ""
         val photoPath = arguments?.getString(ARG_PHOTO) ?: ""
+        @Suppress("UNCHECKED_CAST")
+        val detections = (arguments?.getSerializable(ARG_DETECTIONS) as? ArrayList<com.example.soboroskin.AcneDetection>) ?: arrayListOf()
+        val imageW = arguments?.getInt(ARG_IMAGE_W) ?: 0
+        val imageH = arguments?.getInt(ARG_IMAGE_H) ?: 0
 
-        bindResults(skinType, moisture, oil, trouble, elasticity, comment, photoPath)
+        bindResults(skinType, moisture, oil, trouble, elasticity, comment, photoPath, detections, imageW, imageH)
 
         binding.btnBack.setOnClickListener {
             requireActivity().supportFragmentManager.popBackStack()
@@ -94,7 +107,10 @@ class ScanResultFragment : Fragment() {
         trouble: Int,
         elasticity: Int,
         comment: String,
-        photoPath: String
+        photoPath: String,
+        detections: List<com.example.soboroskin.AcneDetection>,
+        imageW: Int,
+        imageH: Int
     ) {
         binding.tvSkinType.text = skinType
         binding.tvMoistureScore.text = getString(R.string.score_format, moisture)
@@ -112,9 +128,15 @@ class ScanResultFragment : Fragment() {
         if (photoPath.isNotEmpty()) {
             Glide.with(this)
                 .load(photoPath)
-                .centerCrop()
                 .placeholder(android.R.drawable.ic_menu_camera)
                 .into(binding.ivCapturedPhoto)
+        }
+
+        // 여드름 박스 오버레이
+        if (detections.isNotEmpty() && imageW > 0 && imageH > 0) {
+            binding.overlayView.setResults(detections, imageW, imageH)
+        } else {
+            binding.overlayView.clear()
         }
     }
 

@@ -43,21 +43,25 @@
             <View android:layout_width="40dp" android:layout_height="40dp" />
         </LinearLayout>
 
-        <!-- Captured Photo -->
-        <androidx.cardview.widget.CardView
-            android:layout_width="120dp"
-            android:layout_height="120dp"
-            android:layout_gravity="center"
-            android:layout_marginTop="20dp"
-            app:cardCornerRadius="60dp"
-            app:cardElevation="4dp">
+        <!-- Captured Photo + Acne Overlay -->
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="300dp"
+            android:layout_marginTop="20dp">
+
             <ImageView
                 android:id="@+id/iv_captured_photo"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:scaleType="centerCrop"
+                android:scaleType="fitCenter"
                 android:src="@android:drawable/ic_menu_camera" />
-        </androidx.cardview.widget.CardView>
+
+            <com.example.soboroskin.OverlayView
+                android:id="@+id/overlay_view"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:background="@android:color/transparent" />
+        </FrameLayout>
 
         <!-- Skin Type -->
         <LinearLayout

@@ -21,6 +21,11 @@ import java.io.File
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 import kotlin.random.Random
+import androidx.lifecycle.lifecycleScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import com.example.soboroskin.SkinAnalyzer
 
 class ScanFragment : Fragment() {
 
@@ -28,6 +33,8 @@ class ScanFragment : Fragment() {
     private val binding get() = _binding!!
 
     private lateinit var cameraExecutor: ExecutorService
+    private var skinAnalyzer: SkinAnalyzer? = null
+
     private var imageCapture: ImageCapture? = null
 
     private val permissionLauncher = registerForActivityResult(
@@ -50,6 +57,12 @@ class ScanFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        skinAnalyzer = try {
+            SkinAnalyzer(requireContext())
+        } catch (t: Throwable) {
+            Log.e("ScanFragment", "SkinAnalyzer init failed — falling back to mock", t)
+            null
+        }
 
         cameraExecutor = Executors.newSingleThreadExecutor()
 
@@ -122,32 +135,86 @@ class ScanFragment : Fragment() {
             ContextCompat.getMainExecutor(requireContext()),
             object : ImageCapture.OnImageSavedCallback {
                 override fun onImageSaved(output: ImageCapture.OutputFileResults) {
-                    // Mock AI 분석 (실제 AI API 연동 시 여기서 호출)
-                    analyzeSkin(photoFile.absolutePath)
+                    val analyzer = skinAnalyzer
+                    if (analyzer == null) {
+                        analyzeSkin(photoFile.absolutePath)
+                        return
+                    }
+                    val bitmap = BitmapFactory.decodeFile(photoFile.absolutePath)
+                    analyzeWithAI(analyzer, bitmap, photoFile.absolutePath)
                 }
 
                 override fun onError(exception: ImageCaptureException) {
                     Log.e("ScanFragment", "Capture failed", exception)
-                    // 카메라 없는 에뮬레이터/개발용 mock 결과
                     analyzeSkin("")
                 }
             }
         ) ?: run {
-            // imageCapture 초기화 안된 경우 mock
             analyzeSkin("")
         }
     }
+    private fun analyzeWithAI(analyzer: SkinAnalyzer, bitmap: Bitmap, photoPath: String) {
+        val imageW = bitmap.width
+        val imageH = bitmap.height
+        lifecycleScope.launch {
+            val result = withContext(Dispatchers.Default) {
+                try {
+                    analyzer.analyze(bitmap)
+                } catch (t: Throwable) {
+                    Log.e("ScanFragment", "SkinAnalyzer.analyze failed — using mock", t)
+                    null
+                }
+            }
 
-    private fun analyzeSkin(photoPath: String) {
-        // Mock AI 분석 결과 생성 (실제 서비스에서는 서버 API 호출)
+            if (result == null) {
+                analyzeSkin(photoPath)
+                return@launch
+            }
+
+            // 감지 결과 확인용 Toast
+            android.widget.Toast.makeText(
+                requireContext(),
+                "얼굴감지:${result.faceDetected} 여드름:${result.detections.size}개",
+                android.widget.Toast.LENGTH_LONG
+            ).show()
+
+            if (!result.faceDetected) {
+                hideAnalyzing()
+                android.widget.Toast.makeText(
+                    requireContext(),
+                    "얼굴을 감지하지 못했어요. 정면을 바라봐 주세요.",
+                    android.widget.Toast.LENGTH_SHORT
+                ).show()
+                return@launch
+            }
+
+            // 여드름 개수 기반 trouble 점수 계산
+            val acneCount = result.detections.size
+            val troubleScore = minOf(100, acneCount * 5)
+
+            // 부위별 결과 로그
+            result.partCounts.forEach { (part, count) ->
+                Log.d("SkinAnalysis", "$part: ${count}개")
+            }
+
+            analyzeSkin(photoPath, troubleScore, result, imageW, imageH)
+        }
+    }
+    private fun analyzeSkin(
+        photoPath: String,
+        troubleScore: Int = Random.nextInt(5, 60),
+        analysisResult: com.example.soboroskin.AnalysisResult? = null,
+        imageWidth: Int = 0,
+        imageHeight: Int = 0
+    ) {
         val skinTypes = listOf("건성", "지성", "복합성", "민감성", "중성")
         val skinType = skinTypes.random()
 
         val moisture = Random.nextInt(40, 95)
         val oil = Random.nextInt(20, 85)
-        val trouble = Random.nextInt(5, 60)
         val elasticity = Random.nextInt(50, 90)
 
+        val acneCount = analysisResult?.detections?.size ?: 0
         val comments = mapOf(
             "건성" to "수분이 부족한 상태예요. 보습 크림과 수분 에센스를 충분히 사용하고, 물을 많이 마셔보세요.",
             "지성" to "유분이 많은 상태예요. 저자극 클렌저로 꼼꼼히 세안하고 가벼운 수분 젤을 사용해보세요.",
@@ -156,16 +223,25 @@ class ScanFragment : Fragment() {
             "중성" to "균형 잡힌 좋은 피부 상태예요! 지금 루틴을 유지하고 수분 공급을 꾸준히 해주세요."
         )
 
+        val aiComment = if (acneCount > 0) {
+            "여드름이 ${acneCount}개 감지됐어요. ${comments[skinType] ?: ""}"
+        } else {
+            comments[skinType] ?: ""
+        }
+
         hideAnalyzing()
 
         (activity as? MainActivity)?.showScanResult(
             skinType = skinType,
             moistureScore = moisture,
             oilScore = oil,
-            troubleScore = trouble,
+            troubleScore = troubleScore,
             elasticityScore = elasticity,
-            aiComment = comments[skinType] ?: "",
-            photoPath = photoPath
+            aiComment = aiComment,
+            photoPath = photoPath,
+            detections = analysisResult?.detections ?: emptyList(),
+            imageWidth = imageWidth,
+            imageHeight = imageHeight
         )
     }
 
