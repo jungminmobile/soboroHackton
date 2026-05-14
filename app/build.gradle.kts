@@ -82,6 +82,9 @@ dependencies {
     implementation("androidx.room:room-ktx:2.7.0")
     kapt("androidx.room:room-compiler:2.7.0")
 
+    // EXIF 회전 처리
+    implementation("androidx.exifinterface:exifinterface:1.3.7")
+
     // CameraX (카메라 제어)
     val camerax_version = "1.3.2"
     implementation("androidx.camera:camera-core:${camerax_version}")

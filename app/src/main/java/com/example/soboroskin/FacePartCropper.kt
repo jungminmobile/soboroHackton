@@ -2,12 +2,15 @@ package com.example.soboroskin
 
 import android.content.Context
 import android.graphics.Bitmap
+import android.graphics.PointF
 import android.graphics.RectF
 import com.google.mediapipe.framework.image.BitmapImageBuilder
 import com.google.mediapipe.tasks.core.BaseOptions
 import com.google.mediapipe.tasks.vision.facelandmarker.FaceLandmarker
 import com.google.mediapipe.tasks.vision.facelandmarker.FaceLandmarker.FaceLandmarkerOptions
 import com.google.mediapipe.tasks.vision.facelandmarker.FaceLandmarkerResult
+
+data class FaceContour(val name: String, val points: List<PointF>)
 
 data class FacePart(
     val name: String,
@@ -139,6 +142,26 @@ class FacePartCropper(private val context: Context) {
         y2 = minOf(imgH.toFloat(), y2 + ph)
         if (x2 - x1 < 10 || y2 - y1 < 10) return null
         return RectF(x1, y1, x2, y2)
+    }
+
+    // PARTS_8 기준 얼굴 부위별 윤곽 포인트 반환
+    fun getContours(bitmap: Bitmap): List<FaceContour>? {
+        val mpImage = BitmapImageBuilder(bitmap).build()
+        val result: FaceLandmarkerResult = faceLandmarker?.detect(mpImage) ?: return null
+        if (result.faceLandmarks().isEmpty()) return null
+
+        val landmarks = result.faceLandmarks()[0]
+        val imgW = bitmap.width.toFloat()
+        val imgH = bitmap.height.toFloat()
+
+        return PARTS_8.mapNotNull { (name, indices) ->
+            val pts = indices.mapNotNull { idx ->
+                if (idx < landmarks.size)
+                    PointF(landmarks[idx].x() * imgW, landmarks[idx].y() * imgH)
+                else null
+            }
+            if (pts.size >= 3) FaceContour(name, pts) else null
+        }
     }
 
     fun close() {

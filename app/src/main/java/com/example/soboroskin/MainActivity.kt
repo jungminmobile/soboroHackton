@@ -50,6 +50,10 @@ class MainActivity : AppCompatActivity() {
     fun openScanOverlay() {
         isScanOpen = true
 
+        // 하단 바 / FAB 숨기기 (스캔 오버레이가 전체 화면을 덮어야 함)
+        binding.bottomNav.visibility = View.GONE
+        binding.fabScan.visibility = View.GONE
+
         // ScanFragment를 오버레이 컨테이너에 로드
         val scanFragment = ScanFragment()
         supportFragmentManager.beginTransaction()
@@ -63,9 +67,6 @@ class MainActivity : AppCompatActivity() {
             .translationY(0f)
             .setDuration(350)
             .start()
-
-        // FAB 아이콘 변경 (X로)
-        binding.fabScan.setImageResource(android.R.drawable.ic_menu_close_clear_cancel)
     }
 
     fun closeScanOverlay() {
@@ -79,11 +80,11 @@ class MainActivity : AppCompatActivity() {
                 supportFragmentManager.findFragmentById(R.id.scan_fragment_container)?.let { frag ->
                     supportFragmentManager.beginTransaction().remove(frag).commit()
                 }
+                // 하단 바 / FAB 복원
+                binding.bottomNav.visibility = View.VISIBLE
+                binding.fabScan.visibility = View.VISIBLE
             }
             .start()
-
-        // FAB 아이콘 원래대로
-        binding.fabScan.setImageResource(R.drawable.ic_scan)
     }
 
     fun showScanResult(

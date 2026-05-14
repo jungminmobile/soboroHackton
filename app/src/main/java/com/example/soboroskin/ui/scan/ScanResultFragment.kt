@@ -1,14 +1,20 @@
 package com.example.soboroskin.ui.scan
 
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
+import android.graphics.Matrix
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
+import androidx.exifinterface.media.ExifInterface
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
-import com.bumptech.glide.Glide
 import com.example.soboroskin.MainActivity
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
+import java.io.File
 import com.example.soboroskin.R
 import com.example.soboroskin.data.db.AppDatabase
 import com.example.soboroskin.data.model.DiagnosisEntity
@@ -124,12 +130,16 @@ class ScanResultFragment : Fragment() {
         binding.progressTrouble.progress = trouble
         binding.progressElasticity.progress = elasticity
 
-        // 사진 로드
+        // 사진 로드 — EXIF 보정 비트맵을 직접 설정해서 OverlayView와 좌표계 일치
         if (photoPath.isNotEmpty()) {
-            Glide.with(this)
-                .load(photoPath)
-                .placeholder(android.R.drawable.ic_menu_camera)
-                .into(binding.ivCapturedPhoto)
+            lifecycleScope.launch {
+                val bmp = withContext(Dispatchers.IO) {
+                    loadBitmapWithExifRotation(File(photoPath))
+                }
+                if (_binding != null && bmp != null) {
+                    binding.ivCapturedPhoto.setImageBitmap(bmp)
+                }
+            }
         }
 
         // 여드름 박스 오버레이
@@ -138,6 +148,28 @@ class ScanResultFragment : Fragment() {
         } else {
             binding.overlayView.clear()
         }
+    }
+
+    private fun loadBitmapWithExifRotation(file: File): Bitmap? {
+        val raw = BitmapFactory.decodeFile(file.absolutePath) ?: return null
+        val exif = ExifInterface(file.absolutePath)
+        val orientation = exif.getAttributeInt(
+            ExifInterface.TAG_ORIENTATION, ExifInterface.ORIENTATION_NORMAL
+        )
+        val degrees = when (orientation) {
+            ExifInterface.ORIENTATION_ROTATE_90  -> 90f
+            ExifInterface.ORIENTATION_ROTATE_180 -> 180f
+            ExifInterface.ORIENTATION_ROTATE_270 -> 270f
+            else -> 0f
+        }
+        val flipH = orientation == ExifInterface.ORIENTATION_FLIP_HORIZONTAL ||
+                    orientation == ExifInterface.ORIENTATION_TRANSVERSE ||
+                    orientation == ExifInterface.ORIENTATION_TRANSPOSE
+        val matrix = Matrix()
+        if (degrees != 0f) matrix.postRotate(degrees)
+        if (flipH) matrix.postScale(-1f, 1f, raw.width / 2f, raw.height / 2f)
+        return if (degrees == 0f && !flipH) raw
+        else Bitmap.createBitmap(raw, 0, 0, raw.width, raw.height, matrix, true)
     }
 
     private fun saveToDiary(

@@ -4,6 +4,8 @@ import android.Manifest
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
+import android.graphics.Matrix
+import android.net.Uri
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
@@ -13,6 +15,7 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.camera.core.*
 import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.core.content.ContextCompat
+import androidx.exifinterface.media.ExifInterface
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import com.example.soboroskin.MainActivity
@@ -22,6 +25,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.io.File
+import java.io.FileOutputStream
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 import kotlin.random.Random
@@ -35,11 +39,19 @@ class ScanFragment : Fragment() {
     private var skinAnalyzer: SkinAnalyzer? = null
     private var imageCapture: ImageCapture? = null
     private var capturedFile: File? = null
+    private var capturedBitmap: Bitmap? = null
 
     private val permissionLauncher = registerForActivityResult(
         ActivityResultContracts.RequestPermission()
     ) { granted ->
         if (granted) startCamera() else showPermissionView()
+    }
+
+    private val galleryLauncher = registerForActivityResult(
+        ActivityResultContracts.GetContent()
+    ) { uri: Uri? ->
+        uri ?: return@registerForActivityResult
+        handleGalleryUri(uri)
     }
 
     override fun onCreateView(
@@ -64,6 +76,10 @@ class ScanFragment : Fragment() {
 
         binding.btnClose.setOnClickListener {
             (activity as? MainActivity)?.closeScanOverlay()
+        }
+
+        binding.btnGallery.setOnClickListener {
+            galleryLauncher.launch("image/*")
         }
 
         // 촬영 버튼 → 사진 찍고 미리보기 표시
@@ -154,35 +170,66 @@ class ScanFragment : Fragment() {
         ) ?: startAnalysis(null)
     }
 
+    private fun handleGalleryUri(uri: Uri) {
+        lifecycleScope.launch {
+            val file = withContext(Dispatchers.IO) {
+                // Uri → 캐시 파일로 복사 (EXIF 보정 & 경로 필요)
+                try {
+                    val ins = requireContext().contentResolver.openInputStream(uri) ?: return@withContext null
+                    val dest = File(requireContext().cacheDir, "gallery_${System.currentTimeMillis()}.jpg")
+                    FileOutputStream(dest).use { ins.copyTo(it) }
+                    ins.close()
+                    dest
+                } catch (t: Throwable) {
+                    Log.e("ScanFragment", "gallery copy failed", t)
+                    null
+                }
+            }
+            if (file != null && _binding != null) {
+                capturedFile = file
+                showPhotoPreview(file)
+            }
+        }
+    }
+
+    private fun loadBitmapWithExifRotation(file: File): Bitmap? {
+        val raw = BitmapFactory.decodeFile(file.absolutePath) ?: return null
+        val exif = ExifInterface(file.absolutePath)
+        val orientation = exif.getAttributeInt(
+            ExifInterface.TAG_ORIENTATION, ExifInterface.ORIENTATION_NORMAL
+        )
+        val degrees = when (orientation) {
+            ExifInterface.ORIENTATION_ROTATE_90  -> 90f
+            ExifInterface.ORIENTATION_ROTATE_180 -> 180f
+            ExifInterface.ORIENTATION_ROTATE_270 -> 270f
+            else -> 0f
+        }
+        val flipH = orientation == ExifInterface.ORIENTATION_FLIP_HORIZONTAL ||
+                    orientation == ExifInterface.ORIENTATION_TRANSVERSE ||
+                    orientation == ExifInterface.ORIENTATION_TRANSPOSE
+        val matrix = Matrix()
+        if (degrees != 0f) matrix.postRotate(degrees)
+        if (flipH) matrix.postScale(-1f, 1f, raw.width / 2f, raw.height / 2f)
+        return if (degrees == 0f && !flipH) raw
+        else Bitmap.createBitmap(raw, 0, 0, raw.width, raw.height, matrix, true)
+    }
+
     private fun showPhotoPreview(file: File) {
-        val bitmap = BitmapFactory.decodeFile(file.absolutePath) ?: return
+        val bitmap = loadBitmapWithExifRotation(file) ?: return
+        capturedBitmap = bitmap
         binding.ivPreview.setImageBitmap(bitmap)
         binding.layoutPhotoPreview.visibility = View.VISIBLE
         binding.overlayFaceRegions.clear()
 
-        // 백그라운드에서 얼굴 부위 감지 후 점선 표시
+        // 백그라운드에서 얼굴 윤곽선 감지 후 매끄러운 곡선 표시
         val analyzer = skinAnalyzer ?: return
         lifecycleScope.launch {
-            val parts = withContext(Dispatchers.Default) {
-                try { analyzer.cropFaceParts(bitmap) }
+            val contours = withContext(Dispatchers.Default) {
+                try { analyzer.getFaceContours(bitmap) }
                 catch (t: Throwable) { null }
             }
-            if (parts != null && _binding != null) {
-                // 겹치는 부위 제거: 이름이 같은 그룹 중 가장 작은 bbox만 남김
-                val uniqueParts = parts
-                    .groupBy { it.name }
-                    .map { (_, list) -> list.minByOrNull { it.bitmap.width * it.bitmap.height }!! }
-
-                val regions = uniqueParts.map { part ->
-                    val rect = android.graphics.RectF(
-                        part.offsetX.toFloat(),
-                        part.offsetY.toFloat(),
-                        (part.offsetX + part.bitmap.width).toFloat(),
-                        (part.offsetY + part.bitmap.height).toFloat()
-                    )
-                    Pair(part.name, rect)
-                }
-                binding.overlayFaceRegions.setFaceRegions(regions, bitmap.width, bitmap.height)
+            if (contours != null && _binding != null) {
+                binding.overlayFaceRegions.setFaceContours(contours, bitmap.width, bitmap.height)
             }
         }
     }
@@ -191,6 +238,7 @@ class ScanFragment : Fragment() {
         binding.layoutPhotoPreview.visibility = View.GONE
         binding.ivPreview.setImageBitmap(null)
         binding.overlayFaceRegions.clear()
+        capturedBitmap = null
     }
 
     private fun startAnalysis(file: File?) {
@@ -200,7 +248,7 @@ class ScanFragment : Fragment() {
             return
         }
         val analyzer = skinAnalyzer
-        val bitmap = BitmapFactory.decodeFile(file.absolutePath)
+        val bitmap = capturedBitmap ?: loadBitmapWithExifRotation(file)
         if (analyzer == null || bitmap == null) {
             analyzeSkin(file.absolutePath)
             return

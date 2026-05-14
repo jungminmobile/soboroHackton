@@ -119,35 +119,72 @@
             android:paddingHorizontal="24dp" />
     </LinearLayout>
 
-    <!-- Capture Button -->
+    <!-- Capture + Gallery Buttons -->
     <LinearLayout
+        android:id="@+id/layout_capture_buttons"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:gravity="center"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        android:layout_marginBottom="60dp">
+        android:layout_marginBottom="52dp">
 
-        <com.google.android.material.floatingactionbutton.FloatingActionButton
-            android:id="@+id/btn_capture"
-            android:layout_width="72dp"
-            android:layout_height="72dp"
-            android:src="@android:drawable/ic_menu_camera"
-            android:contentDescription="@string/scan_capture"
-            app:backgroundTint="@color/on_primary"
-            app:tint="@color/primary"
-            app:fabSize="normal"
-            app:elevation="4dp" />
-
-        <TextView
+        <!-- 갤러리 선택 -->
+        <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/scan_capture"
-            android:textColor="@color/on_primary"
-            android:textSize="13sp"
-            android:layout_marginTop="8dp" />
+            android:orientation="vertical"
+            android:gravity="center"
+            android:layout_marginEnd="32dp">
+
+            <com.google.android.material.floatingactionbutton.FloatingActionButton
+                android:id="@+id/btn_gallery"
+                android:layout_width="52dp"
+                android:layout_height="52dp"
+                android:src="@android:drawable/ic_menu_gallery"
+                android:contentDescription="갤러리"
+                app:backgroundTint="#AA000000"
+                app:tint="@color/on_primary"
+                app:fabSize="mini"
+                app:elevation="4dp" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="갤러리"
+                android:textColor="@color/on_primary"
+                android:textSize="12sp"
+                android:layout_marginTop="6dp" />
+        </LinearLayout>
+
+        <!-- 촬영 -->
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:gravity="center">
+
+            <com.google.android.material.floatingactionbutton.FloatingActionButton
+                android:id="@+id/btn_capture"
+                android:layout_width="72dp"
+                android:layout_height="72dp"
+                android:src="@android:drawable/ic_menu_camera"
+                android:contentDescription="@string/scan_capture"
+                app:backgroundTint="@color/on_primary"
+                app:tint="@color/primary"
+                app:fabSize="normal"
+                app:elevation="4dp" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/scan_capture"
+                android:textColor="@color/on_primary"
+                android:textSize="13sp"
+                android:layout_marginTop="8dp" />
+        </LinearLayout>
     </LinearLayout>
 
     <!-- Photo Preview (촬영 후 확인 화면) -->
@@ -175,6 +212,7 @@
             android:background="@android:color/transparent" />
 
         <LinearLayout
+            android:id="@+id/layout_preview_bottom"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_gravity="bottom"
@@ -204,7 +242,7 @@
                     android:id="@+id/tv_conf_value"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="0.05"
+                    android:text="0.04"
                     android:textColor="#FFD700"
                     android:textSize="13sp"
                     android:textStyle="bold" />
@@ -231,7 +269,7 @@
                     android:layout_weight="1"
                     android:layout_marginHorizontal="8dp"
                     android:max="6"
-                    android:progress="3" />
+                    android:progress="2" />
 
                 <TextView
                     android:layout_width="wrap_content"

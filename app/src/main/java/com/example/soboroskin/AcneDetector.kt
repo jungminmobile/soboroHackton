@@ -2,6 +2,7 @@ package com.example.soboroskin
 
 import android.content.Context
 import android.graphics.Bitmap
+import android.graphics.Color
 import android.graphics.RectF
 import android.util.Log
 import org.tensorflow.lite.Interpreter
@@ -22,24 +23,26 @@ data class AcneDetection(
     val bbox: RectF get() = RectF(left, top, right, bottom)
 }
 
+private data class LbParams(val scale: Float, val padLeft: Int, val padTop: Int)
+
 class AcneDetector(private val context: Context) {
 
     private var interpreter: Interpreter? = null
-    var confThreshold = 0.05f
-    private val iouThreshold  = 0.45f
-    private val maxBoxRatio   = 0.40f
+    var confThreshold = 0.04f
+    private val iouThreshold = 0.5f  // Python: model.predict(..., iou=0.5)
 
     private var inputW = 640
     private var inputH = 640
-
-    // 출력 텐서 포맷
-    private var isYolov8 = false   // true: [1, 5+, N]  false: [1, N, 5+]
+    // 출력 포맷
+    //  - NMS 내장 (ultralytics export with nms=True): [1, N, 6] = [x1,y1,x2,y2,score,class]
+    //  - Raw YOLOv8:                                   [1, 4+C, num_boxes]
+    private var isNmsIncluded = false
     private var numBoxes = 8400
-    private var numAttrs = 5       // cx cy w h score (단일 클래스)
+    private var numAttrs = 5
+    // 첫 inference에서 좌표 단위(0~1 vs 0~640) 자동 감지
+    private var coordsAreNormalized: Boolean? = null
 
-    init {
-        loadModel()
-    }
+    init { loadModel() }
 
     private fun loadModel() {
         val afd = context.assets.openFd("acne_clean_best_float32.tflite")
@@ -48,110 +51,193 @@ class AcneDetector(private val context: Context) {
 
         interpreter = Interpreter(model, Interpreter.Options().apply { setNumThreads(4) })
 
-        val inp = interpreter!!.getInputTensor(0).shape()   // e.g. [1, 640, 640, 3]
-        val out = interpreter!!.getOutputTensor(0).shape()  // e.g. [1, 5, 8400] or [1, 8400, 6]
+        val inp = interpreter!!.getInputTensor(0).shape()
+        val out = interpreter!!.getOutputTensor(0).shape()
 
-        inputH = inp[1]
-        inputW = inp[2]
+        inputH = inp[1]; inputW = inp[2]
 
-        // YOLOv8 고정: [1, 4+nc, num_boxes]
-        isYolov8 = true
-        numAttrs = out[1]
-        numBoxes = out[2]
+        // NMS 내장 export: [1, N, 6]
+        if (out.size == 3 && out[2] == 6) {
+            isNmsIncluded = true
+            numBoxes = out[1]   // e.g. 300
+            numAttrs = out[2]   // 6
+        } else {
+            // Raw YOLOv8: [1, attrs, boxes]
+            isNmsIncluded = false
+            numAttrs = out[1]
+            numBoxes = out[2]
+        }
 
-        Log.d("AcneDetector", "input=${inp.contentToString()} output=${out.contentToString()} attrs=$numAttrs boxes=$numBoxes")
+        Log.d("AcneDetector",
+            "input=${inp.contentToString()} output=${out.contentToString()} nmsIncluded=$isNmsIncluded")
     }
 
     fun detect(bitmap: Bitmap, partName: String): List<AcneDetection> {
         val interp = interpreter ?: return emptyList()
-        val origW = bitmap.width.toFloat()
-        val origH = bitmap.height.toFloat()
-
-        val inputBuf = preprocess(bitmap)
+        val (inputBuf, lb) = letterboxPreprocess(bitmap)
         val outputBuf = allocateOutput()
-
         interp.run(inputBuf, outputBuf)
-
-        return parseOutput(outputBuf, origW, origH, partName)
+        return parseOutput(outputBuf, bitmap.width.toFloat(), bitmap.height.toFloat(), partName, lb)
     }
 
-    private fun preprocess(bitmap: Bitmap): ByteBuffer {
-        val scaled = Bitmap.createScaledBitmap(bitmap, inputW, inputH, true)
-        val buf = ByteBuffer.allocateDirect(1 * inputH * inputW * 3 * 4)
-            .order(ByteOrder.nativeOrder())
+    /**
+     * Python ultralytics와 동일한 letterbox 전처리:
+     * 종횡비 유지, 빈 공간은 YOLOv8 기본 패딩색(114, 114, 114)으로 채움
+     */
+    private fun letterboxPreprocess(bitmap: Bitmap): Pair<ByteBuffer, LbParams> {
+        val scale = minOf(inputW.toFloat() / bitmap.width, inputH.toFloat() / bitmap.height)
+        val scaledW = (bitmap.width  * scale).toInt().coerceIn(1, inputW)
+        val scaledH = (bitmap.height * scale).toInt().coerceIn(1, inputH)
+        val padLeft = (inputW - scaledW) / 2
+        val padTop  = (inputH - scaledH) / 2
+
+        val scaled = Bitmap.createScaledBitmap(bitmap, scaledW, scaledH, true)
+        val buf = ByteBuffer.allocateDirect(inputH * inputW * 3 * 4).order(ByteOrder.nativeOrder())
+        val grayF = 114f / 255f
+
         for (y in 0 until inputH) {
             for (x in 0 until inputW) {
-                val px = scaled.getPixel(x, y)
-                buf.putFloat(((px shr 16) and 0xFF) / 255f)
-                buf.putFloat(((px shr 8)  and 0xFF) / 255f)
-                buf.putFloat(( px         and 0xFF) / 255f)
+                val imgX = x - padLeft
+                val imgY = y - padTop
+                if (imgX < 0 || imgX >= scaledW || imgY < 0 || imgY >= scaledH) {
+                    buf.putFloat(grayF); buf.putFloat(grayF); buf.putFloat(grayF)
+                } else {
+                    val px = scaled.getPixel(imgX, imgY)
+                    buf.putFloat(Color.red(px)   / 255f)
+                    buf.putFloat(Color.green(px) / 255f)
+                    buf.putFloat(Color.blue(px)  / 255f)
+                }
             }
         }
         buf.rewind()
-        return buf
+        return Pair(buf, LbParams(scale, padLeft, padTop))
     }
 
-    private fun allocateOutput(): Array<Array<FloatArray>> {
-        return if (isYolov8)
-            Array(1) { Array(numAttrs) { FloatArray(numBoxes) } }
-        else
-            Array(1) { Array(numBoxes) { FloatArray(numAttrs) } }
-    }
+    private fun allocateOutput(): Array<Array<FloatArray>> =
+        if (isNmsIncluded) Array(1) { Array(numBoxes) { FloatArray(numAttrs) } }
+        else               Array(1) { Array(numAttrs) { FloatArray(numBoxes) } }
 
     private fun parseOutput(
         raw: Array<Array<FloatArray>>,
-        origW: Float,
-        origH: Float,
-        partName: String
+        origW: Float, origH: Float,
+        partName: String,
+        lb: LbParams
     ): List<AcneDetection> {
-        val candidates = mutableListOf<AcneDetection>()
+        return if (isNmsIncluded) parseNmsIncluded(raw, origW, origH, partName, lb)
+               else               parseRawYolov8(raw, origW, origH, partName, lb)
+    }
+
+    /**
+     * NMS 내장 export 출력: [1, N, 6] = [x1, y1, x2, y2, score, class]
+     * 좌표는 letterboxed 640 기준 (normalized 0~1 또는 픽셀 0~640) — 첫 호출에서 자동 감지
+     */
+    private fun parseNmsIncluded(
+        raw: Array<Array<FloatArray>>,
+        origW: Float, origH: Float,
+        partName: String,
+        lb: LbParams
+    ): List<AcneDetection> {
+        // 좌표 단위 자동 감지 (한 번만)
+        if (coordsAreNormalized == null) {
+            var maxCoord = 0f
+            for (i in 0 until numBoxes) {
+                for (k in 0..3) {
+                    val v = raw[0][i][k]
+                    if (v > maxCoord) maxCoord = v
+                }
+            }
+            coordsAreNormalized = maxCoord <= 1.5f
+            Log.d("AcneDetector", "auto-detect maxCoord=$maxCoord normalized=$coordsAreNormalized")
+        }
+        val normalized = coordsAreNormalized == true
+        val results = mutableListOf<AcneDetection>()
+        var validCount = 0
 
         for (i in 0 until numBoxes) {
-            val cx: Float; val cy: Float; val w: Float; val h: Float; val score: Float
-
-            if (isYolov8) {
-                // raw[0][attr][box]
-                cx    = raw[0][0][i]
-                cy    = raw[0][1][i]
-                w     = raw[0][2][i]
-                h     = raw[0][3][i]
-                // 단일 클래스 → index 4; 다중 클래스 → max of [4..]
-                score = if (numAttrs == 5) raw[0][4][i]
-                        else (4 until numAttrs).maxOf { raw[0][it][i] }
-            } else {
-                // YOLOv5: raw[0][box][attr], attr[4]=objectness, attr[5]=class
-                cx    = raw[0][i][0]
-                cy    = raw[0][i][1]
-                w     = raw[0][i][2]
-                h     = raw[0][i][3]
-                val obj = raw[0][i][4]
-                val cls = if (numAttrs > 5) raw[0][i][5] else 1f
-                score = obj * cls
-            }
+            val det = raw[0][i]
+            val x1n = det[0]
+            val y1n = det[1]
+            val x2n = det[2]
+            val y2n = det[3]
+            val score = det[4]
+            // val cls = det[5]
 
             if (score < confThreshold) continue
+            if (x2n <= x1n || y2n <= y1n) continue  // 0-padded 빈 슬롯
 
-            // 정규화 좌표(0~1) → 원본 픽셀 좌표
-            val x1 = (cx - w / 2f) * origW
-            val y1 = (cy - h / 2f) * origH
-            val x2 = (cx + w / 2f) * origW
-            val y2 = (cy + h / 2f) * origH
+            // letterboxed 640 좌표 (픽셀)
+            val lx1 = if (normalized) x1n * inputW else x1n
+            val ly1 = if (normalized) y1n * inputH else y1n
+            val lx2 = if (normalized) x2n * inputW else x2n
+            val ly2 = if (normalized) y2n * inputH else y2n
 
-            // 너무 큰 박스 제거
-            if (w > maxBoxRatio || h > maxBoxRatio) continue
+            // letterbox 역변환 → 크롭 픽셀 좌표
+            val rx1 = (lx1 - lb.padLeft) / lb.scale
+            val ry1 = (ly1 - lb.padTop)  / lb.scale
+            val rx2 = (lx2 - lb.padLeft) / lb.scale
+            val ry2 = (ly2 - lb.padTop)  / lb.scale
 
-            candidates.add(
+            if (validCount < 3) {
+                Log.d("AcneDetector",
+                    "[$partName #$i] xyxy(n)=${"%.3f".format(x1n)},${"%.3f".format(y1n)}," +
+                    "${"%.3f".format(x2n)},${"%.3f".format(y2n)} score=${"%.3f".format(score)} " +
+                    "→ crop=(${rx1.toInt()},${ry1.toInt()})-(${rx2.toInt()},${ry2.toInt()}) " +
+                    "of ${origW.toInt()}x${origH.toInt()}")
+                validCount++
+            }
+
+            if (rx2 <= 0f || ry2 <= 0f || rx1 >= origW || ry1 >= origH) continue
+
+            results.add(
                 AcneDetection(
-                    left = x1.coerceAtLeast(0f),
-                    top = y1.coerceAtLeast(0f),
-                    right = x2.coerceAtMost(origW),
-                    bottom = y2.coerceAtMost(origH),
+                    left       = rx1.coerceAtLeast(0f),
+                    top        = ry1.coerceAtLeast(0f),
+                    right      = rx2.coerceAtMost(origW),
+                    bottom     = ry2.coerceAtMost(origH),
                     confidence = score,
-                    part = partName
+                    part       = partName
                 )
             )
         }
+        // NMS는 모델 안에서 이미 적용됨 — 추가 NMS 불필요
+        return results
+    }
 
+    /** Raw YOLOv8 출력: [1, 4+C, num_boxes] = [cx, cy, w, h, ...class_scores] */
+    private fun parseRawYolov8(
+        raw: Array<Array<FloatArray>>,
+        origW: Float, origH: Float,
+        partName: String,
+        lb: LbParams
+    ): List<AcneDetection> {
+        val candidates = mutableListOf<AcneDetection>()
+        for (i in 0 until numBoxes) {
+            val cx = raw[0][0][i]
+            val cy = raw[0][1][i]
+            val w  = raw[0][2][i]
+            val h  = raw[0][3][i]
+            val score = if (numAttrs == 5) raw[0][4][i]
+                        else (4 until numAttrs).maxOf { raw[0][it][i] }
+            if (score < confThreshold) continue
+
+            val rx1 = ((cx - w / 2f) * inputW - lb.padLeft) / lb.scale
+            val ry1 = ((cy - h / 2f) * inputH - lb.padTop)  / lb.scale
+            val rx2 = ((cx + w / 2f) * inputW - lb.padLeft) / lb.scale
+            val ry2 = ((cy + h / 2f) * inputH - lb.padTop)  / lb.scale
+
+            if (rx2 <= 0f || ry2 <= 0f || rx1 >= origW || ry1 >= origH) continue
+
+            candidates.add(
+                AcneDetection(
+                    left       = rx1.coerceAtLeast(0f),
+                    top        = ry1.coerceAtLeast(0f),
+                    right      = rx2.coerceAtMost(origW),
+                    bottom     = ry2.coerceAtMost(origH),
+                    confidence = score,
+                    part       = partName
+                )
+            )
+        }
         return nms(candidates)
     }
 
@@ -174,7 +260,5 @@ class AcneDetector(private val context: Context) {
         return if (union > 0f) inter / union else 0f
     }
 
-    fun close() {
-        interpreter?.close()
-    }
+    fun close() { interpreter?.close() }
 }

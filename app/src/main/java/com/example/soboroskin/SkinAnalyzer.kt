@@ -20,6 +20,7 @@ class SkinAnalyzer(private val context: Context) {
         set(value) { acneDetector.confThreshold = value }
 
     fun cropFaceParts(bitmap: Bitmap): List<FacePart>? = facePartCropper.cropParts(bitmap)
+    fun getFaceContours(bitmap: Bitmap): List<FaceContour>? = facePartCropper.getContours(bitmap)
 
     fun analyze(bitmap: Bitmap): AnalysisResult {
         // 1단계: MediaPipe로 얼굴 부위 크롭
@@ -33,19 +34,27 @@ class SkinAnalyzer(private val context: Context) {
         // 2단계: 각 크롭에 YOLO 적용
         val allDetections = mutableListOf<AcneDetection>()
 
+        val imgW = bitmap.width.toFloat()
+        val imgH = bitmap.height.toFloat()
+        // Python 코드와 동일: 전체 이미지 대비 20% 초과 박스 제거
+        val maxBoxW = imgW * 0.20f
+        val maxBoxH = imgH * 0.20f
+
         for (part in parts) {
             val detections = acneDetector.detect(part.bitmap, part.name)
 
             // 크롭 좌표 → 원본 좌표로 역변환
-            val mapped = detections.map { det ->
-                det.copy(
-                    left  = det.left  + part.offsetX,
-                    top   = det.top   + part.offsetY,
-                    right = det.right + part.offsetX,
-                    bottom = det.bottom + part.offsetY
-                )
+            for (det in detections) {
+                val ox1 = det.left  + part.offsetX
+                val oy1 = det.top   + part.offsetY
+                val ox2 = det.right + part.offsetX
+                val oy2 = det.bottom + part.offsetY
+
+                // Python: if (ox2-ox1)/w > 0.20 or (oy2-oy1)/h > 0.20: continue
+                if (ox2 - ox1 > maxBoxW || oy2 - oy1 > maxBoxH) continue
+
+                allDetections.add(det.copy(left=ox1, top=oy1, right=ox2, bottom=oy2))
             }
-            allDetections.addAll(mapped)
         }
 
         // 3단계: 전체 NMS (과도한 중복 제거)
