@@ -69,13 +69,13 @@
                 android:textColor="@color/primary" />
         </LinearLayout>
 
-        <!-- ── 회차별 여드름 크롭 사진 ── -->
+        <!-- ── 회차별 트러블 크롭 사진 ── -->
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="20dp"
             android:layout_marginBottom="8dp"
-            android:text="회차별 여드름 변화"
+            android:text="회차별 트러블 변화"
             android:textSize="13sp"
             android:textStyle="bold"
             android:textColor="@color/text_secondary" />

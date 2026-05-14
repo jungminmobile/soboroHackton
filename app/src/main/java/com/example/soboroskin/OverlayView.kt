@@ -94,6 +94,19 @@ class OverlayView @JvmOverloads constructor(
         style = Paint.Style.FILL
     }
 
+    // ─── Display transform (synced from ImageView.imageMatrix) ──
+    private var displayScale   = 0f   // 0 = not yet set, fall back to computed
+    private var displayOffsetX = 0f
+    private var displayOffsetY = 0f
+
+    /** ScanResultFragment이 ImageView.imageMatrix에서 읽어 호출 */
+    fun setDisplayTransform(scale: Float, offsetX: Float, offsetY: Float) {
+        displayScale   = scale
+        displayOffsetX = offsetX
+        displayOffsetY = offsetY
+        invalidate()
+    }
+
     // ─── Public API ───────────────────────────────────────────
 
     fun setResults(detections: List<AcneDetection>, imageWidth: Int, imageHeight: Int) {
@@ -101,6 +114,7 @@ class OverlayView @JvmOverloads constructor(
         this.faceContours = emptyList()
         this.imageWidth = imageWidth
         this.imageHeight = imageHeight
+        displayScale = 0f  // reset; will re-sync from ImageView
         deselectedIndices.clear()
         isClickable = detections.isNotEmpty()
         invalidate()
@@ -112,6 +126,7 @@ class OverlayView @JvmOverloads constructor(
         this.detections = emptyList()
         this.imageWidth = imageWidth
         this.imageHeight = imageHeight
+        displayScale = 0f
         deselectedIndices.clear()
         isClickable = false
         invalidate()
@@ -132,15 +147,27 @@ class OverlayView @JvmOverloads constructor(
     /** 현재 선택된 수 */
     fun getSelectedCount(): Int = detections.size - deselectedIndices.size
 
+    // ─── Transform helpers ────────────────────────────────────
+
+    private fun resolveScale()   = if (displayScale > 0f) displayScale
+                                   else minOf(width.toFloat() / imageWidth, height.toFloat() / imageHeight)
+    private fun resolveOffsetX() = if (displayScale > 0f) displayOffsetX
+                                   else (width - imageWidth * resolveScale()) / 2f
+    private fun resolveOffsetY() = if (displayScale > 0f) displayOffsetY
+                                   else (height - imageHeight * resolveScale()) / 2f
+
+    private fun toView(det: AcneDetection, s: Float, ox: Float, oy: Float) =
+        RectF(det.left * s + ox, det.top * s + oy, det.right * s + ox, det.bottom * s + oy)
+
     // ─── Touch ───────────────────────────────────────────────
 
     override fun onTouchEvent(event: MotionEvent): Boolean {
         if (event.action != MotionEvent.ACTION_UP) return true
         if (detections.isEmpty()) return true
 
-        val scale = minOf(width.toFloat() / imageWidth, height.toFloat() / imageHeight)
-        val offsetX = (width - imageWidth * scale) / 2f
-        val offsetY = (height - imageHeight * scale) / 2f
+        val scale   = resolveScale()
+        val offsetX = resolveOffsetX()
+        val offsetY = resolveOffsetY()
 
         val touchX = event.x
         val touchY = event.y
@@ -148,12 +175,7 @@ class OverlayView @JvmOverloads constructor(
         // 탭된 박스 찾기 (뒤에서부터 — 앞에 그려진 박스 우선)
         for (i in detections.indices.reversed()) {
             val det = detections[i]
-            val scaledRect = RectF(
-                det.left  * scale + offsetX,
-                det.top   * scale + offsetY,
-                det.right * scale + offsetX,
-                det.bottom * scale + offsetY
-            )
+            val scaledRect = toView(det, scale, offsetX, offsetY)
             // 탭 영역 12dp 확장
             val expand = 12f * resources.displayMetrics.density
             scaledRect.inset(-expand, -expand)
@@ -176,9 +198,9 @@ class OverlayView @JvmOverloads constructor(
         super.onDraw(canvas)
         if (detections.isEmpty() && faceContours.isEmpty()) return
 
-        val scale = minOf(width.toFloat() / imageWidth, height.toFloat() / imageHeight)
-        val offsetX = (width  - imageWidth  * scale) / 2f
-        val offsetY = (height - imageHeight * scale) / 2f
+        val scale   = resolveScale()
+        val offsetX = resolveOffsetX()
+        val offsetY = resolveOffsetY()
 
         // 얼굴 부위 곡선
         for (contour in faceContours) {
@@ -203,12 +225,7 @@ class OverlayView @JvmOverloads constructor(
 
         // 여드름 박스
         for ((i, det) in detections.withIndex()) {
-            val scaled = RectF(
-                det.left  * scale + offsetX,
-                det.top   * scale + offsetY,
-                det.right * scale + offsetX,
-                det.bottom * scale + offsetY
-            )
+            val scaled = toView(det, scale, offsetX, offsetY)
 
             if (i in deselectedIndices) {
                 // ── 제외된 박스: 회색 점선 + 반투명 오버레이 + X

@@ -119,21 +119,25 @@ class ScanResultFragment : Fragment() {
         comment: String, photoPath: String,
         detections: List<AcneDetection>, imageW: Int, imageH: Int
     ) {
-        binding.tvSkinType.text              = skinType
-        binding.tvMoistureScore.text         = getString(R.string.score_format, moisture)
-        binding.tvOilScore.text              = getString(R.string.score_format, oil)
-        binding.tvTroubleScore.text          = getString(R.string.score_format, trouble)
-        binding.tvElasticityScore.text       = getString(R.string.score_format, elasticity)
-        binding.tvAiComment.text             = comment
-        binding.progressMoisture.progress    = moisture
-        binding.progressOil.progress         = oil
-        binding.progressTrouble.progress     = trouble
-        binding.progressElasticity.progress  = elasticity
-
         if (photoPath.isNotEmpty()) {
             lifecycleScope.launch {
-                val bmp = withContext(Dispatchers.IO) { loadBitmapWithExifRotation(File(photoPath)) }
-                if (_binding != null && bmp != null) binding.ivCapturedPhoto.setImageBitmap(bmp)
+                // showPhotoPreview에서 이미 EXIF 보정 후 재저장했으므로 단순 디코드
+                val bmp = withContext(Dispatchers.IO) {
+                    android.graphics.BitmapFactory.decodeFile(photoPath)
+                }
+                if (_binding == null || bmp == null) return@launch
+                binding.ivCapturedPhoto.setImageBitmap(bmp)
+                // ImageView가 실제로 그린 변환 행렬을 overlay에 동기화
+                binding.ivCapturedPhoto.post {
+                    if (_binding == null) return@post
+                    val values = FloatArray(9)
+                    binding.ivCapturedPhoto.imageMatrix.getValues(values)
+                    binding.overlayView.setDisplayTransform(
+                        scale   = values[android.graphics.Matrix.MSCALE_X],
+                        offsetX = values[android.graphics.Matrix.MTRANS_X],
+                        offsetY = values[android.graphics.Matrix.MTRANS_Y]
+                    )
+                }
             }
         }
 
@@ -204,7 +208,7 @@ class ScanResultFragment : Fragment() {
 
             requireActivity().runOnUiThread {
                 val msg = if (detections.isEmpty())
-                    "여드름 없이 저장되었습니다"
+                    "트러블 없이 저장되었습니다"
                 else
                     getString(R.string.result_saved)
                 Toast.makeText(requireContext(), msg, Toast.LENGTH_SHORT).show()

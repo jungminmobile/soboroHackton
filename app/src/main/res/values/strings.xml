@@ -79,11 +79,11 @@
     <!-- Diary Delete -->
     <string name="diary_delete_all">전체 삭제</string>
     <string name="diary_delete_all_title">전체 로그 삭제</string>
-    <string name="diary_delete_all_msg">모든 진단 기록과 여드름 기록이 삭제됩니다.\n\n이 작업은 되돌릴 수 없습니다.</string>
+    <string name="diary_delete_all_msg">모든 진단 기록과 트러블 기록이 삭제됩니다.\n\n이 작업은 되돌릴 수 없습니다.</string>
     <string name="diary_delete_all_done">모든 기록이 삭제되었습니다</string>
 
     <!-- Scan Result Acne Select -->
-    <string name="result_acne_detected">여드름 %d개 감지됨</string>
+    <string name="result_acne_detected">트러블 %d개 감지됨</string>
     <string name="result_acne_selected">%d / %d개 선택됨</string>
     <string name="result_acne_hint">탭하면 기록에서 제외</string>
 

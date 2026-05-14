@@ -51,14 +51,15 @@ class DiaryLogFragment : Fragment() {
 
         adapter = DiaryLogAdapter(
             onItemClick     = { entity -> handleEntryClick(entity) },
-            onItemLongClick = { entity -> enterSelectionMode(entity) }
+            onItemLongClick = { entity -> enterSelectionMode(entity) },
+            onGroupSelect   = { ids -> handleGroupSelect(ids) }
         )
 
         binding.rvDiaryLog.layoutManager = LinearLayoutManager(requireContext())
         binding.rvDiaryLog.adapter = adapter
 
-        // 전체 삭제
-        binding.btnDeleteAll.setOnClickListener { showDeleteAllConfirmDialog() }
+        // 선택 버튼
+        binding.btnSelect.setOnClickListener { enterSelectionModeEmpty() }
 
         // 선택 취소
         binding.btnCancelSelection.setOnClickListener { exitSelectionMode() }
@@ -77,8 +78,8 @@ class DiaryLogFragment : Fragment() {
                         adapter.submitList(buildListWithSeparators(entries))
 
                         val isEmpty = entries.isEmpty()
-                        binding.layoutEmpty.visibility  = if (isEmpty) View.VISIBLE else View.GONE
-                        binding.btnDeleteAll.visibility = if (isEmpty) View.INVISIBLE else View.VISIBLE
+                        binding.layoutEmpty.visibility = if (isEmpty) View.VISIBLE else View.GONE
+                        binding.btnSelect.visibility   = if (isEmpty) View.INVISIBLE else View.VISIBLE
 
                         // 삭제 후 선택 모드 자동 해제
                         if (isEmpty) exitSelectionMode()
@@ -88,6 +89,15 @@ class DiaryLogFragment : Fragment() {
     }
 
     // ─── 선택 모드 ───────────────────────────────────────────────
+
+    private fun enterSelectionModeEmpty() {
+        if (!adapter.isSelectionMode) {
+            adapter.isSelectionMode = true
+            updateSelectionBar()
+            binding.layoutSelectionBar.visibility = View.VISIBLE
+            binding.layoutHeader.visibility       = View.GONE
+        }
+    }
 
     private fun enterSelectionMode(entity: DiagnosisEntity) {
         if (!adapter.isSelectionMode) {
@@ -106,6 +116,11 @@ class DiaryLogFragment : Fragment() {
         }
     }
 
+    private fun handleGroupSelect(ids: Set<Long>) {
+        adapter.toggleGroupSelection(ids)
+        updateSelectionBar()
+    }
+
     private fun exitSelectionMode() {
         adapter.clearSelection()
         binding.layoutSelectionBar.visibility = View.GONE
@@ -115,8 +130,7 @@ class DiaryLogFragment : Fragment() {
     private fun updateSelectionBar() {
         val count = adapter.getSelectedCount()
         binding.tvSelectedCount.text = "${count}개 선택됨"
-        // 0개면 삭제 버튼 비활성화
-        binding.btnDeleteSelected.alpha = if (count > 0) 1f else 0.4f
+        binding.btnDeleteSelected.alpha     = if (count > 0) 1f else 0.4f
         binding.btnDeleteSelected.isEnabled = count > 0
     }
 
@@ -127,7 +141,7 @@ class DiaryLogFragment : Fragment() {
         if (count == 0) return
         AlertDialog.Builder(requireContext())
             .setTitle("선택 삭제")
-            .setMessage("선택한 ${count}개의 기록을 삭제할까요?\n관련 여드름 기록도 함께 정리됩니다.")
+            .setMessage("선택한 ${count}개의 기록을 삭제할까요?\n관련 트러블 기록도 함께 정리됩니다.")
             .setNegativeButton(getString(R.string.btn_cancel), null)
             .setPositiveButton("삭제") { _, _ -> deleteSelectedLogs() }
             .show()
@@ -160,53 +174,35 @@ class DiaryLogFragment : Fragment() {
         }
     }
 
-    // ─── 전체 삭제 ───────────────────────────────────────────────
-
-    private fun showDeleteAllConfirmDialog() {
-        AlertDialog.Builder(requireContext())
-            .setTitle(getString(R.string.diary_delete_all_title))
-            .setMessage(getString(R.string.diary_delete_all_msg))
-            .setNegativeButton(getString(R.string.btn_cancel), null)
-            .setPositiveButton(getString(R.string.diary_delete_all)) { _, _ -> deleteAllLogs() }
-            .show()
-    }
-
-    private fun deleteAllLogs() {
-        viewLifecycleOwner.lifecycleScope.launch {
-            withContext(Dispatchers.IO) {
-                val db = AppDatabase.getInstance(requireContext())
-                for (d in allEntries) {
-                    if (d.photoPath.isNotEmpty()) {
-                        try { File(d.photoPath).delete() } catch (_: Exception) {}
-                    }
-                }
-                db.acneSpotRecordDao().deleteAll()
-                db.acneSpotDao().deleteAll()
-                db.diagnosisDao().deleteAll()
-            }
-            Toast.makeText(requireContext(), getString(R.string.diary_delete_all_done), Toast.LENGTH_SHORT).show()
-        }
-    }
-
-    // ─── 구분선 삽입 ─────────────────────────────────────────────
+    // ─── 구분선 삽입 (그룹 ID 포함) ─────────────────────────────
 
     private fun buildListWithSeparators(entries: List<DiagnosisEntity>): List<DiaryListItem> {
         if (entries.isEmpty()) return emptyList()
         val now = System.currentTimeMillis()
-        val result = mutableListOf<DiaryListItem>()
+        val items = mutableListOf<DiaryListItem>()
         val insertedDays = mutableSetOf<Int>()
+        var lastSepPos = -1
+        val sepGroups = mutableMapOf<Int, MutableSet<Long>>()
 
         for (entry in entries) {
             val daysAgo = TimeUnit.MILLISECONDS.toDays(now - entry.date).toInt()
             for ((days, label) in separatorThresholds) {
                 if (daysAgo >= days && days !in insertedDays) {
-                    result.add(DiaryListItem.Separator(label))
+                    items.add(DiaryListItem.Separator(label))
                     insertedDays.add(days)
+                    lastSepPos = items.size - 1
+                    sepGroups[lastSepPos] = mutableSetOf()
                 }
             }
-            result.add(DiaryListItem.Entry(entry))
+            items.add(DiaryListItem.Entry(entry))
+            if (lastSepPos >= 0) sepGroups[lastSepPos]?.add(entry.id)
         }
-        return result
+
+        // 각 구분선에 해당 그룹의 entry ID 집합을 주입
+        return items.mapIndexed { pos, item ->
+            if (item is DiaryListItem.Separator) item.copy(groupIds = sepGroups[pos] ?: emptySet())
+            else item
+        }
     }
 
     override fun onDestroyView() {

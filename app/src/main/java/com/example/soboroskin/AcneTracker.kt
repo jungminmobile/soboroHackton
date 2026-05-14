@@ -7,16 +7,18 @@ import com.example.soboroskin.data.model.AcneSpotRecordEntity
 import kotlin.math.sqrt
 
 /**
- * 여드름 개체 추적기
- * - 새 감지 결과를 기존 AcneSpot DB와 매칭
- * - 같은 여드름이면 변화 타입(worsened/improved/existing) 기록
- * - 새 여드름이면 INSERT, 사라진 여드름이면 healed 처리
+ * 트러블 개체 추적기
+ * - 새 감지 결과를 기존 TroubleSpot DB와 매칭
+ * - 같은 트러블이면 변화 타입(worsened/improved/existing) 기록
+ * - 새 트러블이면 INSERT, 사라진 트러블이면 healed 처리
  */
 class AcneTracker(private val db: AppDatabase) {
 
     companion object {
-        // 같은 여드름으로 판단하는 정규화 거리 임계값 (이미지 대각선의 8%)
-        private const val MATCH_THRESHOLD = 0.08f
+        // 같은 부위 내에서 같은 트러블로 판단하는 거리 임계값 (이미지 대각선의 15%)
+        private const val MATCH_THRESHOLD = 0.15f
+        // 부위 불일치 시 폴백 매칭 임계값 (8%) — AI가 경계 부위를 다르게 라벨링할 때 커버
+        private const val MATCH_THRESHOLD_FALLBACK = 0.08f
         // 이 기간 이상 감지 안 되면 완치로 판단 (7일)
         private const val HEAL_THRESHOLD_MS = 7 * 24 * 60 * 60 * 1000L
         // 크기 변화 판단 기준 (10%)
@@ -31,6 +33,11 @@ class AcneTracker(private val db: AppDatabase) {
             raw.contains("right_cheek") -> "right_cheek"
             raw.contains("left_jaw")    -> "left_jaw"
             raw.contains("right_jaw")   -> "right_jaw"
+            raw.contains("forehead")    -> "forehead"
+            raw.contains("nose")        -> "nose"
+            raw.contains("chin")        -> "chin"
+            raw.contains("mouth")       -> "mouth"
+            raw.contains("eye")         -> "eye"
             else                        -> raw
         }
     }
@@ -69,8 +76,8 @@ class AcneTracker(private val db: AppDatabase) {
         for (det in sortedDetections) {
             val (bestSpot, bestDist) = findBestMatch(det, activeSpots, matchedSpotIds)
 
-            if (bestSpot != null && bestDist < MATCH_THRESHOLD) {
-                // ── 기존 여드름 업데이트 ──
+            if (bestSpot != null) {
+                // ── 기존 트러블 업데이트 ──
                 matchedSpotIds.add(bestSpot.id)
 
                 val lastRecord = db.acneSpotRecordDao().getLatestRecord(bestSpot.id)
@@ -99,7 +106,7 @@ class AcneTracker(private val db: AppDatabase) {
                     )
                 )
             } else {
-                // ── 새 여드름 ──
+                // ── 새 트러블 ──
                 Log.d("AcneTracker", "NEW spot part=${det.partName} cx=${"%.3f".format(det.cx)} cy=${"%.3f".format(det.cy)}")
 
                 val newSpot = AcneSpotEntity(
@@ -152,29 +159,57 @@ class AcneTracker(private val db: AppDatabase) {
         }
     }
 
+    /**
+     * 두 단계 매칭:
+     * 1단계: 같은 부위 내에서 MATCH_THRESHOLD(15%) 이내 → 우선 매칭
+     * 2단계: 같은 부위 매칭 실패 시, 부위 무관하게 MATCH_THRESHOLD_FALLBACK(8%) 이내 폴백
+     *        (AI가 경계 부위를 다르게 라벨링하는 경우 커버)
+     */
     private fun findBestMatch(
         det: NormalizedDetection,
         activeSpots: List<AcneSpotEntity>,
         alreadyMatched: Set<Long>
     ): Pair<AcneSpotEntity?, Float> {
+
+        // 1단계: 같은 부위 매칭
         var bestSpot: AcneSpotEntity? = null
         var bestDist = Float.MAX_VALUE
 
         for (spot in activeSpots) {
             if (spot.id in alreadyMatched) continue
-            // 같은 부위끼리만 매칭 (정규화된 이름으로 비교)
             if (normalizePartName(spot.partName) != det.partName) continue
 
-            val dx = spot.normalizedCx - det.cx
-            val dy = spot.normalizedCy - det.cy
-            val dist = sqrt((dx * dx + dy * dy).toDouble()).toFloat()
-
+            val dist = euclidean(spot.normalizedCx, spot.normalizedCy, det.cx, det.cy)
             if (dist < bestDist) {
                 bestDist = dist
                 bestSpot = spot
             }
         }
-        return Pair(bestSpot, bestDist)
+        if (bestSpot != null && bestDist < MATCH_THRESHOLD) return Pair(bestSpot, bestDist)
+
+        // 2단계: 부위 무관 폴백 매칭 (매우 가까운 경우만)
+        bestSpot = null
+        bestDist = Float.MAX_VALUE
+
+        for (spot in activeSpots) {
+            if (spot.id in alreadyMatched) continue
+            val dist = euclidean(spot.normalizedCx, spot.normalizedCy, det.cx, det.cy)
+            if (dist < bestDist) {
+                bestDist = dist
+                bestSpot = spot
+            }
+        }
+
+        return if (bestSpot != null && bestDist < MATCH_THRESHOLD_FALLBACK)
+            Pair(bestSpot, bestDist)
+        else
+            Pair(null, Float.MAX_VALUE)
+    }
+
+    private fun euclidean(x1: Float, y1: Float, x2: Float, y2: Float): Float {
+        val dx = x1 - x2
+        val dy = y1 - y2
+        return sqrt((dx * dx + dy * dy).toDouble()).toFloat()
     }
 
     private fun classifyChange(

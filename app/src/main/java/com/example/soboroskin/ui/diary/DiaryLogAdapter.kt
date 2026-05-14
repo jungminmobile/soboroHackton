@@ -16,13 +16,14 @@ import java.util.*
 // ── 리스트 아이템 타입 ──────────────────────────────────────────
 sealed class DiaryListItem {
     data class Entry(val entity: DiagnosisEntity) : DiaryListItem()
-    data class Separator(val label: String)        : DiaryListItem()
+    data class Separator(val label: String, val groupIds: Set<Long> = emptySet()) : DiaryListItem()
 }
 
 // ── 어댑터 ──────────────────────────────────────────────────────
 class DiaryLogAdapter(
     private val onItemClick:     (DiagnosisEntity) -> Unit,
-    private val onItemLongClick: (DiagnosisEntity) -> Unit
+    private val onItemLongClick: (DiagnosisEntity) -> Unit,
+    private val onGroupSelect:   (Set<Long>) -> Unit = {}
 ) : ListAdapter<DiaryListItem, RecyclerView.ViewHolder>(DiffCallback()) {
 
     companion object {
@@ -38,6 +39,15 @@ class DiaryLogAdapter(
 
     fun toggleSelection(id: Long) {
         if (selectedIds.contains(id)) selectedIds.remove(id) else selectedIds.add(id)
+        notifyDataSetChanged()
+    }
+
+    fun toggleGroupSelection(ids: Set<Long>) {
+        if (selectedIds.containsAll(ids)) {
+            selectedIds.removeAll(ids)
+        } else {
+            selectedIds.addAll(ids)
+        }
         notifyDataSetChanged()
     }
 
@@ -83,10 +93,8 @@ class DiaryLogAdapter(
 
             // ── 선택 상태 UI ──
             val isSelected = selectedIds.contains(entity.id)
-            binding.viewSelectedOverlay.visibility =
-                if (isSelectionMode && isSelected) View.VISIBLE else View.INVISIBLE
-            binding.tvCheckBadge.visibility =
-                if (isSelectionMode && isSelected) View.VISIBLE else View.GONE
+            binding.cbSelect.visibility = if (isSelectionMode) View.VISIBLE else View.GONE
+            binding.cbSelect.isChecked  = isSelected
 
             // ── 클릭 핸들러 ──
             binding.root.setOnClickListener {
@@ -102,8 +110,19 @@ class DiaryLogAdapter(
     inner class SeparatorViewHolder(private val binding: ItemDiarySeparatorBinding) :
         RecyclerView.ViewHolder(binding.root) {
 
-        fun bind(label: String) {
-            binding.tvSeparatorLabel.text = label
+        fun bind(separator: DiaryListItem.Separator) {
+            binding.tvSeparatorLabel.text = separator.label
+
+            if (isSelectionMode && separator.groupIds.isNotEmpty()) {
+                binding.cbGroupSelect.visibility = View.VISIBLE
+                binding.cbGroupSelect.isChecked  = selectedIds.containsAll(separator.groupIds)
+                binding.cbGroupSelect.setOnClickListener {
+                    onGroupSelect(separator.groupIds)
+                }
+            } else {
+                binding.cbGroupSelect.visibility = View.GONE
+                binding.cbGroupSelect.setOnClickListener(null)
+            }
         }
     }
 
@@ -129,7 +148,7 @@ class DiaryLogAdapter(
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
         when (val item = getItem(position)) {
             is DiaryListItem.Entry     -> (holder as EntryViewHolder).bind(item.entity)
-            is DiaryListItem.Separator -> (holder as SeparatorViewHolder).bind(item.label)
+            is DiaryListItem.Separator -> (holder as SeparatorViewHolder).bind(item)
         }
     }
 

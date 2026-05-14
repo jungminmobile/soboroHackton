@@ -221,6 +221,13 @@ class ScanFragment : Fragment() {
         binding.layoutPhotoPreview.visibility = View.VISIBLE
         binding.overlayFaceRegions.clear()
 
+        // EXIF 보정된 픽셀을 파일에 다시 저장 — 이후 모든 로딩이 올바른 방향을 씀
+        lifecycleScope.launch(Dispatchers.IO) {
+            try {
+                FileOutputStream(file).use { bitmap.compress(android.graphics.Bitmap.CompressFormat.JPEG, 95, it) }
+            } catch (_: Throwable) {}
+        }
+
         // 백그라운드에서 얼굴 윤곽선 감지 후 매끄러운 곡선 표시
         val analyzer = skinAnalyzer ?: return
         lifecycleScope.launch {
@@ -312,7 +319,7 @@ class ScanFragment : Fragment() {
             "중성" to "균형 잡힌 좋은 피부 상태예요! 지금 루틴을 유지하고 수분 공급을 꾸준히 해주세요."
         )
         val aiComment = if (acneCount > 0)
-            "여드름이 ${acneCount}개 감지됐어요. ${comments[skinType] ?: ""}"
+            "트러블이 ${acneCount}개 감지됐어요. ${comments[skinType] ?: ""}"
         else
             comments[skinType] ?: ""
 
