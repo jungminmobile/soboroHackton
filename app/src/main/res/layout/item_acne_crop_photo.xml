@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:gravity="center_horizontal"
+    android:paddingHorizontal="8dp">
+
+    <!-- 회차 날짜 -->
+    <TextView
+        android:id="@+id/tv_crop_date"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="01.01"
+        android:textSize="11sp"
+        android:textColor="@color/text_secondary"
+        android:layout_marginBottom="6dp" />
+
+    <!-- 크롭 사진 -->
+    <FrameLayout
+        android:layout_width="130dp"
+        android:layout_height="130dp"
+        android:background="#1A1D9E75">
+
+        <ImageView
+            android:id="@+id/iv_crop_photo"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:scaleType="centerCrop" />
+
+        <TextView
+            android:id="@+id/tv_crop_placeholder"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:text="📷"
+            android:textSize="30sp"
+            android:gravity="center"
+            android:visibility="gone" />
+    </FrameLayout>
+
+    <!-- 변화 뱃지 -->
+    <TextView
+        android:id="@+id/tv_crop_change"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="6dp"
+        android:text="신규"
+        android:textSize="11sp"
+        android:textStyle="bold"
+        android:textColor="@color/primary" />
+
+</LinearLayout>

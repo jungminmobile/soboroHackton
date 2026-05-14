@@ -2,11 +2,9 @@ package com.example.soboroskin
 
 import android.os.Bundle
 import android.view.View
-import android.view.animation.AnimationUtils
 import androidx.appcompat.app.AppCompatActivity
 import androidx.navigation.NavController
 import androidx.navigation.fragment.NavHostFragment
-import androidx.navigation.ui.setupWithNavController
 import com.example.soboroskin.databinding.ActivityMainBinding
 import com.example.soboroskin.ui.scan.ScanFragment
 
@@ -21,9 +19,7 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
-
         setupNavigation()
-        setupFab()
     }
 
     private fun setupNavigation() {
@@ -31,36 +27,32 @@ class MainActivity : AppCompatActivity() {
             .findFragmentById(R.id.nav_host_fragment) as NavHostFragment
         navController = navHostFragment.navController
 
-        binding.bottomNav.setupWithNavController(navController)
-
-        // 가운데 placeholder 항목 클릭 막기
-        binding.bottomNav.menu.findItem(R.id.placeholder_scan)?.isEnabled = false
-    }
-
-    private fun setupFab() {
-        binding.fabScan.setOnClickListener {
-            if (isScanOpen) {
-                closeScanOverlay()
-            } else {
-                openScanOverlay()
+        // 진단 탭은 nav graph 목적지가 없으므로 직접 처리
+        binding.bottomNav.setOnItemSelectedListener { item ->
+            when (item.itemId) {
+                R.id.nav_scan -> {
+                    openScanOverlay()
+                    false // 선택 상태 유지 안 함
+                }
+                else -> {
+                    navController.navigate(item.itemId)
+                    true
+                }
             }
         }
     }
 
     fun openScanOverlay() {
+        if (isScanOpen) return
         isScanOpen = true
 
-        // 하단 바 / FAB 숨기기 (스캔 오버레이가 전체 화면을 덮어야 함)
         binding.bottomNav.visibility = View.GONE
-        binding.fabScan.visibility = View.GONE
 
-        // ScanFragment를 오버레이 컨테이너에 로드
         val scanFragment = ScanFragment()
         supportFragmentManager.beginTransaction()
             .replace(R.id.scan_fragment_container, scanFragment)
             .commit()
 
-        // 슬라이드 업 애니메이션
         binding.scanOverlayContainer.visibility = View.VISIBLE
         binding.scanOverlayContainer.translationY = binding.scanOverlayContainer.height.toFloat()
         binding.scanOverlayContainer.animate()
@@ -71,7 +63,6 @@ class MainActivity : AppCompatActivity() {
 
     fun closeScanOverlay() {
         isScanOpen = false
-
         binding.scanOverlayContainer.animate()
             .translationY(binding.scanOverlayContainer.height.toFloat())
             .setDuration(300)
@@ -80,9 +71,7 @@ class MainActivity : AppCompatActivity() {
                 supportFragmentManager.findFragmentById(R.id.scan_fragment_container)?.let { frag ->
                     supportFragmentManager.beginTransaction().remove(frag).commit()
                 }
-                // 하단 바 / FAB 복원
                 binding.bottomNav.visibility = View.VISIBLE
-                binding.fabScan.visibility = View.VISIBLE
             }
             .start()
     }
@@ -100,16 +89,16 @@ class MainActivity : AppCompatActivity() {
         imageHeight: Int = 0
     ) {
         val resultFragment = com.example.soboroskin.ui.scan.ScanResultFragment.newInstance(
-            skinType = skinType,
-            moistureScore = moistureScore,
-            oilScore = oilScore,
-            troubleScore = troubleScore,
+            skinType        = skinType,
+            moistureScore   = moistureScore,
+            oilScore        = oilScore,
+            troubleScore    = troubleScore,
             elasticityScore = elasticityScore,
-            aiComment = aiComment,
-            photoPath = photoPath,
-            detections = detections,
-            imageWidth = imageWidth,
-            imageHeight = imageHeight
+            aiComment       = aiComment,
+            photoPath       = photoPath,
+            detections      = detections,
+            imageWidth      = imageWidth,
+            imageHeight     = imageHeight
         )
         supportFragmentManager.beginTransaction()
             .setCustomAnimations(android.R.anim.slide_in_left, android.R.anim.slide_out_right)
@@ -119,7 +108,6 @@ class MainActivity : AppCompatActivity() {
 
     fun onDiagnosisSaved() {
         closeScanOverlay()
-        // 기록장 탭으로 이동
         binding.bottomNav.selectedItemId = R.id.diaryFragment
     }
 
@@ -127,6 +115,7 @@ class MainActivity : AppCompatActivity() {
         if (isScanOpen) {
             closeScanOverlay()
         } else {
+            @Suppress("DEPRECATION")
             super.onBackPressed()
         }
     }

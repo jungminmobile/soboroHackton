@@ -2,6 +2,7 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.kapt)
+    id("com.google.gms.google-services")
 }
 
 android {
@@ -107,6 +108,11 @@ dependencies {
 
     // MPAndroidChart (차트 시각화)
     implementation("com.github.PhilJay:MPAndroidChart:v3.1.0")
+
+    // Firebase
+    implementation(platform("com.google.firebase:firebase-bom:33.7.0"))
+    implementation("com.google.firebase:firebase-auth-ktx")
+    implementation("com.google.firebase:firebase-analytics-ktx")
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)

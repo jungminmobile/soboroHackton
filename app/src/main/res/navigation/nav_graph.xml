@@ -18,12 +18,6 @@
         tools:layout="@layout/fragment_diary" />
 
     <fragment
-        android:id="@+id/communityFragment"
-        android:name="com.example.soboroskin.ui.community.CommunityFragment"
-        android:label="커뮤니티"
-        tools:layout="@layout/fragment_community" />
-
-    <fragment
         android:id="@+id/cosmeticsFragment"
         android:name="com.example.soboroskin.ui.cosmetics.CosmeticsFragment"
         android:label="화장품"

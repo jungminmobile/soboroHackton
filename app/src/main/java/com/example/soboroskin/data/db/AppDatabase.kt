@@ -4,16 +4,24 @@ import android.content.Context
 import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
+import com.example.soboroskin.data.model.AcneSpotEntity
+import com.example.soboroskin.data.model.AcneSpotRecordEntity
 import com.example.soboroskin.data.model.DiagnosisEntity
 
 @Database(
-    entities = [DiagnosisEntity::class],
-    version = 1,
+    entities = [
+        DiagnosisEntity::class,
+        AcneSpotEntity::class,
+        AcneSpotRecordEntity::class
+    ],
+    version = 2,
     exportSchema = false
 )
 abstract class AppDatabase : RoomDatabase() {
 
     abstract fun diagnosisDao(): DiagnosisDao
+    abstract fun acneSpotDao(): AcneSpotDao
+    abstract fun acneSpotRecordDao(): AcneSpotRecordDao
 
     companion object {
         @Volatile

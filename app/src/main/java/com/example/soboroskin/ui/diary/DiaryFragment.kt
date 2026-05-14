@@ -33,6 +33,7 @@ class DiaryFragment : Fragment() {
                 0 -> getString(R.string.diary_tab_log)
                 1 -> getString(R.string.diary_tab_chart)
                 2 -> getString(R.string.diary_tab_photo)
+                3 -> "여드름"
                 else -> ""
             }
         }.attach()

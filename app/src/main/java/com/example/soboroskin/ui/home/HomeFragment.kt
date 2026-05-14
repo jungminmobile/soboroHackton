@@ -11,6 +11,8 @@ import com.example.soboroskin.R
 import com.example.soboroskin.data.db.AppDatabase
 import com.example.soboroskin.data.model.DiagnosisEntity
 import com.example.soboroskin.databinding.FragmentHomeBinding
+import com.example.soboroskin.ui.profile.ProfileBottomSheet
+import com.google.firebase.auth.FirebaseAuth
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.*
@@ -43,17 +45,36 @@ class HomeFragment : Fragment() {
         // 랜덤 팁
         binding.tvTip.text = tips.random()
 
+        // 프로필 버튼
+        binding.btnProfile.setOnClickListener {
+            ProfileBottomSheet().show(parentFragmentManager, ProfileBottomSheet.TAG)
+        }
+
         // 진단 시작 버튼
         binding.btnQuickScan.setOnClickListener {
             (activity as? MainActivity)?.openScanOverlay()
         }
 
+        loadUserProfile()
         loadLatestDiagnosis()
     }
 
     override fun onResume() {
         super.onResume()
+        loadUserProfile()
         loadLatestDiagnosis()
+    }
+
+    private fun loadUserProfile() {
+        val user = FirebaseAuth.getInstance().currentUser
+        if (user != null) {
+            val name = user.displayName?.takeIf { it.isNotEmpty() } ?: "사용자"
+            binding.tvAvatar.text = name.firstOrNull()?.toString() ?: "S"
+            binding.tvProfileName.text = name
+        } else {
+            binding.tvAvatar.text = "G"
+            binding.tvProfileName.text = "게스트"
+        }
     }
 
     private fun loadLatestDiagnosis() {

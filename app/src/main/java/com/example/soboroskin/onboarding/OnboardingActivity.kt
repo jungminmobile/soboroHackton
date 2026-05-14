@@ -4,7 +4,7 @@ import android.content.Intent
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.viewpager2.widget.ViewPager2
-import com.example.soboroskin.MainActivity
+import com.example.soboroskin.auth.AuthActivity
 import com.example.soboroskin.R
 import com.example.soboroskin.databinding.ActivityOnboardingBinding
 
@@ -99,7 +99,7 @@ class OnboardingActivity : AppCompatActivity() {
 
     private fun goToMain() {
         startActivity(
-            Intent(this, MainActivity::class.java)
+            Intent(this, AuthActivity::class.java)
                 .addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_NEW_TASK)
         )
         @Suppress("DEPRECATION")

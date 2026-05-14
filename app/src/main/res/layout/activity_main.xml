@@ -50,18 +50,4 @@
         app:itemIconTint="@color/nav_selector"
         app:labelVisibilityMode="labeled" />
 
-    <!-- Center FAB (Scan Button) -->
-    <com.google.android.material.floatingactionbutton.FloatingActionButton
-        android:id="@+id/fab_scan"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="bottom|center_horizontal"
-        android:layout_marginBottom="24dp"
-        android:contentDescription="@string/nav_scan"
-        android:src="@drawable/ic_scan"
-        app:backgroundTint="@color/primary"
-        app:tint="@color/on_primary"
-        app:fabSize="normal"
-        app:elevation="8dp" />
-
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

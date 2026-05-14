@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "104705691703",
+    "project_id": "soboroskin",
+    "storage_bucket": "soboroskin.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:104705691703:android:ec51066dab738ff102efb2",
+        "android_client_info": {
+          "package_name": "com.example.soboroskin"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCENWGEQkzN7HoL69kQJkXDPOYL3mNvfBg"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
