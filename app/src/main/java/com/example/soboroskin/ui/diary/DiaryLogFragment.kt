@@ -6,6 +6,8 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
+import androidx.lifecycle.Lifecycle
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.soboroskin.data.db.AppDatabase
 import com.example.soboroskin.databinding.FragmentDiaryLogBinding
@@ -34,15 +36,17 @@ class DiaryLogFragment : Fragment() {
         binding.rvDiaryLog.layoutManager = LinearLayoutManager(requireContext())
         binding.rvDiaryLog.adapter = adapter
 
-        lifecycleScope.launch {
-            AppDatabase.getInstance(requireContext())
-                .diagnosisDao()
-                .getAllEntries()
-                .collectLatest { entries ->
-                    adapter.submitList(entries)
-                    binding.layoutEmpty.visibility =
-                        if (entries.isEmpty()) View.VISIBLE else View.GONE
-                }
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
+                AppDatabase.getInstance(requireContext())
+                    .diagnosisDao()
+                    .getAllEntries()
+                    .collectLatest { entries ->
+                        adapter.submitList(entries)
+                        binding.layoutEmpty.visibility =
+                            if (entries.isEmpty()) View.VISIBLE else View.GONE
+                    }
+            }
         }
     }
 
