@@ -1,43 +1,142 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout
+<LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:orientation="vertical"
     android:background="@color/background">
 
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/rv_diary_log"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:paddingHorizontal="16dp"
-        android:paddingTop="8dp"
-        android:paddingBottom="16dp"
-        android:clipToPadding="false" />
-
-    <!-- Empty State -->
+    <!-- 헤더: 제목 + 선택 버튼 -->
     <LinearLayout
-        android:id="@+id/layout_empty"
+        android:id="@+id/layout_header"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:orientation="vertical"
-        android:gravity="center"
-        android:visibility="gone"
-        android:padding="32dp">
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:paddingStart="16dp"
+        android:paddingEnd="8dp"
+        android:paddingTop="12dp"
+        android:paddingBottom="4dp">
 
         <TextView
-            android:layout_width="wrap_content"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:text="📋"
-            android:textSize="48sp" />
+            android:layout_weight="1"
+            android:text="@string/diary_tab_log"
+            android:textSize="15sp"
+            android:textStyle="bold"
+            android:textColor="@color/on_background" />
 
         <TextView
+            android:id="@+id/btn_select"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/diary_no_record"
-            android:textColor="@color/text_secondary"
-            android:textSize="14sp"
-            android:gravity="center"
-            android:lineSpacingMultiplier="1.5"
-            android:layout_marginTop="12dp" />
+            android:text="선택"
+            android:textSize="13sp"
+            android:textColor="@color/primary"
+            android:paddingHorizontal="12dp"
+            android:paddingVertical="8dp"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:clickable="true"
+            android:focusable="true" />
+
     </LinearLayout>
-</FrameLayout>
+
+    <!-- 콘텐츠: RecyclerView + Empty State -->
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1">
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/rv_diary_log"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:paddingHorizontal="16dp"
+            android:paddingTop="4dp"
+            android:paddingBottom="16dp"
+            android:clipToPadding="false" />
+
+        <!-- Empty State -->
+        <LinearLayout
+            android:id="@+id/layout_empty"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical"
+            android:gravity="center"
+            android:visibility="gone"
+            android:padding="32dp">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="📋"
+                android:textSize="48sp" />
+
+            <TextView
+                android:id="@+id/tv_empty_msg"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/diary_no_record"
+                android:textColor="@color/text_secondary"
+                android:textSize="14sp"
+                android:gravity="center"
+                android:lineSpacingMultiplier="1.5"
+                android:layout_marginTop="12dp" />
+        </LinearLayout>
+
+    </FrameLayout>
+
+    <!-- 선택 모드 하단 액션바 (평소에는 GONE) -->
+    <LinearLayout
+        android:id="@+id/layout_selection_bar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:paddingHorizontal="16dp"
+        android:paddingVertical="12dp"
+        android:background="@color/surface"
+        android:elevation="8dp"
+        android:visibility="gone">
+
+        <TextView
+            android:id="@+id/tv_selected_count"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="0개 선택됨"
+            android:textSize="14sp"
+            android:textColor="@color/on_background" />
+
+        <TextView
+            android:id="@+id/btn_cancel_selection"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="취소"
+            android:textSize="14sp"
+            android:textColor="@color/text_secondary"
+            android:paddingHorizontal="16dp"
+            android:paddingVertical="8dp"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:clickable="true"
+            android:focusable="true" />
+
+        <TextView
+            android:id="@+id/btn_delete_selected"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="삭제"
+            android:textSize="14sp"
+            android:textStyle="bold"
+            android:textColor="#FFFFFF"
+            android:paddingHorizontal="20dp"
+            android:paddingVertical="8dp"
+            android:background="@drawable/bg_button_primary"
+            android:clickable="true"
+            android:focusable="true"
+            android:layout_marginStart="8dp" />
+
+    </LinearLayout>
+
+</LinearLayout>

@@ -60,8 +60,38 @@
                 android:id="@+id/overlay_view"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:background="@android:color/transparent" />
+                android:background="@android:color/transparent"
+                android:clickable="true"
+                android:focusable="true" />
         </FrameLayout>
+
+        <!-- 여드름 탭 제외 힌트 (여드름 감지 시만 표시) -->
+        <LinearLayout
+            android:id="@+id/layout_acne_hint"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:layout_marginTop="8dp"
+            android:paddingHorizontal="4dp"
+            android:visibility="gone">
+
+            <TextView
+                android:id="@+id/tv_acne_count"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="여드름 0개 감지됨"
+                android:textSize="13sp"
+                android:textColor="@color/text_secondary" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="💡 탭하면 기록에서 제외"
+                android:textSize="12sp"
+                android:textColor="@color/text_hint" />
+        </LinearLayout>
 
         <!-- Skin Type -->
         <LinearLayout

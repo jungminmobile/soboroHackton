@@ -6,7 +6,9 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
@@ -36,16 +38,18 @@ class DiaryPhotoFragment : Fragment() {
         binding.rvDiaryPhotos.layoutManager = GridLayoutManager(requireContext(), 3)
         binding.rvDiaryPhotos.adapter = adapter
 
-        lifecycleScope.launch {
-            AppDatabase.getInstance(requireContext())
-                .diagnosisDao()
-                .getAiDiagnoses()
-                .collectLatest { entries ->
-                    val withPhotos = entries.filter { it.photoPath.isNotEmpty() }
-                    adapter.submitList(withPhotos)
-                    binding.layoutEmptyPhoto.visibility =
-                        if (withPhotos.isEmpty()) View.VISIBLE else View.GONE
-                }
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
+                AppDatabase.getInstance(requireContext())
+                    .diagnosisDao()
+                    .getAiDiagnoses()
+                    .collectLatest { entries ->
+                        val withPhotos = entries.filter { it.photoPath.isNotEmpty() }
+                        adapter.submitList(withPhotos)
+                        binding.layoutEmptyPhoto.visibility =
+                            if (withPhotos.isEmpty()) View.VISIBLE else View.GONE
+                    }
+            }
         }
     }
 

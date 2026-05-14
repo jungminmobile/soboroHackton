@@ -100,7 +100,12 @@ class ScanResultFragment : Fragment() {
         }
 
         binding.btnSaveToDiary.setOnClickListener {
-            saveToDiary(skinType, moisture, oil, trouble, elasticity, comment, photoPath, detections, imageW, imageH)
+            // OverlayView에서 선택된 여드름만 가져와 저장
+            val selectedDetections = if (detections.isNotEmpty() && imageW > 0 && imageH > 0)
+                binding.overlayView.getSelectedDetections()
+            else
+                detections
+            saveToDiary(skinType, moisture, oil, trouble, elasticity, comment, photoPath, selectedDetections, imageW, imageH)
         }
 
         binding.btnRetry.setOnClickListener {
@@ -132,10 +137,29 @@ class ScanResultFragment : Fragment() {
             }
         }
 
-        if (detections.isNotEmpty() && imageW > 0 && imageH > 0)
+        if (detections.isNotEmpty() && imageW > 0 && imageH > 0) {
             binding.overlayView.setResults(detections, imageW, imageH)
-        else
+
+            // 힌트 영역 표시
+            binding.layoutAcneHint.visibility = View.VISIBLE
+            updateAcneCountText(detections.size, detections.size)
+
+            // 탭 시 카운트 업데이트
+            binding.overlayView.onSelectionChanged = { selected, total ->
+                updateAcneCountText(selected, total)
+            }
+        } else {
             binding.overlayView.clear()
+            binding.layoutAcneHint.visibility = View.GONE
+        }
+    }
+
+    private fun updateAcneCountText(selected: Int, total: Int) {
+        if (_binding == null) return
+        binding.tvAcneCount.text = if (selected == total)
+            getString(R.string.result_acne_detected, total)
+        else
+            getString(R.string.result_acne_selected, selected, total)
     }
 
     private fun saveToDiary(
@@ -143,6 +167,7 @@ class ScanResultFragment : Fragment() {
         comment: String, photoPath: String,
         detections: List<AcneDetection>, imageW: Int, imageH: Int
     ) {
+        binding.btnSaveToDiary.isEnabled = false
         val now = System.currentTimeMillis()
         val entity = DiagnosisEntity(
             skinType        = skinType,
@@ -162,7 +187,7 @@ class ScanResultFragment : Fragment() {
             // 1. 진단 저장 → diagnosisId 확보
             val diagnosisId = db.diagnosisDao().insert(entity)
 
-            // 2. 여드름 위치 추적
+            // 2. 선택된 여드름 위치만 추적
             if (detections.isNotEmpty() && imageW > 0 && imageH > 0) {
                 try {
                     AcneTracker(db).track(
@@ -178,7 +203,11 @@ class ScanResultFragment : Fragment() {
             }
 
             requireActivity().runOnUiThread {
-                Toast.makeText(requireContext(), getString(R.string.result_saved), Toast.LENGTH_SHORT).show()
+                val msg = if (detections.isEmpty())
+                    "여드름 없이 저장되었습니다"
+                else
+                    getString(R.string.result_saved)
+                Toast.makeText(requireContext(), msg, Toast.LENGTH_SHORT).show()
                 (activity as? MainActivity)?.onDiagnosisSaved()
             }
         }
@@ -206,6 +235,7 @@ class ScanResultFragment : Fragment() {
 
     override fun onDestroyView() {
         super.onDestroyView()
+        binding.overlayView.onSelectionChanged = null
         _binding = null
     }
 }

@@ -36,4 +36,13 @@ interface DiagnosisDao {
 
     @Query("SELECT * FROM diagnoses WHERE id = :id LIMIT 1")
     suspend fun getById(id: Long): DiagnosisEntity?
+
+    @Query("DELETE FROM diagnoses")
+    suspend fun deleteAll()
+
+    @Query("SELECT * FROM diagnoses")
+    suspend fun getAllNow(): List<DiagnosisEntity>
+
+    @Query("DELETE FROM diagnoses WHERE id IN (:ids)")
+    suspend fun deleteByIds(ids: List<Long>)
 }

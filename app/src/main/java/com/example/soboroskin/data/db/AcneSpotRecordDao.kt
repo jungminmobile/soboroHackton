@@ -17,4 +17,10 @@ interface AcneSpotRecordDao {
 
     @Query("SELECT * FROM acne_spot_records WHERE diagnosisId = :diagnosisId")
     suspend fun getRecordsForDiagnosis(diagnosisId: Long): List<AcneSpotRecordEntity>
+
+    @Query("DELETE FROM acne_spot_records")
+    suspend fun deleteAll()
+
+    @Query("DELETE FROM acne_spot_records WHERE diagnosisId IN (:diagnosisIds)")
+    suspend fun deleteByDiagnosisIds(diagnosisIds: List<Long>)
 }

@@ -1,118 +1,136 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.cardview.widget.CardView
+<LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_marginVertical="6dp"
-    app:cardCornerRadius="16dp"
-    app:cardElevation="2dp"
-    app:cardBackgroundColor="@color/surface">
+    android:orientation="horizontal"
+    android:gravity="center_vertical"
+    android:layout_marginVertical="6dp">
 
-    <LinearLayout
-        android:layout_width="match_parent"
+    <!-- 선택 모드 체크박스 (평소엔 GONE) -->
+    <CheckBox
+        android:id="@+id/cb_select"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:padding="16dp">
+        android:layout_marginEnd="4dp"
+        android:clickable="false"
+        android:focusable="false"
+        android:visibility="gone" />
 
-        <!-- Header Row -->
+    <androidx.cardview.widget.CardView
+        android:id="@+id/card_view"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        app:cardCornerRadius="16dp"
+        app:cardElevation="2dp"
+        app:cardBackgroundColor="@color/surface">
+
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:gravity="center_vertical"
-            android:layout_marginBottom="12dp">
+            android:orientation="vertical"
+            android:padding="16dp">
 
-            <!-- AI Badge -->
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="🤖 AI 진단"
-                android:background="@drawable/bg_tag"
-                android:paddingHorizontal="10dp"
-                android:paddingVertical="4dp"
-                android:textColor="@color/primary"
-                android:textSize="11sp"
-                android:textStyle="bold" />
-
-            <View android:layout_width="0dp" android:layout_height="1dp" android:layout_weight="1" />
-
-            <TextView
-                android:id="@+id/tv_date"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:textColor="@color/text_hint"
-                android:textSize="11sp"
-                android:text="2024.01.15" />
-        </LinearLayout>
-
-        <!-- Skin Type + Photo row -->
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:gravity="center_vertical">
-
-            <ImageView
-                android:id="@+id/iv_photo"
-                android:layout_width="56dp"
-                android:layout_height="56dp"
-                android:scaleType="centerCrop"
-                android:src="@android:drawable/ic_menu_camera"
-                android:background="@drawable/bg_card_rounded" />
-
+            <!-- Header Row -->
             <LinearLayout
-                android:layout_width="0dp"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:orientation="vertical"
-                android:layout_marginStart="12dp">
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:layout_marginBottom="12dp">
 
                 <TextView
-                    android:id="@+id/tv_skin_type"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="건성"
-                    android:textSize="16sp"
-                    android:textStyle="bold"
-                    android:textColor="@color/on_background" />
+                    android:text="🤖 AI 진단"
+                    android:background="@drawable/bg_tag"
+                    android:paddingHorizontal="10dp"
+                    android:paddingVertical="4dp"
+                    android:textColor="@color/primary"
+                    android:textSize="11sp"
+                    android:textStyle="bold" />
 
-                <!-- Score Row -->
-                <LinearLayout
-                    android:layout_width="match_parent"
+                <View android:layout_width="0dp" android:layout_height="1dp" android:layout_weight="1" />
+
+                <TextView
+                    android:id="@+id/tv_date"
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    android:layout_marginTop="6dp">
+                    android:textColor="@color/text_hint"
+                    android:textSize="11sp"
+                    android:text="2024.01.15" />
+            </LinearLayout>
 
-                    <TextView android:id="@+id/tv_score_moisture"
-                        android:layout_width="wrap_content" android:layout_height="wrap_content"
-                        android:text="💧78" android:textSize="12sp" android:textColor="@color/accent_moisture"
-                        android:layout_marginEnd="8dp" />
-                    <TextView android:id="@+id/tv_score_oil"
-                        android:layout_width="wrap_content" android:layout_height="wrap_content"
-                        android:text="✨45" android:textSize="12sp" android:textColor="@color/accent_oil"
-                        android:layout_marginEnd="8dp" />
-                    <TextView android:id="@+id/tv_score_trouble"
-                        android:layout_width="wrap_content" android:layout_height="wrap_content"
-                        android:text="🔴30" android:textSize="12sp" android:textColor="@color/accent_trouble"
-                        android:layout_marginEnd="8dp" />
-                    <TextView android:id="@+id/tv_score_elasticity"
-                        android:layout_width="wrap_content" android:layout_height="wrap_content"
-                        android:text="💜65" android:textSize="12sp" android:textColor="@color/accent_elasticity" />
+            <!-- Skin Type + Photo row -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical">
+
+                <ImageView
+                    android:id="@+id/iv_photo"
+                    android:layout_width="56dp"
+                    android:layout_height="56dp"
+                    android:scaleType="centerCrop"
+                    android:src="@android:drawable/ic_menu_camera"
+                    android:background="@drawable/bg_card_rounded" />
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:orientation="vertical"
+                    android:layout_marginStart="12dp">
+
+                    <TextView
+                        android:id="@+id/tv_skin_type"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="건성"
+                        android:textSize="16sp"
+                        android:textStyle="bold"
+                        android:textColor="@color/on_background" />
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:layout_marginTop="6dp">
+
+                        <TextView android:id="@+id/tv_score_moisture"
+                            android:layout_width="wrap_content" android:layout_height="wrap_content"
+                            android:text="💧78" android:textSize="12sp" android:textColor="@color/accent_moisture"
+                            android:layout_marginEnd="8dp" />
+                        <TextView android:id="@+id/tv_score_oil"
+                            android:layout_width="wrap_content" android:layout_height="wrap_content"
+                            android:text="✨45" android:textSize="12sp" android:textColor="@color/accent_oil"
+                            android:layout_marginEnd="8dp" />
+                        <TextView android:id="@+id/tv_score_trouble"
+                            android:layout_width="wrap_content" android:layout_height="wrap_content"
+                            android:text="🔴30" android:textSize="12sp" android:textColor="@color/accent_trouble"
+                            android:layout_marginEnd="8dp" />
+                        <TextView android:id="@+id/tv_score_elasticity"
+                            android:layout_width="wrap_content" android:layout_height="wrap_content"
+                            android:text="💜65" android:textSize="12sp" android:textColor="@color/accent_elasticity" />
+                    </LinearLayout>
                 </LinearLayout>
             </LinearLayout>
+
+            <!-- Notes -->
+            <TextView
+                android:id="@+id/tv_notes"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:textSize="13sp"
+                android:textColor="@color/text_secondary"
+                android:lineSpacingMultiplier="1.4"
+                android:visibility="gone" />
+
         </LinearLayout>
+    </androidx.cardview.widget.CardView>
 
-        <!-- Notes if any -->
-        <TextView
-            android:id="@+id/tv_notes"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="10dp"
-            android:textSize="13sp"
-            android:textColor="@color/text_secondary"
-            android:lineSpacingMultiplier="1.4"
-            android:visibility="gone" />
-
-    </LinearLayout>
-</androidx.cardview.widget.CardView>
+</LinearLayout>

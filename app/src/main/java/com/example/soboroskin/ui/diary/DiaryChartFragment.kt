@@ -6,14 +6,16 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import com.example.soboroskin.data.db.AppDatabase
 import com.example.soboroskin.data.model.DiagnosisEntity
 import com.example.soboroskin.databinding.FragmentDiaryChartBinding
 import com.github.mikephil.charting.components.XAxis
 import com.github.mikephil.charting.data.*
 import com.github.mikephil.charting.formatter.IndexAxisValueFormatter
-import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.*
@@ -24,6 +26,7 @@ class DiaryChartFragment : Fragment() {
     private var _binding: FragmentDiaryChartBinding? = null
     private val binding get() = _binding!!
 
+    // DB에서 실시간으로 받는 전체 목록
     private var allEntries: List<DiagnosisEntity> = emptyList()
     private var dayRange = 7
 
@@ -40,7 +43,7 @@ class DiaryChartFragment : Fragment() {
 
         setupChart()
         setupChipGroup()
-        loadData()
+        observeData()   // Flow로 실시간 관찰 (삭제 시 자동 갱신)
     }
 
     private fun setupChart() {
@@ -82,17 +85,24 @@ class DiaryChartFragment : Fragment() {
         }
     }
 
-    private fun loadData() {
-        lifecycleScope.launch {
-            allEntries = AppDatabase.getInstance(requireContext())
-                .diagnosisDao()
-                .getAllEntries()
-                .first()
-            updateChart()
+    /** Flow를 collectLatest로 관찰 → 삭제/추가 즉시 차트 갱신 */
+    private fun observeData() {
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
+                AppDatabase.getInstance(requireContext())
+                    .diagnosisDao()
+                    .getAllEntries()
+                    .collectLatest { entries ->
+                        allEntries = entries
+                        updateChart()
+                    }
+            }
         }
     }
 
     private fun updateChart() {
+        if (_binding == null) return
+
         val cutoff = System.currentTimeMillis() - TimeUnit.DAYS.toMillis(dayRange.toLong())
         val filtered = allEntries
             .filter { it.date >= cutoff && !it.isManual }
@@ -100,7 +110,11 @@ class DiaryChartFragment : Fragment() {
 
         if (filtered.isEmpty()) {
             binding.lineChart.clear()
-            binding.lineChart.setNoDataText("이 기간에 진단 기록이 없어요")
+            binding.lineChart.setNoDataText(
+                if (allEntries.isEmpty()) "아직 진단 기록이 없어요"
+                else "이 기간에 진단 기록이 없어요"
+            )
+            binding.lineChart.invalidate()
             updateAverages(emptyList())
             return
         }
@@ -108,13 +122,13 @@ class DiaryChartFragment : Fragment() {
         val sdf = SimpleDateFormat("MM/dd", Locale.getDefault())
         val labels = filtered.map { sdf.format(Date(it.date)) }
 
-        val moistureEntries = filtered.mapIndexed { i, e -> Entry(i.toFloat(), e.moistureScore.toFloat()) }
-        val oilEntries      = filtered.mapIndexed { i, e -> Entry(i.toFloat(), e.oilScore.toFloat()) }
-        val troubleEntries  = filtered.mapIndexed { i, e -> Entry(i.toFloat(), e.troubleScore.toFloat()) }
+        val moistureEntries   = filtered.mapIndexed { i, e -> Entry(i.toFloat(), e.moistureScore.toFloat()) }
+        val oilEntries        = filtered.mapIndexed { i, e -> Entry(i.toFloat(), e.oilScore.toFloat()) }
+        val troubleEntries    = filtered.mapIndexed { i, e -> Entry(i.toFloat(), e.troubleScore.toFloat()) }
         val elasticityEntries = filtered.mapIndexed { i, e -> Entry(i.toFloat(), e.elasticityScore.toFloat()) }
 
-        fun makeDataSet(entries: List<Entry>, label: String, color: Int): LineDataSet {
-            return LineDataSet(entries, label).apply {
+        fun makeDataSet(entries: List<Entry>, label: String, color: Int): LineDataSet =
+            LineDataSet(entries, label).apply {
                 this.color = color
                 setCircleColor(color)
                 lineWidth = 2f
@@ -122,13 +136,12 @@ class DiaryChartFragment : Fragment() {
                 setDrawValues(false)
                 mode = LineDataSet.Mode.CUBIC_BEZIER
             }
-        }
 
         val lineData = LineData(
-            makeDataSet(moistureEntries,   "💧 수분",  Color.parseColor("#4FC3F7")),
-            makeDataSet(oilEntries,        "✨ 유분",  Color.parseColor("#FFB74D")),
+            makeDataSet(moistureEntries,   "💧 수분",   Color.parseColor("#4FC3F7")),
+            makeDataSet(oilEntries,        "✨ 유분",   Color.parseColor("#FFB74D")),
             makeDataSet(troubleEntries,    "🔴 트러블", Color.parseColor("#EF5350")),
-            makeDataSet(elasticityEntries, "💜 탄력",  Color.parseColor("#BA68C8"))
+            makeDataSet(elasticityEntries, "💜 탄력",   Color.parseColor("#BA68C8"))
         )
 
         binding.lineChart.xAxis.valueFormatter = IndexAxisValueFormatter(labels)
@@ -139,6 +152,7 @@ class DiaryChartFragment : Fragment() {
     }
 
     private fun updateAverages(entries: List<DiagnosisEntity>) {
+        if (_binding == null) return
         if (entries.isEmpty()) {
             binding.tvAvgMoisture.text   = "-"
             binding.tvAvgOil.text        = "-"

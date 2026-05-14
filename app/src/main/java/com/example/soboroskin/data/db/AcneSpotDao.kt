@@ -24,4 +24,11 @@ interface AcneSpotDao {
 
     @Update
     suspend fun update(spot: AcneSpotEntity)
+
+    @Query("DELETE FROM acne_spots")
+    suspend fun deleteAll()
+
+    // 기록이 하나도 남지 않은 여드름 spot 정리
+    @Query("DELETE FROM acne_spots WHERE id NOT IN (SELECT DISTINCT spotId FROM acne_spot_records)")
+    suspend fun deleteOrphaned()
 }
