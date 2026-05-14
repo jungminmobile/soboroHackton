@@ -15,6 +15,12 @@ class SkinAnalyzer(private val context: Context) {
     private val facePartCropper = FacePartCropper(context)
     private val acneDetector = AcneDetector(context)
 
+    var confThreshold: Float
+        get() = acneDetector.confThreshold
+        set(value) { acneDetector.confThreshold = value }
+
+    fun cropFaceParts(bitmap: Bitmap): List<FacePart>? = facePartCropper.cropParts(bitmap)
+
     fun analyze(bitmap: Bitmap): AnalysisResult {
         // 1단계: MediaPipe로 얼굴 부위 크롭
         val parts = facePartCropper.cropParts(bitmap)

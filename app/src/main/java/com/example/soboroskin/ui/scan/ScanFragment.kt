@@ -14,18 +14,17 @@ import androidx.camera.core.*
 import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.lifecycleScope
 import com.example.soboroskin.MainActivity
-import com.example.soboroskin.R
+import com.example.soboroskin.SkinAnalyzer
 import com.example.soboroskin.databinding.FragmentScanBinding
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.io.File
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 import kotlin.random.Random
-import androidx.lifecycle.lifecycleScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
-import com.example.soboroskin.SkinAnalyzer
 
 class ScanFragment : Fragment() {
 
@@ -34,17 +33,13 @@ class ScanFragment : Fragment() {
 
     private lateinit var cameraExecutor: ExecutorService
     private var skinAnalyzer: SkinAnalyzer? = null
-
     private var imageCapture: ImageCapture? = null
+    private var capturedFile: File? = null
 
     private val permissionLauncher = registerForActivityResult(
         ActivityResultContracts.RequestPermission()
     ) { granted ->
-        if (granted) {
-            startCamera()
-        } else {
-            showPermissionView()
-        }
+        if (granted) startCamera() else showPermissionView()
     }
 
     override fun onCreateView(
@@ -57,6 +52,7 @@ class ScanFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
         skinAnalyzer = try {
             SkinAnalyzer(requireContext())
         } catch (t: Throwable) {
@@ -70,8 +66,33 @@ class ScanFragment : Fragment() {
             (activity as? MainActivity)?.closeScanOverlay()
         }
 
+        // 촬영 버튼 → 사진 찍고 미리보기 표시
         binding.btnCapture.setOnClickListener {
-            captureAndAnalyze()
+            takePicture()
+        }
+
+        // 다시 찍기 → 카메라로 복귀
+        binding.btnRetake.setOnClickListener {
+            hidePhotoPreview()
+        }
+
+        // 민감도 슬라이더 (0.02 ~ 0.08, step 0.01, 7단계)
+        binding.seekbarConf.setOnSeekBarChangeListener(object : android.widget.SeekBar.OnSeekBarChangeListener {
+            override fun onProgressChanged(seekBar: android.widget.SeekBar, progress: Int, fromUser: Boolean) {
+                val conf = 0.02f + progress * 0.01f
+                binding.tvConfValue.text = String.format("%.2f", conf)
+            }
+            override fun onStartTrackingTouch(seekBar: android.widget.SeekBar) {}
+            override fun onStopTrackingTouch(seekBar: android.widget.SeekBar) {}
+        })
+
+        // 분석하기 → conf 적용 후 AI 분석 시작
+        binding.btnAnalyze.setOnClickListener {
+            val file = capturedFile ?: return@setOnClickListener
+            val conf = 0.02f + binding.seekbarConf.progress * 0.01f
+            skinAnalyzer?.confThreshold = conf
+            hidePhotoPreview()
+            startAnalysis(file)
         }
 
         binding.btnRequestPermission.setOnClickListener {
@@ -82,15 +103,11 @@ class ScanFragment : Fragment() {
     }
 
     private fun checkCameraPermission() {
-        when {
-            ContextCompat.checkSelfPermission(
-                requireContext(), Manifest.permission.CAMERA
-            ) == PackageManager.PERMISSION_GRANTED -> {
-                startCamera()
-            }
-            else -> {
-                permissionLauncher.launch(Manifest.permission.CAMERA)
-            }
+        if (ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.CAMERA)
+            == PackageManager.PERMISSION_GRANTED) {
+            startCamera()
+        } else {
+            permissionLauncher.launch(Manifest.permission.CAMERA)
         }
     }
 
@@ -99,21 +116,16 @@ class ScanFragment : Fragment() {
         val cameraProviderFuture = ProcessCameraProvider.getInstance(requireContext())
         cameraProviderFuture.addListener({
             val cameraProvider = cameraProviderFuture.get()
-
             val preview = Preview.Builder().build().also {
                 it.setSurfaceProvider(binding.cameraPreview.surfaceProvider)
             }
-
             imageCapture = ImageCapture.Builder()
                 .setCaptureMode(ImageCapture.CAPTURE_MODE_MINIMIZE_LATENCY)
                 .build()
-
-            val cameraSelector = CameraSelector.DEFAULT_FRONT_CAMERA
-
             try {
                 cameraProvider.unbindAll()
                 cameraProvider.bindToLifecycle(
-                    viewLifecycleOwner, cameraSelector, preview, imageCapture
+                    viewLifecycleOwner, CameraSelector.DEFAULT_FRONT_CAMERA, preview, imageCapture
                 )
             } catch (e: Exception) {
                 Log.e("ScanFragment", "Camera binding failed", e)
@@ -121,13 +133,8 @@ class ScanFragment : Fragment() {
         }, ContextCompat.getMainExecutor(requireContext()))
     }
 
-    private fun captureAndAnalyze() {
-        showAnalyzing()
-
-        val photoFile = File(
-            requireContext().cacheDir,
-            "skin_${System.currentTimeMillis()}.jpg"
-        )
+    private fun takePicture() {
+        val photoFile = File(requireContext().cacheDir, "skin_${System.currentTimeMillis()}.jpg")
         val outputOptions = ImageCapture.OutputFileOptions.Builder(photoFile).build()
 
         imageCapture?.takePicture(
@@ -135,33 +142,80 @@ class ScanFragment : Fragment() {
             ContextCompat.getMainExecutor(requireContext()),
             object : ImageCapture.OnImageSavedCallback {
                 override fun onImageSaved(output: ImageCapture.OutputFileResults) {
-                    val analyzer = skinAnalyzer
-                    if (analyzer == null) {
-                        analyzeSkin(photoFile.absolutePath)
-                        return
-                    }
-                    val bitmap = BitmapFactory.decodeFile(photoFile.absolutePath)
-                    analyzeWithAI(analyzer, bitmap, photoFile.absolutePath)
+                    capturedFile = photoFile
+                    showPhotoPreview(photoFile)
                 }
-
                 override fun onError(exception: ImageCaptureException) {
                     Log.e("ScanFragment", "Capture failed", exception)
-                    analyzeSkin("")
+                    // 카메라 오류 시 바로 mock 분석
+                    startAnalysis(null)
                 }
             }
-        ) ?: run {
-            analyzeSkin("")
+        ) ?: startAnalysis(null)
+    }
+
+    private fun showPhotoPreview(file: File) {
+        val bitmap = BitmapFactory.decodeFile(file.absolutePath) ?: return
+        binding.ivPreview.setImageBitmap(bitmap)
+        binding.layoutPhotoPreview.visibility = View.VISIBLE
+        binding.overlayFaceRegions.clear()
+
+        // 백그라운드에서 얼굴 부위 감지 후 점선 표시
+        val analyzer = skinAnalyzer ?: return
+        lifecycleScope.launch {
+            val parts = withContext(Dispatchers.Default) {
+                try { analyzer.cropFaceParts(bitmap) }
+                catch (t: Throwable) { null }
+            }
+            if (parts != null && _binding != null) {
+                // 겹치는 부위 제거: 이름이 같은 그룹 중 가장 작은 bbox만 남김
+                val uniqueParts = parts
+                    .groupBy { it.name }
+                    .map { (_, list) -> list.minByOrNull { it.bitmap.width * it.bitmap.height }!! }
+
+                val regions = uniqueParts.map { part ->
+                    val rect = android.graphics.RectF(
+                        part.offsetX.toFloat(),
+                        part.offsetY.toFloat(),
+                        (part.offsetX + part.bitmap.width).toFloat(),
+                        (part.offsetY + part.bitmap.height).toFloat()
+                    )
+                    Pair(part.name, rect)
+                }
+                binding.overlayFaceRegions.setFaceRegions(regions, bitmap.width, bitmap.height)
+            }
         }
     }
+
+    private fun hidePhotoPreview() {
+        binding.layoutPhotoPreview.visibility = View.GONE
+        binding.ivPreview.setImageBitmap(null)
+        binding.overlayFaceRegions.clear()
+    }
+
+    private fun startAnalysis(file: File?) {
+        showAnalyzing()
+        if (file == null) {
+            analyzeSkin("")
+            return
+        }
+        val analyzer = skinAnalyzer
+        val bitmap = BitmapFactory.decodeFile(file.absolutePath)
+        if (analyzer == null || bitmap == null) {
+            analyzeSkin(file.absolutePath)
+            return
+        }
+        analyzeWithAI(analyzer, bitmap, file.absolutePath)
+    }
+
     private fun analyzeWithAI(analyzer: SkinAnalyzer, bitmap: Bitmap, photoPath: String) {
         val imageW = bitmap.width
         val imageH = bitmap.height
         lifecycleScope.launch {
             val result = withContext(Dispatchers.Default) {
-                try {
-                    analyzer.analyze(bitmap)
-                } catch (t: Throwable) {
-                    Log.e("ScanFragment", "SkinAnalyzer.analyze failed — using mock", t)
+                try { analyzer.analyze(bitmap) }
+                catch (t: Throwable) {
+                    Log.e("ScanFragment", "analyze failed", t)
                     null
                 }
             }
@@ -170,13 +224,6 @@ class ScanFragment : Fragment() {
                 analyzeSkin(photoPath)
                 return@launch
             }
-
-            // 감지 결과 확인용 Toast
-            android.widget.Toast.makeText(
-                requireContext(),
-                "얼굴감지:${result.faceDetected} 여드름:${result.detections.size}개",
-                android.widget.Toast.LENGTH_LONG
-            ).show()
 
             if (!result.faceDetected) {
                 hideAnalyzing()
@@ -188,18 +235,14 @@ class ScanFragment : Fragment() {
                 return@launch
             }
 
-            // 여드름 개수 기반 trouble 점수 계산
             val acneCount = result.detections.size
-            val troubleScore = minOf(100, acneCount * 5)
-
-            // 부위별 결과 로그
             result.partCounts.forEach { (part, count) ->
                 Log.d("SkinAnalysis", "$part: ${count}개")
             }
-
-            analyzeSkin(photoPath, troubleScore, result, imageW, imageH)
+            analyzeSkin(photoPath, minOf(100, acneCount * 5), result, imageW, imageH)
         }
     }
+
     private fun analyzeSkin(
         photoPath: String,
         troubleScore: Int = Random.nextInt(5, 60),
@@ -209,11 +252,9 @@ class ScanFragment : Fragment() {
     ) {
         val skinTypes = listOf("건성", "지성", "복합성", "민감성", "중성")
         val skinType = skinTypes.random()
-
         val moisture = Random.nextInt(40, 95)
         val oil = Random.nextInt(20, 85)
         val elasticity = Random.nextInt(50, 90)
-
         val acneCount = analysisResult?.detections?.size ?: 0
         val comments = mapOf(
             "건성" to "수분이 부족한 상태예요. 보습 크림과 수분 에센스를 충분히 사용하고, 물을 많이 마셔보세요.",
@@ -222,15 +263,12 @@ class ScanFragment : Fragment() {
             "민감성" to "피부가 민감한 상태예요. 자극이 적은 순한 제품을 사용하고 자외선 차단에 신경 써주세요.",
             "중성" to "균형 잡힌 좋은 피부 상태예요! 지금 루틴을 유지하고 수분 공급을 꾸준히 해주세요."
         )
-
-        val aiComment = if (acneCount > 0) {
+        val aiComment = if (acneCount > 0)
             "여드름이 ${acneCount}개 감지됐어요. ${comments[skinType] ?: ""}"
-        } else {
+        else
             comments[skinType] ?: ""
-        }
 
         hideAnalyzing()
-
         (activity as? MainActivity)?.showScanResult(
             skinType = skinType,
             moistureScore = moisture,

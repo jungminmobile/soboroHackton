@@ -25,7 +25,7 @@ data class AcneDetection(
 class AcneDetector(private val context: Context) {
 
     private var interpreter: Interpreter? = null
-    private val confThreshold = 0.04f
+    var confThreshold = 0.05f
     private val iouThreshold  = 0.45f
     private val maxBoxRatio   = 0.40f
 
