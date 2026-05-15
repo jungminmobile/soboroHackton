@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:background="@color/surface">
+
+    <!-- 핸들 -->
+    <View
+        android:layout_width="40dp"
+        android:layout_height="4dp"
+        android:layout_marginTop="10dp"
+        android:layout_gravity="center_horizontal"
+        android:background="@drawable/bg_sheet_handle" />
+
+    <!-- 헤더 -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:paddingHorizontal="20dp"
+        android:paddingTop="14dp"
+        android:paddingBottom="10dp">
+
+        <View
+            android:id="@+id/view_region_color"
+            android:layout_width="12dp"
+            android:layout_height="12dp"
+            android:background="@drawable/bg_legend_dot_red"
+            android:layout_marginEnd="10dp" />
+
+        <TextView
+            android:id="@+id/tv_region_title"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="왼볼"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            android:textColor="@color/on_background" />
+
+        <TextView
+            android:id="@+id/tv_region_count"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="3개"
+            android:textSize="14sp"
+            android:textColor="@color/text_secondary" />
+    </LinearLayout>
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="@color/surface_variant"
+        android:layout_marginHorizontal="16dp" />
+
+    <!-- 스팟 목록 -->
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/rv_region_spots"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:maxHeight="400dp"
+        android:nestedScrollingEnabled="false"
+        android:paddingBottom="24dp" />
+
+</LinearLayout>

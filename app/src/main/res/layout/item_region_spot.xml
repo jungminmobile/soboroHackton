@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal"
+    android:gravity="center_vertical"
+    android:paddingHorizontal="20dp"
+    android:paddingVertical="12dp"
+    android:background="?attr/selectableItemBackground"
+    android:clickable="true"
+    android:focusable="true">
+
+    <!-- 상태 도트 -->
+    <View
+        android:id="@+id/view_status_dot"
+        android:layout_width="10dp"
+        android:layout_height="10dp"
+        android:background="@drawable/bg_legend_dot_red"
+        android:layout_marginEnd="14dp" />
+
+    <!-- 날짜 / 회차 정보 -->
+    <LinearLayout
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/tv_spot_date_range"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="2024.01.01 ~ 2024.01.15"
+            android:textSize="13sp"
+            android:textColor="@color/on_background"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/tv_spot_obs_count"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="2dp"
+            android:text="3회 관측"
+            android:textSize="12sp"
+            android:textColor="@color/text_hint" />
+    </LinearLayout>
+
+    <!-- 상태 배지 -->
+    <TextView
+        android:id="@+id/tv_spot_status"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:background="@drawable/bg_tag"
+        android:paddingHorizontal="10dp"
+        android:paddingVertical="4dp"
+        android:text="신규"
+        android:textSize="12sp"
+        android:textStyle="bold"
+        android:textColor="@color/primary"
+        android:layout_marginEnd="8dp" />
+
+    <!-- 화살표 -->
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="›"
+        android:textSize="18sp"
+        android:textColor="@color/text_hint" />
+
+</LinearLayout>
