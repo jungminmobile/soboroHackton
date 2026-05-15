@@ -87,6 +87,7 @@ class ScanResultFragment : Fragment() {
         val elasticity = arguments?.getInt(ARG_ELASTICITY)     ?: 0
         val comment    = arguments?.getString(ARG_COMMENT)     ?: ""
         val photoPath  = arguments?.getString(ARG_PHOTO)       ?: ""
+
         @Suppress("UNCHECKED_CAST")
         val detections = (arguments?.getSerializable(ARG_DETECTIONS) as? ArrayList<AcneDetection>)
             ?: arrayListOf()
@@ -95,12 +96,30 @@ class ScanResultFragment : Fragment() {
 
         bindResults(skinType, moisture, oil, trouble, elasticity, comment, photoPath, detections, imageW, imageH)
 
+        // 1. 뒤로가기 버튼
         binding.btnBack.setOnClickListener {
             requireActivity().supportFragmentManager.popBackStack()
         }
 
+        // 🚀 2. 상세 분석 페이지로 이동 (추가된 화살표 버튼)
+        binding.btnNextDetail.setOnClickListener {
+            val bundle = Bundle().apply {
+                putString("photo_path", photoPath) // 사진 경로 전달
+            }
+            val detailFragment = DiagnosisResultFragment().apply {
+                arguments = bundle
+            }
+
+            // 오버레이 컨테이너 안에서 화면 교체
+            parentFragmentManager.beginTransaction()
+                .setCustomAnimations(android.R.anim.slide_in_left, android.R.anim.slide_out_right)
+                .replace(R.id.scan_fragment_container, detailFragment)
+                .addToBackStack(null) // 뒤로가기 시 다시 결과창으로
+                .commit()
+        }
+
+        // 3. 다이어리에 저장 버튼
         binding.btnSaveToDiary.setOnClickListener {
-            // OverlayView에서 선택된 여드름만 가져와 저장
             val selectedDetections = if (detections.isNotEmpty() && imageW > 0 && imageH > 0)
                 binding.overlayView.getSelectedDetections()
             else
@@ -108,6 +127,7 @@ class ScanResultFragment : Fragment() {
             saveToDiary(skinType, moisture, oil, trouble, elasticity, comment, photoPath, selectedDetections, imageW, imageH)
         }
 
+        // 4. 다시 찍기 버튼
         binding.btnRetry.setOnClickListener {
             (activity as? MainActivity)?.closeScanOverlay()
             (activity as? MainActivity)?.openScanOverlay()
@@ -121,13 +141,12 @@ class ScanResultFragment : Fragment() {
     ) {
         if (photoPath.isNotEmpty()) {
             lifecycleScope.launch {
-                // showPhotoPreview에서 이미 EXIF 보정 후 재저장했으므로 단순 디코드
                 val bmp = withContext(Dispatchers.IO) {
                     android.graphics.BitmapFactory.decodeFile(photoPath)
                 }
                 if (_binding == null || bmp == null) return@launch
                 binding.ivCapturedPhoto.setImageBitmap(bmp)
-                // ImageView가 실제로 그린 변환 행렬을 overlay에 동기화
+
                 binding.ivCapturedPhoto.post {
                     if (_binding == null) return@post
                     val values = FloatArray(9)
@@ -143,12 +162,9 @@ class ScanResultFragment : Fragment() {
 
         if (detections.isNotEmpty() && imageW > 0 && imageH > 0) {
             binding.overlayView.setResults(detections, imageW, imageH)
-
-            // 힌트 영역 표시
             binding.layoutAcneHint.visibility = View.VISIBLE
             updateAcneCountText(detections.size, detections.size)
 
-            // 탭 시 카운트 업데이트
             binding.overlayView.onSelectionChanged = { selected, total ->
                 updateAcneCountText(selected, total)
             }
@@ -187,11 +203,8 @@ class ScanResultFragment : Fragment() {
 
         lifecycleScope.launch {
             val db = AppDatabase.getInstance(requireContext())
-
-            // 1. 진단 저장 → diagnosisId 확보
             val diagnosisId = db.diagnosisDao().insert(entity)
 
-            // 2. 선택된 여드름 위치만 추적
             if (detections.isNotEmpty() && imageW > 0 && imageH > 0) {
                 try {
                     AcneTracker(db).track(
@@ -217,6 +230,7 @@ class ScanResultFragment : Fragment() {
         }
     }
 
+    // (기존 코드 유지) EXIF 보정 로드 함수
     private fun loadBitmapWithExifRotation(file: File): Bitmap? {
         val raw = BitmapFactory.decodeFile(file.absolutePath) ?: return null
         val exif = ExifInterface(file.absolutePath)
@@ -228,8 +242,8 @@ class ScanResultFragment : Fragment() {
             else -> 0f
         }
         val flipH = orientation == ExifInterface.ORIENTATION_FLIP_HORIZONTAL ||
-                    orientation == ExifInterface.ORIENTATION_TRANSVERSE ||
-                    orientation == ExifInterface.ORIENTATION_TRANSPOSE
+                orientation == ExifInterface.ORIENTATION_TRANSVERSE ||
+                orientation == ExifInterface.ORIENTATION_TRANSPOSE
         val matrix = Matrix()
         if (degrees != 0f) matrix.postRotate(degrees)
         if (flipH) matrix.postScale(-1f, 1f, raw.width / 2f, raw.height / 2f)

@@ -11,6 +11,7 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.camera.core.*
 import androidx.camera.lifecycle.ProcessCameraProvider
@@ -19,7 +20,7 @@ import androidx.exifinterface.media.ExifInterface
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import com.example.soboroskin.MainActivity
-import com.example.soboroskin.SkinAnalyzer
+import com.example.soboroskin.SkinAnalyzer // 또는 프로젝트 내의 분석기 클래스명 확인
 import com.example.soboroskin.databinding.FragmentScanBinding
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -65,10 +66,11 @@ class ScanFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        // 분석기 초기화
         skinAnalyzer = try {
             SkinAnalyzer(requireContext())
         } catch (t: Throwable) {
-            Log.e("ScanFragment", "SkinAnalyzer init failed — falling back to mock", t)
+            Log.e("ScanFragment", "SkinAnalyzer init failed", t)
             null
         }
 
@@ -82,17 +84,15 @@ class ScanFragment : Fragment() {
             galleryLauncher.launch("image/*")
         }
 
-        // 촬영 버튼 → 사진 찍고 미리보기 표시
         binding.btnCapture.setOnClickListener {
             takePicture()
         }
 
-        // 다시 찍기 → 카메라로 복귀
         binding.btnRetake.setOnClickListener {
             hidePhotoPreview()
         }
 
-        // 민감도 슬라이더 (0.02 ~ 0.08, step 0.01, 7단계)
+        // 민감도 설정 시 수치 표시
         binding.seekbarConf.setOnSeekBarChangeListener(object : android.widget.SeekBar.OnSeekBarChangeListener {
             override fun onProgressChanged(seekBar: android.widget.SeekBar, progress: Int, fromUser: Boolean) {
                 val conf = 0.02f + progress * 0.01f
@@ -102,7 +102,7 @@ class ScanFragment : Fragment() {
             override fun onStopTrackingTouch(seekBar: android.widget.SeekBar) {}
         })
 
-        // 분석하기 → conf 적용 후 AI 분석 시작
+        // 분석하기 버튼 클릭 시
         binding.btnAnalyze.setOnClickListener {
             val file = capturedFile ?: return@setOnClickListener
             val conf = 0.02f + binding.seekbarConf.progress * 0.01f
@@ -163,7 +163,6 @@ class ScanFragment : Fragment() {
                 }
                 override fun onError(exception: ImageCaptureException) {
                     Log.e("ScanFragment", "Capture failed", exception)
-                    // 카메라 오류 시 바로 mock 분석
                     startAnalysis(null)
                 }
             }
@@ -173,7 +172,6 @@ class ScanFragment : Fragment() {
     private fun handleGalleryUri(uri: Uri) {
         lifecycleScope.launch {
             val file = withContext(Dispatchers.IO) {
-                // Uri → 캐시 파일로 복사 (EXIF 보정 & 경로 필요)
                 try {
                     val ins = requireContext().contentResolver.openInputStream(uri) ?: return@withContext null
                     val dest = File(requireContext().cacheDir, "gallery_${System.currentTimeMillis()}.jpg")
@@ -181,7 +179,6 @@ class ScanFragment : Fragment() {
                     ins.close()
                     dest
                 } catch (t: Throwable) {
-                    Log.e("ScanFragment", "gallery copy failed", t)
                     null
                 }
             }
@@ -195,9 +192,7 @@ class ScanFragment : Fragment() {
     private fun loadBitmapWithExifRotation(file: File): Bitmap? {
         val raw = BitmapFactory.decodeFile(file.absolutePath) ?: return null
         val exif = ExifInterface(file.absolutePath)
-        val orientation = exif.getAttributeInt(
-            ExifInterface.TAG_ORIENTATION, ExifInterface.ORIENTATION_NORMAL
-        )
+        val orientation = exif.getAttributeInt(ExifInterface.TAG_ORIENTATION, ExifInterface.ORIENTATION_NORMAL)
         val degrees = when (orientation) {
             ExifInterface.ORIENTATION_ROTATE_90  -> 90f
             ExifInterface.ORIENTATION_ROTATE_180 -> 180f
@@ -205,8 +200,8 @@ class ScanFragment : Fragment() {
             else -> 0f
         }
         val flipH = orientation == ExifInterface.ORIENTATION_FLIP_HORIZONTAL ||
-                    orientation == ExifInterface.ORIENTATION_TRANSVERSE ||
-                    orientation == ExifInterface.ORIENTATION_TRANSPOSE
+                orientation == ExifInterface.ORIENTATION_TRANSVERSE ||
+                orientation == ExifInterface.ORIENTATION_TRANSPOSE
         val matrix = Matrix()
         if (degrees != 0f) matrix.postRotate(degrees)
         if (flipH) matrix.postScale(-1f, 1f, raw.width / 2f, raw.height / 2f)
@@ -221,14 +216,12 @@ class ScanFragment : Fragment() {
         binding.layoutPhotoPreview.visibility = View.VISIBLE
         binding.overlayFaceRegions.clear()
 
-        // EXIF 보정된 픽셀을 파일에 다시 저장 — 이후 모든 로딩이 올바른 방향을 씀
         lifecycleScope.launch(Dispatchers.IO) {
             try {
-                FileOutputStream(file).use { bitmap.compress(android.graphics.Bitmap.CompressFormat.JPEG, 95, it) }
+                FileOutputStream(file).use { bitmap.compress(Bitmap.CompressFormat.JPEG, 95, it) }
             } catch (_: Throwable) {}
         }
 
-        // 백그라운드에서 얼굴 윤곽선 감지 후 매끄러운 곡선 표시
         val analyzer = skinAnalyzer ?: return
         lifecycleScope.launch {
             val contours = withContext(Dispatchers.Default) {
@@ -269,10 +262,7 @@ class ScanFragment : Fragment() {
         lifecycleScope.launch {
             val result = withContext(Dispatchers.Default) {
                 try { analyzer.analyze(bitmap) }
-                catch (t: Throwable) {
-                    Log.e("ScanFragment", "analyze failed", t)
-                    null
-                }
+                catch (t: Throwable) { null }
             }
 
             if (result == null) {
@@ -282,19 +272,11 @@ class ScanFragment : Fragment() {
 
             if (!result.faceDetected) {
                 hideAnalyzing()
-                android.widget.Toast.makeText(
-                    requireContext(),
-                    "얼굴을 감지하지 못했어요. 정면을 바라봐 주세요.",
-                    android.widget.Toast.LENGTH_SHORT
-                ).show()
+                Toast.makeText(requireContext(), "얼굴을 감지하지 못했어요.", Toast.LENGTH_SHORT).show()
                 return@launch
             }
 
-            val acneCount = result.detections.size
-            result.partCounts.forEach { (part, count) ->
-                Log.d("SkinAnalysis", "$part: ${count}개")
-            }
-            analyzeSkin(photoPath, minOf(100, acneCount * 5), result, imageW, imageH)
+            analyzeSkin(photoPath, minOf(100, result.detections.size * 5), result, imageW, imageH)
         }
     }
 
@@ -305,26 +287,20 @@ class ScanFragment : Fragment() {
         imageWidth: Int = 0,
         imageHeight: Int = 0
     ) {
+        // AI 분석을 하지 않고 넘기는 단계 (팀원 대기 중)
         val skinTypes = listOf("건성", "지성", "복합성", "민감성", "중성")
         val skinType = skinTypes.random()
         val moisture = Random.nextInt(40, 95)
         val oil = Random.nextInt(20, 85)
         val elasticity = Random.nextInt(50, 90)
+
         val acneCount = analysisResult?.detections?.size ?: 0
-        val comments = mapOf(
-            "건성" to "수분이 부족한 상태예요. 보습 크림과 수분 에센스를 충분히 사용하고, 물을 많이 마셔보세요.",
-            "지성" to "유분이 많은 상태예요. 저자극 클렌저로 꼼꼼히 세안하고 가벼운 수분 젤을 사용해보세요.",
-            "복합성" to "T존은 유분이, 볼은 건조함이 있어요. 부위별로 다른 케어가 효과적이에요.",
-            "민감성" to "피부가 민감한 상태예요. 자극이 적은 순한 제품을 사용하고 자외선 차단에 신경 써주세요.",
-            "중성" to "균형 잡힌 좋은 피부 상태예요! 지금 루틴을 유지하고 수분 공급을 꾸준히 해주세요."
-        )
-        val aiComment = if (acneCount > 0)
-            "트러블이 ${acneCount}개 감지됐어요. ${comments[skinType] ?: ""}"
-        else
-            comments[skinType] ?: ""
+        val aiComment = if (acneCount > 0) "트러블이 ${acneCount}개 감지됐어요." else "피부 상태가 아주 좋습니다!"
 
         hideAnalyzing()
-        (activity as? MainActivity)?.showScanResult(
+
+        // 🚀 핵심 수정 부분: MainActivity로 형변환하여 showScanResult 호출
+        (requireActivity() as MainActivity).showScanResult(
             skinType = skinType,
             moistureScore = moisture,
             oilScore = oil,

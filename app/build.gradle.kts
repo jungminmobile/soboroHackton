@@ -7,7 +7,6 @@ plugins {
     id("com.google.gms.google-services")
 }
 
-// local.properties에서 API 키 읽기 (android 블록 밖에서 선언)
 val localProps = Properties().also { props ->
     rootProject.file("local.properties").takeIf { it.exists() }
         ?.inputStream()?.use { props.load(it) }
@@ -26,7 +25,8 @@ android {
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         ndk {
-            abiFilters += listOf("arm64-v8a")
+            // 🚀 다양한 기기 대응을 위해 필터 확장
+            abiFilters += listOf("arm64-v8a", "armeabi-v7a", "x86_64")
         }
         buildConfigField(
             "String", "GEMINI_API_KEY",
@@ -56,12 +56,14 @@ android {
     }
 
     aaptOptions {
-        noCompress("tflite")
+        // 🚀 PyTorch 모델(.ptl) 압축 방지 필수!
+        noCompress("tflite", "ptl")
     }
 
     packaging {
         jniLibs {
-            useLegacyPackaging = false
+            // 🚀 PyTorch JNI 라이브러리를 제대로 찾기 위해 true로 변경
+            useLegacyPackaging = true
         }
         resources {
             excludes += "META-INF/LICENSE.md"
@@ -72,7 +74,7 @@ android {
     }
 
     androidResources {
-        noCompress += "tflite"
+        noCompress += listOf("tflite", "ptl")
     }
 }
 
@@ -80,16 +82,12 @@ dependencies {
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.appcompat)
     implementation(libs.material)
-
     implementation("androidx.constraintlayout:constraintlayout:2.1.4")
-
     implementation("androidx.navigation:navigation-fragment-ktx:2.7.7")
     implementation("androidx.navigation:navigation-ui-ktx:2.7.7")
-
     implementation("androidx.room:room-runtime:2.7.0")
     implementation("androidx.room:room-ktx:2.7.0")
     kapt("androidx.room:room-compiler:2.7.0")
-
     implementation("androidx.exifinterface:exifinterface:1.3.7")
 
     val camerax_version = "1.3.2"
@@ -99,24 +97,21 @@ dependencies {
     implementation("androidx.camera:camera-view:${camerax_version}")
 
     implementation("androidx.viewpager2:viewpager2:1.0.0")
-
     implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.7.0")
     implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.7.0")
-
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3")
-
     implementation("com.github.bumptech.glide:glide:4.16.0")
-
     implementation("com.github.PhilJay:MPAndroidChart:v3.1.0")
-
     implementation(platform("com.google.firebase:firebase-bom:33.7.0"))
     implementation("com.google.firebase:firebase-auth-ktx")
     implementation("com.google.firebase:firebase-analytics-ktx")
-
     implementation("com.google.mediapipe:tasks-vision:0.10.26")
-
     implementation("com.google.ai.edge.litert:litert:1.0.1")
     implementation("com.google.ai.edge.litert:litert-api:1.0.1")
+
+    // 🚀 PyTorch Lite 라이브러리 추가 (엔진 부품)
+    implementation("org.pytorch:pytorch_android_lite:1.13.1")
+    implementation("org.pytorch:pytorch_android_torchvision_lite:1.13.1")
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)

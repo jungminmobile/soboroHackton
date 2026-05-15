@@ -7,7 +7,6 @@
     android:orientation="vertical"
     android:background="@color/scan_overlay_background">
 
-    <!-- Header -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -36,10 +35,16 @@
             android:textColor="@color/on_background"
             android:gravity="center" />
 
-        <View android:layout_width="40dp" android:layout_height="40dp" />
+        <ImageButton
+            android:id="@+id/btn_next_detail"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:src="@android:drawable/ic_media_next"
+            android:contentDescription="상세분석"
+            android:tint="@color/on_background" />
     </LinearLayout>
 
-    <!-- Captured Photo + Acne Overlay (fills remaining space) -->
     <FrameLayout
         android:layout_width="match_parent"
         android:layout_height="0dp"
@@ -62,7 +67,6 @@
             android:focusable="true" />
     </FrameLayout>
 
-    <!-- 트러블 편집 카드 (트러블 감지 시만 표시) -->
     <androidx.cardview.widget.CardView
         android:id="@+id/layout_acne_hint"
         android:layout_width="match_parent"
@@ -117,7 +121,6 @@
         </LinearLayout>
     </androidx.cardview.widget.CardView>
 
-    <!-- Action Buttons -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"

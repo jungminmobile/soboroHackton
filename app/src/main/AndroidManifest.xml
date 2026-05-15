@@ -19,7 +19,7 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.Soboroskin"
-        android:extractNativeLibs="false">
+        android:extractNativeLibs="true">
 
         <activity
             android:name=".onboarding.OnboardingActivity"

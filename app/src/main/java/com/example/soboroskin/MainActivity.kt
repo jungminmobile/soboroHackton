@@ -1,18 +1,32 @@
 package com.example.soboroskin
 
 import android.os.Bundle
+import android.util.Log
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import androidx.navigation.NavController
 import androidx.navigation.fragment.NavHostFragment
 import com.example.soboroskin.databinding.ActivityMainBinding
 import com.example.soboroskin.ui.scan.ScanFragment
+import com.example.soboroskin.ui.scan.ScanResultFragment // ✅ 추가됨
 
 class MainActivity : AppCompatActivity() {
 
+    companion object {
+        init {
+            try {
+                // 🚀 PTL 모델을 돌리기 위한 라이브러리 강제 로드
+                System.loadLibrary("pytorch_jni_lite")
+                System.loadLibrary("torchvision_ops_lite")
+                Log.d("SkinAI", "✅ AI 엔진 부품 로드 성공")
+            } catch (e: UnsatisfiedLinkError) {
+                Log.e("SkinAI", "⚠️ 라이브러리 자동 로드 대기 중: ${e.message}")
+            }
+        }
+    }
+
     private lateinit var binding: ActivityMainBinding
     private lateinit var navController: NavController
-
     private var isScanOpen = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -27,17 +41,10 @@ class MainActivity : AppCompatActivity() {
             .findFragmentById(R.id.nav_host_fragment) as NavHostFragment
         navController = navHostFragment.navController
 
-        // 진단 탭은 nav graph 목적지가 없으므로 직접 처리
         binding.bottomNav.setOnItemSelectedListener { item ->
             when (item.itemId) {
-                R.id.nav_scan -> {
-                    openScanOverlay()
-                    false // 선택 상태 유지 안 함
-                }
-                else -> {
-                    navController.navigate(item.itemId)
-                    true
-                }
+                R.id.nav_scan -> { openScanOverlay(); false }
+                else -> { navController.navigate(item.itemId); true }
             }
         }
     }
@@ -45,37 +52,19 @@ class MainActivity : AppCompatActivity() {
     fun openScanOverlay() {
         if (isScanOpen) return
         isScanOpen = true
-
         binding.bottomNav.visibility = View.GONE
-
-        val scanFragment = ScanFragment()
         supportFragmentManager.beginTransaction()
-            .replace(R.id.scan_fragment_container, scanFragment)
+            .replace(R.id.scan_fragment_container, ScanFragment())
             .commit()
 
         binding.scanOverlayContainer.visibility = View.VISIBLE
-        binding.scanOverlayContainer.translationY = binding.scanOverlayContainer.height.toFloat()
-        binding.scanOverlayContainer.animate()
-            .translationY(0f)
-            .setDuration(350)
-            .start()
+        binding.scanOverlayContainer.post {
+            binding.scanOverlayContainer.translationY = binding.scanOverlayContainer.height.toFloat()
+            binding.scanOverlayContainer.animate().translationY(0f).setDuration(350).start()
+        }
     }
 
-    fun closeScanOverlay() {
-        isScanOpen = false
-        binding.scanOverlayContainer.animate()
-            .translationY(binding.scanOverlayContainer.height.toFloat())
-            .setDuration(300)
-            .withEndAction {
-                binding.scanOverlayContainer.visibility = View.GONE
-                supportFragmentManager.findFragmentById(R.id.scan_fragment_container)?.let { frag ->
-                    supportFragmentManager.beginTransaction().remove(frag).commit()
-                }
-                binding.bottomNav.visibility = View.VISIBLE
-            }
-            .start()
-    }
-
+    // 🚀 [추가됨] ScanFragment에서 분석이 끝나면 이 함수를 호출해서 결과창을 띄웁니다.
     fun showScanResult(
         skinType: String,
         moistureScore: Int,
@@ -88,7 +77,8 @@ class MainActivity : AppCompatActivity() {
         imageWidth: Int = 0,
         imageHeight: Int = 0
     ) {
-        val resultFragment = com.example.soboroskin.ui.scan.ScanResultFragment.newInstance(
+        // 결과 화면 프래그먼트 생성 및 데이터 전달
+        val resultFragment = ScanResultFragment.newInstance(
             skinType        = skinType,
             moistureScore   = moistureScore,
             oilScore        = oilScore,
@@ -100,10 +90,27 @@ class MainActivity : AppCompatActivity() {
             imageWidth      = imageWidth,
             imageHeight     = imageHeight
         )
+
+        // 화면 교체
         supportFragmentManager.beginTransaction()
             .setCustomAnimations(android.R.anim.slide_in_left, android.R.anim.slide_out_right)
             .replace(R.id.scan_fragment_container, resultFragment)
             .commit()
+    }
+
+    fun closeScanOverlay() {
+        isScanOpen = false
+        binding.scanOverlayContainer.animate()
+            .translationY(binding.scanOverlayContainer.height.toFloat())
+            .setDuration(300)
+            .withEndAction {
+                binding.scanOverlayContainer.visibility = View.GONE
+                // 오버레이가 닫힐 때 내부의 프래그먼트도 정리
+                supportFragmentManager.findFragmentById(R.id.scan_fragment_container)?.let { frag ->
+                    supportFragmentManager.beginTransaction().remove(frag).commit()
+                }
+                binding.bottomNav.visibility = View.VISIBLE
+            }.start()
     }
 
     fun onDiagnosisSaved() {
@@ -111,6 +118,7 @@ class MainActivity : AppCompatActivity() {
         binding.bottomNav.selectedItemId = R.id.diaryFragment
     }
 
+    // 뒤로가기 처리
     override fun onBackPressed() {
         if (isScanOpen) {
             closeScanOverlay()
