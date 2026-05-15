@@ -39,13 +39,6 @@ class CosmeticsListFragment : Fragment() {
         binding.rvCosmetics.layoutManager = LinearLayoutManager(requireContext())
         binding.rvCosmetics.adapter       = adapter
 
-        // 모델 목록 조회 (디버깅용 — 확인 후 제거)
-        if (tabIndex == 0) {
-            viewLifecycleOwner.lifecycleScope.launch {
-                GeminiRecommendService.listModels()
-            }
-        }
-
         loadRecommendations(tabIndex, adapter)
 
         // 새로고침

@@ -106,51 +106,70 @@ object GeminiRecommendService {
 
         Log.d(TAG, "Fetching all products for skin='$skinType'")
 
-        try {
-            val apiKey = BuildConfig.GEMINI_API_KEY
-            val url    = URL("$API_URL?key=$apiKey")
-            val conn   = (url.openConnection() as HttpURLConnection).apply {
-                requestMethod = "POST"
-                setRequestProperty("Content-Type", "application/json")
-                doOutput = true
-                connectTimeout = 30_000
-                readTimeout    = 30_000
-            }
-
-            val body = JSONObject().apply {
-                put("contents", JSONArray().apply {
-                    put(JSONObject().apply {
-                        put("parts", JSONArray().apply {
-                            put(JSONObject().apply { put("text", prompt) })
-                        })
+        val requestBody = JSONObject().apply {
+            put("contents", JSONArray().apply {
+                put(JSONObject().apply {
+                    put("parts", JSONArray().apply {
+                        put(JSONObject().apply { put("text", prompt) })
                     })
                 })
-            }.toString()
+            })
+            put("generationConfig", JSONObject().apply {
+                put("thinkingConfig", JSONObject().apply {
+                    put("thinkingBudget", 0)
+                })
+            })
+        }.toString()
 
-            OutputStreamWriter(conn.outputStream).use { it.write(body) }
+        // 503 과부하 시 최대 3회 재시도 (2초 간격)
+        repeat(3) { attempt ->
+            try {
+                val apiKey = BuildConfig.GEMINI_API_KEY
+                val url    = URL("$API_URL?key=$apiKey")
+                val conn   = (url.openConnection() as HttpURLConnection).apply {
+                    requestMethod = "POST"
+                    setRequestProperty("Content-Type", "application/json")
+                    doOutput = true
+                    connectTimeout = 15_000
+                    readTimeout    = 60_000
+                }
 
-            val code     = conn.responseCode
-            val response = if (code == 200) conn.inputStream.bufferedReader().readText()
-                           else conn.errorStream?.bufferedReader()?.readText() ?: ""
+                OutputStreamWriter(conn.outputStream).use { it.write(requestBody) }
 
-            Log.d(TAG, "HTTP $code — ${response.take(200)}")
-            if (code != 200) return@withContext emptyList()
+                val code     = conn.responseCode
+                val response = if (code == 200) conn.inputStream.bufferedReader().readText()
+                               else conn.errorStream?.bufferedReader()?.readText() ?: ""
 
-            val text = JSONObject(response)
-                .getJSONArray("candidates")
-                .getJSONObject(0)
-                .getJSONObject("content")
-                .getJSONArray("parts")
-                .getJSONObject(0)
-                .getString("text")
+                Log.d(TAG, "HTTP $code (attempt ${attempt + 1}) — ${response.take(200)}")
 
-            val products = parseProducts(extractJson(text))
-            Log.d(TAG, "Parsed ${products.size} products total")
-            products
-        } catch (e: Exception) {
-            Log.e(TAG, "Gemini REST call failed", e)
-            emptyList()
+                when (code) {
+                    200 -> {
+                        val text = JSONObject(response)
+                            .getJSONArray("candidates")
+                            .getJSONObject(0)
+                            .getJSONObject("content")
+                            .getJSONArray("parts")
+                            .getJSONObject(0)
+                            .getString("text")
+                        val products = parseProducts(extractJson(text))
+                        Log.d(TAG, "Parsed ${products.size} products total")
+                        return@withContext products
+                    }
+                    503 -> {
+                        Log.w(TAG, "503 over capacity, retrying in 3s… (attempt ${attempt + 1}/3)")
+                        if (attempt < 2) kotlinx.coroutines.delay(3_000)
+                    }
+                    else -> {
+                        Log.e(TAG, "Non-retryable HTTP $code")
+                        return@withContext emptyList()
+                    }
+                }
+            } catch (e: Exception) {
+                Log.e(TAG, "Gemini REST call failed (attempt ${attempt + 1})", e)
+                if (attempt < 2) kotlinx.coroutines.delay(2_000)
+            }
         }
+        emptyList()
     }
 
     private fun extractJson(text: String): String {
