@@ -9,7 +9,9 @@ import androidx.lifecycle.lifecycleScope
 import com.example.soboroskin.data.db.AppDatabase
 import com.example.soboroskin.databinding.FragmentCosmeticsBinding
 import com.google.android.material.tabs.TabLayoutMediator
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 class CosmeticsFragment : Fragment() {
 
@@ -36,16 +38,20 @@ class CosmeticsFragment : Fragment() {
             tab.text = tabTitles[pos]
         }.attach()
 
-        // 최근 진단의 피부타입 표시
+        // 최근 진단 데이터 → GeminiRecommendService에 주입
         lifecycleScope.launch {
-            val latest = AppDatabase.getInstance(requireContext())
-                .diagnosisDao()
-                .getLatestDiagnosis()
-            requireActivity().runOnUiThread {
-                if (latest != null) {
-                    binding.tvSkinTypeRecommend.text =
-                        "${latest.skinType} 피부 타입에 맞는 화장품을 추천해드려요 ✨"
-                }
+            val latest = withContext(Dispatchers.IO) {
+                AppDatabase.getInstance(requireContext()).diagnosisDao().getLatestDiagnosis()
+            }
+            if (latest != null) {
+                GeminiRecommendService.skinType      = latest.skinType
+                GeminiRecommendService.moistureScore = latest.moistureScore
+                GeminiRecommendService.oilScore      = latest.oilScore
+                GeminiRecommendService.troubleScore  = latest.troubleScore
+                GeminiRecommendService.elasticityScore = latest.elasticityScore
+
+                binding.tvSkinTypeRecommend.text =
+                    "${latest.skinType} 피부 타입에 맞는 화장품을 AI가 추천해드려요 ✨"
             }
         }
     }
