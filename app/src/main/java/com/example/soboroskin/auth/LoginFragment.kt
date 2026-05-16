@@ -80,12 +80,20 @@ class LoginFragment : Fragment() {
     private fun firebaseAuthWithGoogle(idToken: String) {
         val credential = GoogleAuthProvider.getCredential(idToken, null)
         auth.signInWithCredential(credential)
-            .addOnSuccessListener {
-                authActivity?.goToMain()
+            .addOnSuccessListener { authResult ->
+                val isNewUser = authResult.additionalUserInfo?.isNewUser == true
+                if (isNewUser) {
+                    // 신규 유저 → 가입 완료 화면으로
+                    val displayName = auth.currentUser?.displayName ?: ""
+                    authActivity?.goToSignup(displayName)
+                } else {
+                    // 기존 유저 → 바로 메인으로
+                    authActivity?.goToMain()
+                }
             }
             .addOnFailureListener { e ->
                 setLoading(false)
-                showError("인증에 실패했어요: ${e.localizedMessage}")
+                showError("Google 로그인에 실패했어요. 잠시 후 다시 시도해주세요.")
             }
     }
 

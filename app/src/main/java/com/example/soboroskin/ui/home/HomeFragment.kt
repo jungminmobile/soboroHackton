@@ -42,6 +42,11 @@ class HomeFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        // 오늘 날짜 표시
+        val today = SimpleDateFormat("yyyy년 M월 d일 EEEE", Locale.KOREAN)
+            .format(Date())
+        binding.tvTodayDate.text = today
+
         // 랜덤 팁
         binding.tvTip.text = tips.random()
 
@@ -53,6 +58,13 @@ class HomeFragment : Fragment() {
         // 진단 시작 버튼
         binding.btnQuickScan.setOnClickListener {
             (activity as? MainActivity)?.openScanOverlay()
+        }
+
+        // 모든 기록 보기
+        binding.btnAllRecords.setOnClickListener {
+            (activity as? MainActivity)?.let {
+                it.onDiagnosisSaved()  // diary 탭으로 이동 재활용
+            }
         }
 
         loadUserProfile()
@@ -97,20 +109,28 @@ class HomeFragment : Fragment() {
         binding.layoutDiagnosisContent.visibility = View.VISIBLE
         binding.layoutDiagnosisEmpty.visibility = View.GONE
 
-        binding.tvSkinTypeBadge.text = entity.skinType
-
+        // 배너: 날짜 + 여드름 수
         val sdf = SimpleDateFormat("yyyy. MM. dd", Locale.getDefault())
         binding.tvDiagnosisDate.text = sdf.format(Date(entity.date))
+        binding.tvAcneCountBanner.text = entity.troubleScore.toString()
 
-        binding.tvScoreMoisture.text = getString(R.string.score_format, entity.moistureScore)
-        binding.tvScoreOil.text = getString(R.string.score_format, entity.oilScore)
-        binding.tvScoreTrouble.text = getString(R.string.score_format, entity.troubleScore)
+        // 피부 타입 배지 (배너에 표시)
+        binding.tvSkinTypeBadge.text = entity.skinType
+        binding.tvSkinTypeBadge.visibility = View.VISIBLE
+
+        // 점수 카드
+        binding.tvScoreMoisture.text   = getString(R.string.score_format, entity.moistureScore)
+        binding.tvScoreOil.text        = getString(R.string.score_format, entity.oilScore)
+        binding.tvScoreTrouble.text    = getString(R.string.score_format, entity.troubleScore)
         binding.tvScoreElasticity.text = getString(R.string.score_format, entity.elasticityScore)
     }
 
     private fun showEmpty() {
         binding.layoutDiagnosisContent.visibility = View.GONE
         binding.layoutDiagnosisEmpty.visibility = View.VISIBLE
+        binding.tvDiagnosisDate.text = "최근 기록 없음"
+        binding.tvAcneCountBanner.text = "--"
+        binding.tvSkinTypeBadge.visibility = View.GONE
     }
 
     override fun onDestroyView() {

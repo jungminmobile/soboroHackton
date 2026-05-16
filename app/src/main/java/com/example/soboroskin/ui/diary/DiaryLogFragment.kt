@@ -66,6 +66,7 @@ class DiaryLogFragment : Fragment() {
         setupNavButtons()
         setupChart()
         setupChipGroup()
+        setupJournal()
         observeEntries()
     }
 
@@ -174,30 +175,17 @@ class DiaryLogFragment : Fragment() {
             ).forEach { it.visibility = View.GONE }
         }
 
-        // ── 사진 + 메모 ──
-        val hasPhoto = entry.photoPath.isNotEmpty()
-        val hasNotes = entry.notes.isNotEmpty()
-
-        if (hasPhoto || hasNotes) {
+        // ── 사진 카드 ──
+        if (entry.photoPath.isNotEmpty()) {
             binding.cardPhotoNotes.visibility = View.VISIBLE
-            if (hasPhoto) {
-                binding.ivPhoto.visibility = View.VISIBLE
-                Glide.with(this).load(entry.photoPath).centerCrop().into(binding.ivPhoto)
-            } else {
-                binding.ivPhoto.visibility = View.GONE
-            }
-            if (hasNotes) {
-                binding.tvNotes.visibility = View.VISIBLE
-                binding.tvNotes.text = entry.notes
-                val lp = binding.tvNotes.layoutParams as ViewGroup.MarginLayoutParams
-                lp.marginStart = if (hasPhoto) (12 * resources.displayMetrics.density).toInt() else 0
-                binding.tvNotes.layoutParams = lp
-            } else {
-                binding.tvNotes.visibility = View.GONE
-            }
+            Glide.with(this).load(entry.photoPath).centerCrop().into(binding.ivPhoto)
         } else {
             binding.cardPhotoNotes.visibility = View.GONE
         }
+
+        // ── 피부 일기 로드 ──
+        binding.etJournal.setText(entry.notes)
+        binding.tvJournalSaved.visibility = View.GONE
 
         // 헤더 보이기
         binding.layoutDateNav.visibility  = View.VISIBLE
@@ -216,6 +204,45 @@ class DiaryLogFragment : Fragment() {
         tv.setTextColor(
             if (delta > 0) Color.parseColor("#4CAF50") else Color.parseColor("#EF5350")
         )
+    }
+
+    // ── 피부 일기 ──────────────────────────────────────────────────────
+
+    private fun setupJournal() {
+        // 태그 칩 → 입력창에 텍스트 추가
+        val tagChips = listOf(
+            binding.chipTagSleepLate  to "😴 늦게 잠",
+            binding.chipTagJunkFood   to "🍕 자극적 음식",
+            binding.chipTagDrinkWater to "💧 물 많이 마심",
+            binding.chipTagStress     to "😤 스트레스",
+            binding.chipTagExercise   to "🏃 운동함",
+            binding.chipTagAlcohol    to "🍺 음주"
+        )
+        tagChips.forEach { (chip, tag) ->
+            chip.setOnClickListener {
+                val current = binding.etJournal.text?.toString()?.trimEnd() ?: ""
+                val newText = if (current.isEmpty()) tag else "$current $tag"
+                binding.etJournal.setText(newText)
+                binding.etJournal.setSelection(newText.length)
+            }
+        }
+
+        // 저장 버튼
+        binding.btnSaveJournal.setOnClickListener {
+            val entry = allEntries.getOrNull(currentIndex) ?: return@setOnClickListener
+            val journalText = binding.etJournal.text?.toString() ?: ""
+            viewLifecycleOwner.lifecycleScope.launch {
+                withContext(Dispatchers.IO) {
+                    AppDatabase.getInstance(requireContext())
+                        .diagnosisDao()
+                        .update(entry.copy(notes = journalText))
+                }
+                if (_binding == null) return@launch
+                binding.tvJournalSaved.visibility = View.VISIBLE
+                kotlinx.coroutines.delay(2000)
+                if (_binding != null) binding.tvJournalSaved.visibility = View.GONE
+            }
+        }
     }
 
     // ── 변화 그래프 ────────────────────────────────────────────────────

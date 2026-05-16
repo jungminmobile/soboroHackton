@@ -13,7 +13,7 @@
         android:id="@+id/nav_host_container"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:paddingBottom="64dp">
+        android:paddingBottom="80dp">
 
         <androidx.fragment.app.FragmentContainerView
             android:id="@+id/nav_host_fragment"
@@ -37,17 +37,127 @@
             android:layout_height="match_parent" />
     </FrameLayout>
 
-    <!-- Bottom Navigation Bar -->
-    <com.google.android.material.bottomnavigation.BottomNavigationView
-        android:id="@+id/bottom_nav"
+    <!-- ── Apple Health Style Bottom Tab Bar ─────────────────── -->
+    <!--
+        Total frame: 96dp (FAB 56dp top + 80dp white bar, 40dp overlap)
+        White bar starts at 16dp from top of frame
+        FAB (56dp) sits at top of frame, center-horizontal
+    -->
+    <FrameLayout
+        android:id="@+id/bottom_tab_bar"
         android:layout_width="match_parent"
-        android:layout_height="64dp"
-        android:layout_gravity="bottom"
-        android:background="@color/surface"
-        app:elevation="@dimen/bottom_nav_elevation"
-        app:menu="@menu/bottom_nav_menu"
-        app:itemTextColor="@color/nav_selector"
-        app:itemIconTint="@color/nav_selector"
-        app:labelVisibilityMode="labeled" />
+        android:layout_height="96dp"
+        android:layout_gravity="bottom">
+
+        <!-- White tab bar (bottom 80dp of frame) -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="80dp"
+            android:layout_gravity="bottom"
+            android:background="@color/surface"
+            android:orientation="vertical"
+            android:elevation="8dp">
+
+            <!-- Top hairline border -->
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="0.5dp"
+                android:background="@color/tab_border" />
+
+            <!-- Tab items row -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="1"
+                android:orientation="horizontal">
+
+                <!-- 홈 tab -->
+                <LinearLayout
+                    android:id="@+id/tab_home"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:orientation="vertical"
+                    android:gravity="center"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:background="?attr/selectableItemBackgroundBorderless">
+
+                    <ImageView
+                        android:id="@+id/tab_home_icon"
+                        android:layout_width="26dp"
+                        android:layout_height="26dp"
+                        android:src="@drawable/ic_home"
+                        android:colorFilter="@color/primary" />
+
+                    <TextView
+                        android:id="@+id/tab_home_label"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="홈"
+                        android:textSize="11sp"
+                        android:textColor="@color/primary"
+                        android:layout_marginTop="3dp" />
+                </LinearLayout>
+
+                <!-- Center placeholder (for FAB) -->
+                <View
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1" />
+
+                <!-- 기록 tab -->
+                <LinearLayout
+                    android:id="@+id/tab_diary"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:orientation="vertical"
+                    android:gravity="center"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:background="?attr/selectableItemBackgroundBorderless">
+
+                    <ImageView
+                        android:id="@+id/tab_diary_icon"
+                        android:layout_width="26dp"
+                        android:layout_height="26dp"
+                        android:src="@drawable/ic_diary"
+                        android:colorFilter="@color/nav_unselected" />
+
+                    <TextView
+                        android:id="@+id/tab_diary_label"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="기록"
+                        android:textSize="11sp"
+                        android:textColor="@color/nav_unselected"
+                        android:layout_marginTop="3dp" />
+                </LinearLayout>
+
+            </LinearLayout>
+        </LinearLayout>
+
+        <!-- ── Center Scan FAB (elevated, gradient circle) ── -->
+        <FrameLayout
+            android:id="@+id/tab_scan_fab"
+            android:layout_width="56dp"
+            android:layout_height="56dp"
+            android:layout_gravity="top|center_horizontal"
+            android:background="@drawable/bg_tab_scan_fab"
+            android:clickable="true"
+            android:focusable="true"
+            android:elevation="12dp">
+
+            <ImageView
+                android:layout_width="28dp"
+                android:layout_height="28dp"
+                android:layout_gravity="center"
+                android:src="@drawable/ic_scan"
+                android:colorFilter="@color/on_primary"
+                android:contentDescription="스캔" />
+        </FrameLayout>
+
+    </FrameLayout>
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

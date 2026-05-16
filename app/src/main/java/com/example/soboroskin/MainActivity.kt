@@ -4,11 +4,12 @@ import android.os.Bundle
 import android.util.Log
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.ContextCompat
 import androidx.navigation.NavController
 import androidx.navigation.fragment.NavHostFragment
 import com.example.soboroskin.databinding.ActivityMainBinding
 import com.example.soboroskin.ui.scan.ScanFragment
-import com.example.soboroskin.ui.scan.ScanResultFragment // ✅ 추가됨
+import com.example.soboroskin.ui.scan.ScanResultFragment
 
 class MainActivity : AppCompatActivity() {
 
@@ -28,6 +29,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var binding: ActivityMainBinding
     private lateinit var navController: NavController
     private var isScanOpen = false
+    private var activeTabIndex = 0   // 0 = 홈, 1 = 기록
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -41,18 +43,37 @@ class MainActivity : AppCompatActivity() {
             .findFragmentById(R.id.nav_host_fragment) as NavHostFragment
         navController = navHostFragment.navController
 
-        binding.bottomNav.setOnItemSelectedListener { item ->
-            when (item.itemId) {
-                R.id.nav_scan -> { openScanOverlay(); false }
-                else -> { navController.navigate(item.itemId); true }
+        binding.tabHome.setOnClickListener {
+            if (activeTabIndex != 0) {
+                navController.navigate(R.id.homeFragment)
+                setActiveTab(0)
             }
         }
+        binding.tabDiary.setOnClickListener {
+            if (activeTabIndex != 1) {
+                navController.navigate(R.id.diaryFragment)
+                setActiveTab(1)
+            }
+        }
+        binding.tabScanFab.setOnClickListener { openScanOverlay() }
+
+        setActiveTab(0)
+    }
+
+    private fun setActiveTab(index: Int) {
+        activeTabIndex = index
+        val mint = ContextCompat.getColor(this, R.color.primary)
+        val gray = ContextCompat.getColor(this, R.color.nav_unselected)
+        binding.tabHomeIcon.setColorFilter(if (index == 0) mint else gray)
+        binding.tabHomeLabel.setTextColor(if (index == 0) mint else gray)
+        binding.tabDiaryIcon.setColorFilter(if (index == 1) mint else gray)
+        binding.tabDiaryLabel.setTextColor(if (index == 1) mint else gray)
     }
 
     fun openScanOverlay() {
         if (isScanOpen) return
         isScanOpen = true
-        binding.bottomNav.visibility = View.GONE
+        binding.bottomTabBar.visibility = View.GONE
         supportFragmentManager.beginTransaction()
             .replace(R.id.scan_fragment_container, ScanFragment())
             .commit()
@@ -119,13 +140,14 @@ class MainActivity : AppCompatActivity() {
                 supportFragmentManager.findFragmentById(R.id.scan_fragment_container)?.let { frag ->
                     supportFragmentManager.beginTransaction().remove(frag).commit()
                 }
-                binding.bottomNav.visibility = View.VISIBLE
+                binding.bottomTabBar.visibility = View.VISIBLE
             }.start()
     }
 
     fun onDiagnosisSaved() {
         closeScanOverlay()
-        binding.bottomNav.selectedItemId = R.id.diaryFragment
+        navController.navigate(R.id.diaryFragment)
+        setActiveTab(1)
     }
 
     // 뒤로가기 처리

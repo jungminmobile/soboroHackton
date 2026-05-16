@@ -1,54 +1,60 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!-- Primary Brand Colors (로고 기준 #6EBA93) -->
-    <color name="primary">#6EBA93</color>
-    <color name="primary_dark">#4A9972</color>
-    <color name="primary_light">#EAF6F0</color>
-    <color name="primary_variant">#83C9A4</color>
+    <!-- ── Primary: Fresh Mint Green ──────────────────────── -->
+    <color name="primary">#A8D8A8</color>
+    <color name="primary_dark">#7AC47A</color>
+    <color name="primary_light">#E8F5E8</color>
+    <color name="primary_variant">#90CC90</color>
 
-    <!-- Background Colors -->
-    <color name="background">#F7F6F2</color>
+    <!-- ── Secondary: Soft Lavender ────────────────────────── -->
+    <color name="lavender">#C4A8D4</color>
+    <color name="lavender_dark">#A882BE</color>
+    <color name="lavender_light">#F0E8F8</color>
+
+    <!-- ── Backgrounds (Apple System) ──────────────────────── -->
+    <color name="background">#F2F2F7</color>
     <color name="surface">#FFFFFF</color>
-    <color name="surface_variant">#F0EEE8</color>
+    <color name="surface_variant">#F2F2F7</color>
+    <color name="scan_overlay_background">#F2F2F7</color>
 
-    <!-- Text Colors -->
+    <!-- ── Text ─────────────────────────────────────────────── -->
     <color name="on_primary">#FFFFFF</color>
-    <color name="on_background">#1A1A1A</color>
-    <color name="on_surface">#1A1A1A</color>
-    <color name="text_primary">#1A1A1A</color>
-    <color name="text_secondary">#757575</color>
-    <color name="text_hint">#BDBDBD</color>
+    <color name="on_background">#1C1C1E</color>
+    <color name="on_surface">#1C1C1E</color>
+    <color name="text_primary">#1C1C1E</color>
+    <color name="text_secondary">#8E8E93</color>
+    <color name="text_hint">#C7C7CC</color>
 
-    <!-- Accent / State Colors -->
+    <!-- ── Accents ───────────────────────────────────────────── -->
     <color name="accent_moisture">#4FC3F7</color>
     <color name="accent_oil">#FFB74D</color>
     <color name="accent_trouble">#EF5350</color>
-    <color name="accent_elasticity">#BA68C8</color>
+    <color name="accent_elasticity">#C4A8D4</color>
 
-    <!-- Skin Type Tag Colors -->
-    <color name="tag_dry">#E3F2FD</color>
-    <color name="tag_oily">#FFF3E0</color>
-    <color name="tag_combination">#F3E5F5</color>
-    <color name="tag_sensitive">#FCE4EC</color>
+    <!-- ── Skin Type Tags ────────────────────────────────────── -->
+    <color name="tag_dry">#E8F5E8</color>
+    <color name="tag_oily">#F0E8F8</color>
+    <color name="tag_combination">#E8F5E8</color>
+    <color name="tag_sensitive">#F0E8F8</color>
 
-    <!-- UI Elements -->
-    <color name="divider">#E0E0E0</color>
+    <!-- ── UI Elements ───────────────────────────────────────── -->
+    <color name="divider">#E5E5EA</color>
+    <color name="tab_border">#E5E5EA</color>
     <color name="card_background">#FFFFFF</color>
     <color name="bottom_nav_background">#FFFFFF</color>
-    <color name="scan_overlay_background">#FAFAF8</color>
 
-    <!-- Navigation -->
-    <color name="nav_selected">#6EBA93</color>
-    <color name="nav_unselected">#9E9E9E</color>
+    <!-- ── Navigation ────────────────────────────────────────── -->
+    <color name="nav_selected">#A8D8A8</color>
+    <color name="nav_unselected">#8E8E93</color>
 
-    <!-- Onboarding -->
-    <color name="onboarding_dot_active">#6EBA93</color>
-    <color name="onboarding_dot_inactive">#BDBDBD</color>
+    <!-- ── Onboarding ────────────────────────────────────────── -->
+    <color name="onboarding_dot_active">#A8D8A8</color>
+    <color name="onboarding_dot_inactive">#C7C7CC</color>
 
-    <!-- Error -->
-    <color name="error">#B00020</color>
+    <!-- ── Error ─────────────────────────────────────────────── -->
+    <color name="error">#FF3B30</color>
 
-    <!-- Transparent -->
+    <!-- ── Misc ──────────────────────────────────────────────── -->
     <color name="transparent">#00000000</color>
     <color name="scrim">#80000000</color>
 

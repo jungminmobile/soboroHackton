@@ -6,6 +6,7 @@ import androidx.appcompat.app.AppCompatActivity
 import com.example.soboroskin.MainActivity
 import com.example.soboroskin.R
 import com.google.firebase.auth.FirebaseAuth
+import androidx.core.os.bundleOf
 
 class AuthActivity : AppCompatActivity() {
 
@@ -32,5 +33,15 @@ class AuthActivity : AppCompatActivity() {
                 .addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_NEW_TASK)
         )
         finish()
+    }
+
+    fun goToSignup(displayName: String = "") {
+        val fragment = SignupFragment().apply {
+            arguments = bundleOf("display_name" to displayName)
+        }
+        supportFragmentManager.beginTransaction()
+            .replace(R.id.auth_container, fragment)
+            .addToBackStack(null)
+            .commit()
     }
 }

@@ -4,8 +4,8 @@
         <item name="colorPrimary">@color/primary</item>
         <item name="colorPrimaryVariant">@color/primary_dark</item>
         <item name="colorOnPrimary">@color/on_primary</item>
-        <item name="colorSecondary">@color/primary_variant</item>
-        <item name="colorSecondaryVariant">@color/primary_dark</item>
+        <item name="colorSecondary">@color/lavender</item>
+        <item name="colorSecondaryVariant">@color/lavender_dark</item>
         <item name="colorOnSecondary">@color/on_primary</item>
         <item name="android:colorBackground">@color/background</item>
         <item name="colorSurface">@color/surface</item>
@@ -14,6 +14,8 @@
         <item name="android:windowLightStatusBar" tools:targetApi="m">true</item>
         <item name="android:navigationBarColor">@color/surface</item>
         <item name="android:fontFamily">sans-serif</item>
+        <!-- Material Card defaults -->
+        <item name="materialCardViewStyle">@style/Widget.Soboroskin.Card</item>
     </style>
 
     <!-- Splash / Onboarding - no action bar, full screen feel -->
