@@ -205,7 +205,7 @@
                         android:layout_width="16dp"
                         android:layout_height="16dp"
                         android:src="@drawable/ic_diary_chevron_right"
-                        android:colorFilter="@color/text_hint" />
+                        app:tint="@color/text_hint" />
                 </LinearLayout>
 
                 <!-- 점수 그리드 2×2 -->
@@ -360,7 +360,7 @@
                     <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="모든 기록 보기" android:textSize="15sp" android:textStyle="bold" android:textColor="@color/on_background" />
                     <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="기록장에서 전체 히스토리를 확인하세요" android:textSize="12sp" android:textColor="@color/text_secondary" android:layout_marginTop="2dp" />
                 </LinearLayout>
-                <ImageView android:layout_width="16dp" android:layout_height="16dp" android:src="@drawable/ic_diary_chevron_right" android:colorFilter="@color/text_hint" />
+                <ImageView android:layout_width="16dp" android:layout_height="16dp" android:src="@drawable/ic_diary_chevron_right" app:tint="@color/text_hint" />
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
 

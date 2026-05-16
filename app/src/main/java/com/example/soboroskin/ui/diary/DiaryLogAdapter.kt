@@ -19,7 +19,7 @@ sealed class DiaryListItem {
     data class Separator(val label: String, val groupIds: Set<Long> = emptySet()) : DiaryListItem()
 }
 
-// ── 어댑터 ──────────────────────────────────────────────────────
+// ── 어댑터 ──────────────────────────────────it────────────────────
 class DiaryLogAdapter(
     private val onItemClick:     (DiagnosisEntity) -> Unit,
     private val onItemLongClick: (DiagnosisEntity) -> Unit,
