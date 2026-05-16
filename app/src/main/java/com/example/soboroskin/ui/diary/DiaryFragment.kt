@@ -30,18 +30,12 @@ class DiaryFragment : Fragment() {
 
         TabLayoutMediator(binding.tabLayoutDiary, binding.viewpagerDiary) { tab, position ->
             tab.text = when (position) {
-                0 -> getString(R.string.diary_tab_log)
-                1 -> getString(R.string.diary_tab_chart)
-                2 -> getString(R.string.diary_tab_photo)
-                3 -> "트러블 추적"
+                0 -> "기록"
+                1 -> "사진"
+                2 -> "트러블 추적"
                 else -> ""
             }
         }.attach()
-
-        binding.fabAddRecord.setOnClickListener {
-            // 수동 기록 다이얼로그 표시
-            AddManualRecordDialog().show(childFragmentManager, "AddManualRecord")
-        }
     }
 
     override fun onDestroyView() {

@@ -1,42 +1,57 @@
 package com.example.soboroskin.ui.diary
 
+import android.graphics.Color
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
-import androidx.recyclerview.widget.LinearLayoutManager
+import com.bumptech.glide.Glide
 import com.example.soboroskin.R
 import com.example.soboroskin.data.db.AppDatabase
 import com.example.soboroskin.data.model.DiagnosisEntity
 import com.example.soboroskin.databinding.FragmentDiaryLogBinding
+import com.github.mikephil.charting.components.LimitLine
+import com.github.mikephil.charting.components.XAxis
+import com.github.mikephil.charting.data.Entry
+import com.github.mikephil.charting.data.LineData
+import com.github.mikephil.charting.data.LineDataSet
+import com.github.mikephil.charting.formatter.IndexAxisValueFormatter
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.io.File
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 import java.util.concurrent.TimeUnit
+import kotlin.math.abs
 
 class DiaryLogFragment : Fragment() {
 
     private var _binding: FragmentDiaryLogBinding? = null
     private val binding get() = _binding!!
 
-    private lateinit var adapter: DiaryLogAdapter
     private var allEntries: List<DiagnosisEntity> = emptyList()
+    private var currentIndex: Int = 0
+    private var firstLoad: Boolean = true
 
-    private val separatorThresholds = listOf(
-        7   to "1주 전",
-        21  to "3주 전",
-        30  to "1달 전",
-        90  to "3달 전",
-        365 to "1년 전"
-    )
+    // 차트용
+    private var chartFilteredEntries: List<DiagnosisEntity> = emptyList()
+    private var dayRange: Int = 30
+    private var suppressChipListener = false
+
+    private val dateFmt  = SimpleDateFormat("yyyy.MM.dd  HH:mm", Locale.getDefault())
+    private val chartFmt = SimpleDateFormat("MM/dd", Locale.getDefault())
+
+    // ── Lifecycle ─────────────────────────────────────────────────────
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -48,26 +63,39 @@ class DiaryLogFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        setupNavButtons()
+        setupChart()
+        setupChipGroup()
+        observeEntries()
+    }
 
-        adapter = DiaryLogAdapter(
-            onItemClick     = { entity -> handleEntryClick(entity) },
-            onItemLongClick = { entity -> enterSelectionMode(entity) },
-            onGroupSelect   = { ids -> handleGroupSelect(ids) }
-        )
+    override fun onDestroyView() {
+        super.onDestroyView()
+        firstLoad = true
+        _binding = null
+    }
 
-        binding.rvDiaryLog.layoutManager = LinearLayoutManager(requireContext())
-        binding.rvDiaryLog.adapter = adapter
+    // ── 네비게이션 버튼 ────────────────────────────────────────────────
 
-        // 선택 버튼
-        binding.btnSelect.setOnClickListener { enterSelectionModeEmpty() }
+    private fun setupNavButtons() {
+        binding.btnPrev.setOnClickListener {
+            if (currentIndex < allEntries.size - 1) {
+                currentIndex++
+                showEntry(currentIndex)
+            }
+        }
+        binding.btnNext.setOnClickListener {
+            if (currentIndex > 0) {
+                currentIndex--
+                showEntry(currentIndex)
+            }
+        }
+        binding.btnDeleteEntry.setOnClickListener { showDeleteConfirmDialog() }
+    }
 
-        // 선택 취소
-        binding.btnCancelSelection.setOnClickListener { exitSelectionMode() }
+    // ── 데이터 관찰 ────────────────────────────────────────────────────
 
-        // 선택 삭제
-        binding.btnDeleteSelected.setOnClickListener { showDeleteSelectedConfirmDialog() }
-
-        // 데이터 관찰
+    private fun observeEntries() {
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
                 AppDatabase.getInstance(requireContext())
@@ -75,138 +103,306 @@ class DiaryLogFragment : Fragment() {
                     .getAllEntries()
                     .collectLatest { entries ->
                         allEntries = entries
-                        adapter.submitList(buildListWithSeparators(entries))
-
-                        val isEmpty = entries.isEmpty()
-                        binding.layoutEmpty.visibility = if (isEmpty) View.VISIBLE else View.GONE
-                        binding.btnSelect.visibility   = if (isEmpty) View.INVISIBLE else View.VISIBLE
-
-                        // 삭제 후 선택 모드 자동 해제
-                        if (isEmpty) exitSelectionMode()
+                        if (entries.isEmpty()) {
+                            showEmpty()
+                            firstLoad = true
+                        } else {
+                            if (firstLoad) {
+                                currentIndex = 0
+                                firstLoad = false
+                            } else {
+                                currentIndex = currentIndex.coerceIn(0, entries.size - 1)
+                            }
+                            showEntry(currentIndex)
+                        }
                     }
             }
         }
     }
 
-    // ─── 선택 모드 ───────────────────────────────────────────────
+    // ── 항목 표시 ──────────────────────────────────────────────────────
 
-    private fun enterSelectionModeEmpty() {
-        if (!adapter.isSelectionMode) {
-            adapter.isSelectionMode = true
-            updateSelectionBar()
-            binding.layoutSelectionBar.visibility = View.VISIBLE
-            binding.layoutHeader.visibility       = View.GONE
+    private fun showEntry(index: Int) {
+        val entry     = allEntries.getOrNull(index) ?: return
+        val prevEntry = allEntries.getOrNull(index + 1)   // 더 오래된 기록
+
+        // 날짜 + 카운터
+        binding.tvDateNav.text      = dateFmt.format(Date(entry.date))
+        binding.tvEntryCounter.text = "${index + 1} / ${allEntries.size}"
+
+        // 네비게이션 활성/비활성
+        val canGoPrev = index < allEntries.size - 1
+        val canGoNext = index > 0
+        binding.btnPrev.alpha     = if (canGoPrev) 1f else 0.25f
+        binding.btnPrev.isEnabled = canGoPrev
+        binding.btnNext.alpha     = if (canGoNext) 1f else 0.25f
+        binding.btnNext.isEnabled = canGoNext
+
+        // ── 5개 점수 ──
+        val moisture   = entry.moistureScore
+        val dryness    = (100 - moisture).coerceIn(0, 100)
+        val acne       = entry.troubleScore
+        val pore       = entry.oilScore
+        val elasticity = entry.elasticityScore
+
+        // 오각형: 수분(0) 건조함(1) 여드름(2) 모공(3) 탄력(4)
+        binding.pentagonChart.scores = floatArrayOf(
+            moisture.toFloat(),
+            dryness.toFloat(),
+            acne.toFloat(),
+            pore.toFloat(),
+            elasticity.toFloat()
+        )
+
+        binding.tvValMoisture.text   = "${moisture}점"
+        binding.tvValDryness.text    = "${dryness}점"
+        binding.tvValAcne.text       = "${acne}점"
+        binding.tvValPore.text       = "${pore}점"
+        binding.tvValElasticity.text = "${elasticity}점"
+
+        // 이전 대비 변화량
+        if (prevEntry != null) {
+            showDelta(binding.tvDeltaMoisture,   moisture   - prevEntry.moistureScore)
+            showDelta(binding.tvDeltaDryness,    dryness    - (100 - prevEntry.moistureScore))
+            showDelta(binding.tvDeltaAcne,       acne       - prevEntry.troubleScore)
+            showDelta(binding.tvDeltaPore,       pore       - prevEntry.oilScore)
+            showDelta(binding.tvDeltaElasticity, elasticity - prevEntry.elasticityScore)
+        } else {
+            listOf(
+                binding.tvDeltaMoisture, binding.tvDeltaDryness,
+                binding.tvDeltaAcne, binding.tvDeltaPore, binding.tvDeltaElasticity
+            ).forEach { it.visibility = View.GONE }
+        }
+
+        // ── 사진 + 메모 ──
+        val hasPhoto = entry.photoPath.isNotEmpty()
+        val hasNotes = entry.notes.isNotEmpty()
+
+        if (hasPhoto || hasNotes) {
+            binding.cardPhotoNotes.visibility = View.VISIBLE
+            if (hasPhoto) {
+                binding.ivPhoto.visibility = View.VISIBLE
+                Glide.with(this).load(entry.photoPath).centerCrop().into(binding.ivPhoto)
+            } else {
+                binding.ivPhoto.visibility = View.GONE
+            }
+            if (hasNotes) {
+                binding.tvNotes.visibility = View.VISIBLE
+                binding.tvNotes.text = entry.notes
+                val lp = binding.tvNotes.layoutParams as ViewGroup.MarginLayoutParams
+                lp.marginStart = if (hasPhoto) (12 * resources.displayMetrics.density).toInt() else 0
+                binding.tvNotes.layoutParams = lp
+            } else {
+                binding.tvNotes.visibility = View.GONE
+            }
+        } else {
+            binding.cardPhotoNotes.visibility = View.GONE
+        }
+
+        // 헤더 보이기
+        binding.layoutDateNav.visibility  = View.VISIBLE
+        binding.tvEntryCounter.visibility = View.VISIBLE
+        binding.scrollContent.visibility  = View.VISIBLE
+        binding.layoutEmpty.visibility    = View.GONE
+
+        // 차트: 선택 날짜 하이라이트 갱신
+        updateChart()
+    }
+
+    private fun showDelta(tv: TextView, delta: Int) {
+        if (delta == 0) { tv.visibility = View.GONE; return }
+        tv.visibility = View.VISIBLE
+        tv.text = "${if (delta > 0) "▲" else "▼"}${abs(delta)}"
+        tv.setTextColor(
+            if (delta > 0) Color.parseColor("#4CAF50") else Color.parseColor("#EF5350")
+        )
+    }
+
+    // ── 변화 그래프 ────────────────────────────────────────────────────
+
+    private fun setupChart() {
+        binding.lineChart.apply {
+            description.isEnabled = false
+            setTouchEnabled(true)
+            isDragEnabled = true
+            setScaleEnabled(false)
+            setPinchZoom(false)
+            setDrawGridBackground(false)
+            legend.isEnabled = true
+            legend.textSize  = 11f
+            axisRight.isEnabled = false
+            setNoDataText("아직 진단 기록이 없어요")
+
+            xAxis.apply {
+                position = XAxis.XAxisPosition.BOTTOM
+                setDrawGridLines(false)
+                granularity = 1f
+                labelRotationAngle = -40f
+                textSize = 10f
+            }
+            axisLeft.apply {
+                setDrawGridLines(true)
+                axisMinimum = 0f
+                axisMaximum = 100f
+                granularity = 25f
+                textSize = 10f
+            }
         }
     }
 
-    private fun enterSelectionMode(entity: DiagnosisEntity) {
-        if (!adapter.isSelectionMode) {
-            adapter.isSelectionMode = true
-            adapter.toggleSelection(entity.id)
-            updateSelectionBar()
-            binding.layoutSelectionBar.visibility = View.VISIBLE
-            binding.layoutHeader.visibility       = View.GONE
+    private fun setupChipGroup() {
+        binding.chipGroupPeriod.setOnCheckedStateChangeListener { _, checkedIds ->
+            if (suppressChipListener) return@setOnCheckedStateChangeListener
+            dayRange = when (checkedIds.firstOrNull()) {
+                R.id.chip_7days  -> 7
+                R.id.chip_30days -> 30
+                R.id.chip_90days -> 90
+                else -> dayRange
+            }
+            updateChart()
         }
     }
 
-    private fun handleEntryClick(entity: DiagnosisEntity) {
-        if (adapter.isSelectionMode) {
-            adapter.toggleSelection(entity.id)
-            updateSelectionBar()
+    private fun updateChart() {
+        if (_binding == null) return
+
+        val cutoff = System.currentTimeMillis() - TimeUnit.DAYS.toMillis(dayRange.toLong())
+        chartFilteredEntries = allEntries
+            .filter { it.date >= cutoff }
+            .sortedBy { it.date }   // 오래된 것 → 최신 순 (차트 왼→오른쪽)
+
+        val chart = binding.lineChart
+
+        if (chartFilteredEntries.isEmpty()) {
+            chart.clear()
+            chart.setNoDataText(
+                if (allEntries.isEmpty()) "아직 진단 기록이 없어요"
+                else "이 기간에 진단 기록이 없어요"
+            )
+            chart.invalidate()
+            updateAverages(emptyList())
+            return
+        }
+
+        val labels = chartFilteredEntries.map { chartFmt.format(Date(it.date)) }
+
+        fun makeSet(data: List<Entry>, label: String, hexColor: String): LineDataSet =
+            LineDataSet(data, label).apply {
+                color = Color.parseColor(hexColor)
+                setCircleColor(Color.parseColor(hexColor))
+                lineWidth = 2f
+                circleRadius = 3.5f
+                setDrawValues(false)
+                mode = LineDataSet.Mode.CUBIC_BEZIER
+                isHighlightEnabled = false
+            }
+
+        val lineData = LineData(
+            makeSet(chartFilteredEntries.mapIndexed { i, e -> Entry(i.toFloat(), e.moistureScore.toFloat()) },   "수분",   "#4FC3F7"),
+            makeSet(chartFilteredEntries.mapIndexed { i, e -> Entry(i.toFloat(), e.elasticityScore.toFloat()) }, "탄력",   "#BA68C8"),
+            makeSet(chartFilteredEntries.mapIndexed { i, e -> Entry(i.toFloat(), e.oilScore.toFloat()) },        "모공",   "#4CAF50"),
+            makeSet(chartFilteredEntries.mapIndexed { i, e -> Entry(i.toFloat(), e.troubleScore.toFloat()) },    "여드름", "#EF5350")
+        )
+
+        chart.xAxis.valueFormatter = IndexAxisValueFormatter(labels)
+        chart.data = lineData
+
+        // ── 선택 날짜 세로 표시선 ──
+        chart.xAxis.removeAllLimitLines()
+        val selectedEntry = allEntries.getOrNull(currentIndex)
+        if (selectedEntry != null) {
+            val chartPos = chartFilteredEntries.indexOfFirst { it.id == selectedEntry.id }
+            if (chartPos >= 0) {
+                val ll = LimitLine(chartPos.toFloat()).apply {
+                    lineColor     = Color.parseColor("#6EBA93")
+                    lineWidth     = 2f
+                    enableDashedLine(10f, 6f, 0f)
+                    label         = chartFmt.format(Date(selectedEntry.date))
+                    labelPosition = LimitLine.LimitLabelPosition.RIGHT_TOP
+                    textColor     = Color.parseColor("#4A9972")
+                    textSize      = 9f
+                }
+                chart.xAxis.addLimitLine(ll)
+            }
+            // 선택 항목이 현재 기간 밖이면 칩을 자동 전환
+            else {
+                autoSwitchPeriod(selectedEntry.date)
+            }
+        }
+
+        chart.invalidate()
+        updateAverages(chartFilteredEntries)
+    }
+
+    /** 선택 기록이 현재 기간에 없으면 해당 기간으로 자동 전환 */
+    private fun autoSwitchPeriod(entryDate: Long) {
+        val now = System.currentTimeMillis()
+        val idealRange = when {
+            entryDate >= now - TimeUnit.DAYS.toMillis(7)  -> 7
+            entryDate >= now - TimeUnit.DAYS.toMillis(30) -> 30
+            else -> 90
+        }
+        if (idealRange != dayRange) {
+            dayRange = idealRange
+            suppressChipListener = true
+            when (idealRange) {
+                7  -> binding.chip7days.isChecked  = true
+                30 -> binding.chip30days.isChecked = true
+                90 -> binding.chip90days.isChecked = true
+            }
+            suppressChipListener = false
+            updateChart()   // 기간 변경 후 다시 그리기
         }
     }
 
-    private fun handleGroupSelect(ids: Set<Long>) {
-        adapter.toggleGroupSelection(ids)
-        updateSelectionBar()
+    private fun updateAverages(entries: List<DiagnosisEntity>) {
+        if (_binding == null) return
+        if (entries.isEmpty()) {
+            binding.tvAvgMoisture.text   = "-"
+            binding.tvAvgElasticity.text = "-"
+            binding.tvAvgPore.text       = "-"
+            binding.tvAvgAcne.text       = "-"
+            return
+        }
+        binding.tvAvgMoisture.text   = "${entries.map { it.moistureScore }.average().toInt()}점"
+        binding.tvAvgElasticity.text = "${entries.map { it.elasticityScore }.average().toInt()}점"
+        binding.tvAvgPore.text       = "${entries.map { it.oilScore }.average().toInt()}점"
+        binding.tvAvgAcne.text       = "${entries.map { it.troubleScore }.average().toInt()}점"
     }
 
-    private fun exitSelectionMode() {
-        adapter.clearSelection()
-        binding.layoutSelectionBar.visibility = View.GONE
-        binding.layoutHeader.visibility       = View.VISIBLE
+    // ── 빈 상태 ────────────────────────────────────────────────────────
+
+    private fun showEmpty() {
+        binding.layoutDateNav.visibility  = View.GONE
+        binding.tvEntryCounter.visibility = View.GONE
+        binding.scrollContent.visibility  = View.GONE
+        binding.layoutEmpty.visibility    = View.VISIBLE
     }
 
-    private fun updateSelectionBar() {
-        val count = adapter.getSelectedCount()
-        binding.tvSelectedCount.text = "${count}개 선택됨"
-        binding.btnDeleteSelected.alpha     = if (count > 0) 1f else 0.4f
-        binding.btnDeleteSelected.isEnabled = count > 0
-    }
+    // ── 삭제 ──────────────────────────────────────────────────────────
 
-    // ─── 선택 삭제 ───────────────────────────────────────────────
-
-    private fun showDeleteSelectedConfirmDialog() {
-        val count = adapter.getSelectedCount()
-        if (count == 0) return
+    private fun showDeleteConfirmDialog() {
         AlertDialog.Builder(requireContext())
-            .setTitle("선택 삭제")
-            .setMessage("선택한 ${count}개의 기록을 삭제할까요?\n관련 트러블 기록도 함께 정리됩니다.")
-            .setNegativeButton(getString(R.string.btn_cancel), null)
-            .setPositiveButton("삭제") { _, _ -> deleteSelectedLogs() }
+            .setTitle("기록 삭제")
+            .setMessage("이 진단 기록을 삭제할까요?\n관련 트러블 기록도 함께 정리됩니다.")
+            .setNegativeButton("취소", null)
+            .setPositiveButton("삭제") { _, _ -> deleteCurrentEntry() }
             .show()
     }
 
-    private fun deleteSelectedLogs() {
-        val ids = adapter.getSelectedIds().toList()
-        if (ids.isEmpty()) return
-
+    private fun deleteCurrentEntry() {
+        val entry = allEntries.getOrNull(currentIndex) ?: return
         viewLifecycleOwner.lifecycleScope.launch {
             withContext(Dispatchers.IO) {
                 val db = AppDatabase.getInstance(requireContext())
-
-                // 사진 파일 삭제
-                val toDelete = allEntries.filter { it.id in ids }
-                for (d in toDelete) {
-                    if (d.photoPath.isNotEmpty()) {
-                        try { File(d.photoPath).delete() } catch (_: Exception) {}
-                    }
+                if (entry.photoPath.isNotEmpty()) {
+                    try { File(entry.photoPath).delete() } catch (_: Exception) {}
                 }
-
-                // DB 삭제: 연결된 acne_spot_records 삭제 → 고아 acne_spots 정리 → diagnoses 삭제
-                db.acneSpotRecordDao().deleteByDiagnosisIds(ids)
+                db.acneSpotRecordDao().deleteByDiagnosisIds(listOf(entry.id))
                 db.acneSpotDao().deleteOrphaned()
-                db.diagnosisDao().deleteByIds(ids)
+                db.diagnosisDao().deleteByIds(listOf(entry.id))
             }
-
-            exitSelectionMode()
             Toast.makeText(requireContext(), "삭제되었습니다", Toast.LENGTH_SHORT).show()
         }
-    }
-
-    // ─── 구분선 삽입 (그룹 ID 포함) ─────────────────────────────
-
-    private fun buildListWithSeparators(entries: List<DiagnosisEntity>): List<DiaryListItem> {
-        if (entries.isEmpty()) return emptyList()
-        val now = System.currentTimeMillis()
-        val items = mutableListOf<DiaryListItem>()
-        val insertedDays = mutableSetOf<Int>()
-        var lastSepPos = -1
-        val sepGroups = mutableMapOf<Int, MutableSet<Long>>()
-
-        for (entry in entries) {
-            val daysAgo = TimeUnit.MILLISECONDS.toDays(now - entry.date).toInt()
-            for ((days, label) in separatorThresholds) {
-                if (daysAgo >= days && days !in insertedDays) {
-                    items.add(DiaryListItem.Separator(label))
-                    insertedDays.add(days)
-                    lastSepPos = items.size - 1
-                    sepGroups[lastSepPos] = mutableSetOf()
-                }
-            }
-            items.add(DiaryListItem.Entry(entry))
-            if (lastSepPos >= 0) sepGroups[lastSepPos]?.add(entry.id)
-        }
-
-        // 각 구분선에 해당 그룹의 entry ID 집합을 주입
-        return items.mapIndexed { pos, item ->
-            if (item is DiaryListItem.Separator) item.copy(groupIds = sepGroups[pos] ?: emptySet())
-            else item
-        }
-    }
-
-    override fun onDestroyView() {
-        super.onDestroyView()
-        _binding = null
     }
 }
