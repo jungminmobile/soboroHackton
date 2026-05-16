@@ -4,13 +4,13 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/background">
+    android:background="@drawable/bg_screen_gradient">
 
     <!-- ══ 그라데이션 헤더 (스크롤하면 사라짐) ══════════════════ -->
     <com.google.android.material.appbar.AppBarLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@drawable/bg_gradient_header"
+        android:background="@android:color/transparent"
         app:elevation="0dp">
 
         <LinearLayout
@@ -163,7 +163,7 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         app:layout_behavior="@string/appbar_scrolling_view_behavior"
-        android:background="@color/background">
+        android:background="@android:color/transparent">
 
         <LinearLayout
             android:layout_width="match_parent"
