@@ -67,11 +67,12 @@
 
         </LinearLayout>
 
+        <!-- 수정된 기록 저장 버튼 -->
         <Button
-            android:id="@+id/btnDone"
+            android:id="@+id/btnSaveToDiary"
             android:layout_width="match_parent"
             android:layout_height="56dp"
-            android:text="확인"
+            android:text="기록 저장"
             android:layout_marginTop="32dp"
             android:backgroundTint="@color/primary"
             android:textColor="@color/white" />

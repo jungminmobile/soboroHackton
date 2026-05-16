@@ -7,16 +7,12 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Toast
 import androidx.exifinterface.media.ExifInterface
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import com.example.soboroskin.AcneDetection
-import com.example.soboroskin.AcneTracker
 import com.example.soboroskin.MainActivity
 import com.example.soboroskin.R
-import com.example.soboroskin.data.db.AppDatabase
-import com.example.soboroskin.data.model.DiagnosisEntity
 import com.example.soboroskin.databinding.FragmentScanResultBinding
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -101,10 +97,23 @@ class ScanResultFragment : Fragment() {
             requireActivity().supportFragmentManager.popBackStack()
         }
 
-        // 🚀 2. 상세 분석 페이지로 이동 (추가된 화살표 버튼)
+        // 🚀 2. 하단 '종합결과 확인' 버튼 클릭 시 상세 분석 페이지로 이동
         binding.btnNextDetail.setOnClickListener {
+            // 사용자가 화면에서 탭하여 제외한 트러블을 반영한 최신 리스트를 확보합니다.
+            val selectedDetections = if (detections.isNotEmpty() && imageW > 0 && imageH > 0)
+                binding.overlayView.getSelectedDetections()
+            else
+                detections
+
             val bundle = Bundle().apply {
-                putString("photo_path", photoPath) // 사진 경로 전달
+                putString("photo_path", photoPath)
+                putString("skin_type", skinType)
+                putInt("oil_score", oil)
+                putInt("trouble_score", trouble)
+                putString("ai_comment", comment)
+                putSerializable("detections", ArrayList(selectedDetections)) // 체크된 트러블만 전달
+                putInt("image_w", imageW)
+                putInt("image_h", imageH)
             }
             val detailFragment = DiagnosisResultFragment().apply {
                 arguments = bundle
@@ -118,16 +127,7 @@ class ScanResultFragment : Fragment() {
                 .commit()
         }
 
-        // 3. 다이어리에 저장 버튼
-        binding.btnSaveToDiary.setOnClickListener {
-            val selectedDetections = if (detections.isNotEmpty() && imageW > 0 && imageH > 0)
-                binding.overlayView.getSelectedDetections()
-            else
-                detections
-            saveToDiary(skinType, moisture, oil, trouble, elasticity, comment, photoPath, selectedDetections, imageW, imageH)
-        }
-
-        // 4. 다시 찍기 버튼
+        // 3. 다시 찍기 버튼
         binding.btnRetry.setOnClickListener {
             (activity as? MainActivity)?.closeScanOverlay()
             (activity as? MainActivity)?.openScanOverlay()
@@ -182,55 +182,6 @@ class ScanResultFragment : Fragment() {
             getString(R.string.result_acne_selected, selected, total)
     }
 
-    private fun saveToDiary(
-        skinType: String, moisture: Int, oil: Int, trouble: Int, elasticity: Int,
-        comment: String, photoPath: String,
-        detections: List<AcneDetection>, imageW: Int, imageH: Int
-    ) {
-        binding.btnSaveToDiary.isEnabled = false
-        val now = System.currentTimeMillis()
-        val entity = DiagnosisEntity(
-            skinType        = skinType,
-            moistureScore   = moisture,
-            oilScore        = oil,
-            troubleScore    = trouble,
-            elasticityScore = elasticity,
-            aiComment       = comment,
-            photoPath       = photoPath,
-            isManual        = false,
-            date            = now
-        )
-
-        lifecycleScope.launch {
-            val db = AppDatabase.getInstance(requireContext())
-            val diagnosisId = db.diagnosisDao().insert(entity)
-
-            if (detections.isNotEmpty() && imageW > 0 && imageH > 0) {
-                try {
-                    AcneTracker(db).track(
-                        detections  = detections,
-                        imageWidth  = imageW,
-                        imageHeight = imageH,
-                        diagnosisId = diagnosisId,
-                        date        = now
-                    )
-                } catch (t: Throwable) {
-                    android.util.Log.e("ScanResult", "AcneTracker failed", t)
-                }
-            }
-
-            requireActivity().runOnUiThread {
-                val msg = if (detections.isEmpty())
-                    "트러블 없이 저장되었습니다"
-                else
-                    getString(R.string.result_saved)
-                Toast.makeText(requireContext(), msg, Toast.LENGTH_SHORT).show()
-                (activity as? MainActivity)?.onDiagnosisSaved()
-            }
-        }
-    }
-
-    // (기존 코드 유지) EXIF 보정 로드 함수
     private fun loadBitmapWithExifRotation(file: File): Bitmap? {
         val raw = BitmapFactory.decodeFile(file.absolutePath) ?: return null
         val exif = ExifInterface(file.absolutePath)
