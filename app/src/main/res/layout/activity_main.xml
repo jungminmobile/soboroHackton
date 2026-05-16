@@ -101,9 +101,9 @@
                 android:contentDescription="스캔" />
         </FrameLayout>
 
-        <!-- 기록 tab -->
+        <!-- 화장품 tab -->
         <LinearLayout
-            android:id="@+id/tab_diary"
+            android:id="@+id/tab_cosmetics"
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
             android:orientation="vertical"
@@ -114,17 +114,17 @@
             android:background="?attr/selectableItemBackgroundBorderless">
 
             <ImageView
-                android:id="@+id/tab_diary_icon"
+                android:id="@+id/tab_cosmetics_icon"
                 android:layout_width="22dp"
                 android:layout_height="22dp"
-                android:src="@drawable/ic_diary"
+                android:src="@drawable/ic_cosmetics"
                 app:tint="@color/nav_unselected" />
 
             <TextView
-                android:id="@+id/tab_diary_label"
+                android:id="@+id/tab_cosmetics_label"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="기록"
+                android:text="화장품"
                 android:textSize="10sp"
                 android:textStyle="bold"
                 android:textColor="@color/nav_unselected"
