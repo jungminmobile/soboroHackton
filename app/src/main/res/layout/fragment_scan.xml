@@ -56,17 +56,17 @@
         app:layout_constraintEnd_toEndOf="parent"
         android:layout_marginTop="36dp" />
 
-    <!-- Scan Circle Guide -->
+    <!-- 🥚 수정된 부분: 가로를 260dp로 줄이고, 세로를 340dp로 늘려 계란형으로 변경 -->
     <View
         android:id="@+id/scan_circle"
-        android:layout_width="280dp"
-        android:layout_height="280dp"
+        android:layout_width="260dp"
+        android:layout_height="340dp"
         android:background="@drawable/bg_scan_circle"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        android:layout_marginBottom="60dp" />
+        android:layout_marginBottom="40dp" /> <!-- 세로가 길어져서 중앙 밸런스를 위해 마진을 40dp로 조절 -->
 
     <!-- Guide Text -->
     <TextView

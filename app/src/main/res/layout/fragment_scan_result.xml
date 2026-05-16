@@ -35,14 +35,9 @@
             android:textColor="@color/on_background"
             android:gravity="center" />
 
-        <ImageButton
-            android:id="@+id/btn_next_detail"
+        <View
             android:layout_width="40dp"
-            android:layout_height="40dp"
-            android:background="?attr/selectableItemBackgroundBorderless"
-            android:src="@android:drawable/ic_media_next"
-            android:contentDescription="상세분석"
-            android:tint="@color/on_background" />
+            android:layout_height="40dp" />
     </LinearLayout>
 
     <FrameLayout
@@ -100,9 +95,9 @@
 
                 <TextView
                     android:id="@+id/tv_acne_count"
+                    android:layout_weight="8"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:layout_weight="8"
                     android:text="트러블 0개 감지됨"
                     android:textSize="13sp"
                     android:textStyle="bold"
@@ -130,11 +125,11 @@
         android:paddingBottom="28dp">
 
         <Button
-            android:id="@+id/btn_save_to_diary"
+            android:id="@+id/btn_next_detail"
             android:layout_width="match_parent"
             android:layout_height="52dp"
             android:background="@drawable/bg_button_primary"
-            android:text="@string/result_save"
+            android:text="종합결과 확인"
             android:textColor="@color/on_primary"
             android:textSize="16sp"
             android:textStyle="bold" />
