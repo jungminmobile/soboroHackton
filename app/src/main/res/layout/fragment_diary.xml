@@ -5,7 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:background="@color/background">
+    android:background="@drawable/bg_screen_gradient">
 
     <!-- Header -->
     <LinearLayout
@@ -33,7 +33,7 @@
         android:id="@+id/tab_layout_diary"
         android:layout_width="match_parent"
         android:layout_height="48dp"
-        android:background="@color/background"
+        android:background="@android:color/transparent"
         app:tabSelectedTextColor="@color/primary"
         app:tabTextColor="@color/text_secondary"
         app:tabIndicatorColor="@color/primary"

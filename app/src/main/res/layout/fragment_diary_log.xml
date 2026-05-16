@@ -5,7 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:background="@color/background">
+    android:background="@android:color/transparent">
 
     <!-- ── 날짜 네비게이션 바 ──────────────────────────────────── -->
     <LinearLayout
@@ -17,7 +17,7 @@
         android:paddingStart="4dp"
         android:paddingEnd="8dp"
         android:background="@color/surface"
-        android:elevation="2dp">
+        android:elevation="0dp">
 
         <ImageButton
             android:id="@+id/btn_prev"
@@ -103,7 +103,7 @@
                     android:layout_height="wrap_content"
                     android:layout_marginTop="4dp"
                     app:cardCornerRadius="16dp"
-                    app:cardElevation="2dp"
+                    app:cardElevation="0dp"
                     app:cardBackgroundColor="@color/surface">
 
                     <LinearLayout
@@ -267,7 +267,7 @@
                     android:layout_marginTop="12dp"
                     android:visibility="gone"
                     app:cardCornerRadius="16dp"
-                    app:cardElevation="2dp"
+                    app:cardElevation="0dp"
                     app:cardBackgroundColor="@color/surface">
 
                     <LinearLayout
@@ -333,7 +333,7 @@
                     android:layout_height="wrap_content"
                     android:layout_marginTop="8dp"
                     app:cardCornerRadius="16dp"
-                    app:cardElevation="2dp"
+                    app:cardElevation="0dp"
                     app:cardBackgroundColor="@color/surface">
 
                     <LinearLayout
@@ -431,7 +431,7 @@
                     android:layout_height="wrap_content"
                     android:layout_marginTop="12dp"
                     app:cardCornerRadius="16dp"
-                    app:cardElevation="2dp"
+                    app:cardElevation="0dp"
                     app:cardBackgroundColor="@color/surface">
 
                     <LinearLayout
