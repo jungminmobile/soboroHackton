@@ -1,439 +1,93 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.coordinatorlayout.widget.CoordinatorLayout
+<LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:orientation="vertical"
     android:background="@drawable/bg_screen_gradient">
 
-    <!-- ══ 그라데이션 헤더 (스크롤하면 사라짐) ══════════════════ -->
-    <com.google.android.material.appbar.AppBarLayout
+    <!-- ══ 헤더: 앱 로고 + 이름 + 프로필 (투명 → 그라데이션 배경 비침) ══ -->
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@android:color/transparent"
-        app:elevation="0dp">
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical"
-            app:layout_scrollFlags="scroll|snap">
-
-            <!-- 헤더: 인사말 + 날짜 + 프로필 -->
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:gravity="center_vertical"
-                android:paddingHorizontal="20dp"
-                android:paddingTop="52dp"
-                android:paddingBottom="8dp">
-
-                <LinearLayout
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:orientation="vertical">
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="@string/home_greeting"
-                        android:textSize="28sp"
-                        android:textStyle="bold"
-                        android:textColor="@color/on_primary"
-                        android:letterSpacing="-0.02" />
-
-                    <TextView
-                        android:id="@+id/tv_today_date"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:textSize="14sp"
-                        android:textColor="#CCFFFFFF"
-                        android:layout_marginTop="2dp" />
-                </LinearLayout>
-
-                <LinearLayout
-                    android:id="@+id/btn_profile"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:gravity="center_horizontal"
-                    android:padding="4dp"
-                    android:clickable="true"
-                    android:focusable="true">
-
-                    <TextView
-                        android:id="@+id/tv_avatar"
-                        android:layout_width="40dp"
-                        android:layout_height="40dp"
-                        android:gravity="center"
-                        android:textSize="16sp"
-                        android:textStyle="bold"
-                        android:textColor="@color/primary"
-                        android:background="@drawable/bg_avatar"
-                        android:text="S" />
-
-                    <TextView
-                        android:id="@+id/tv_profile_name"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="2dp"
-                        android:text="내 정보"
-                        android:textSize="10sp"
-                        android:textColor="#CCFFFFFF" />
-                </LinearLayout>
-            </LinearLayout>
-
-            <!-- 진단 요약 배너 -->
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:gravity="center_vertical"
-                android:paddingHorizontal="20dp"
-                android:paddingTop="4dp"
-                android:paddingBottom="32dp">
-
-                <LinearLayout
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:orientation="vertical">
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="오늘의 피부 점수"
-                        android:textSize="13sp"
-                        android:textColor="#CCFFFFFF" />
-
-                    <TextView
-                        android:id="@+id/tv_diagnosis_date"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="최근 기록 없음"
-                        android:textSize="12sp"
-                        android:textColor="#AAFFFFFF"
-                        android:layout_marginTop="2dp" />
-
-                    <TextView
-                        android:id="@+id/tv_skin_type_badge"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="8dp"
-                        android:background="#33FFFFFF"
-                        android:paddingHorizontal="10dp"
-                        android:paddingVertical="3dp"
-                        android:textColor="#FFFFFFFF"
-                        android:textSize="12sp"
-                        android:textStyle="bold"
-                        android:visibility="gone" />
-                </LinearLayout>
-
-                <LinearLayout
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:gravity="center_horizontal">
-
-                    <TextView
-                        android:id="@+id/tv_total_score_banner"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="--"
-                        android:textSize="42sp"
-                        android:textStyle="bold"
-                        android:textColor="@color/on_primary" />
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="종합 점수"
-                        android:textSize="11sp"
-                        android:textColor="#CCFFFFFF" />
-                </LinearLayout>
-            </LinearLayout>
-
-        </LinearLayout>
-    </com.google.android.material.appbar.AppBarLayout>
-
-    <!-- ══ 스크롤 컨텐츠 ════════════════════════════════════════ -->
-    <androidx.core.widget.NestedScrollView
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        app:layout_behavior="@string/appbar_scrolling_view_behavior"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:paddingHorizontal="20dp"
+        android:paddingTop="52dp"
+        android:paddingBottom="16dp"
         android:background="@android:color/transparent">
 
+        <!-- 로고 + 앱이름 -->
+        <ImageView
+            android:layout_width="34dp"
+            android:layout_height="34dp"
+            android:src="@drawable/ic_app_logo"
+            android:contentDescription="앱 로고" />
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="@string/app_name"
+            android:textSize="22sp"
+            android:textStyle="bold"
+            android:textColor="@color/on_primary"
+            android:letterSpacing="-0.02"
+            android:layout_marginStart="10dp" />
+
+        <!-- 프로필 버튼 -->
         <LinearLayout
-            android:layout_width="match_parent"
+            android:id="@+id/btn_profile"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:paddingBottom="100dp">
+            android:gravity="center_horizontal"
+            android:padding="4dp"
+            android:clickable="true"
+            android:focusable="true">
 
-            <!-- ══ SECTION LABEL: 분석 요약 ═══════════════════════ -->
             <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="분석 요약"
-                android:textSize="13sp"
-                android:textAllCaps="true"
-                android:textColor="@color/text_secondary"
-                android:letterSpacing="0.06"
-                android:paddingHorizontal="20dp"
-                android:paddingTop="20dp"
-                android:paddingBottom="8dp" />
-
-            <!-- ══ CARD 1: 최근 스캔 결과 ═══════════════════════ -->
-            <com.google.android.material.card.MaterialCardView
-                android:id="@+id/card_diagnosis"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginHorizontal="16dp"
-                android:layout_marginBottom="8dp"
-                app:cardCornerRadius="16dp"
-                app:cardElevation="0dp"
-                app:cardBackgroundColor="@color/surface"
-                app:strokeWidth="0dp">
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="vertical">
-
-                    <!-- 데이터 있을 때 -->
-                    <LinearLayout
-                        android:id="@+id/layout_diagnosis_content"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:orientation="vertical"
-                        android:padding="16dp"
-                        android:visibility="gone"
-                        tools:visibility="visible">
-
-                        <LinearLayout
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:orientation="horizontal"
-                            android:gravity="center_vertical"
-                            android:layout_marginBottom="12dp">
-
-                            <TextView
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="세부 지표"
-                                android:textSize="13sp"
-                                android:textStyle="bold"
-                                android:textColor="@color/primary" />
-                        </LinearLayout>
-
-                        <!-- 점수 그리드 2×2 -->
-                        <GridLayout
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:columnCount="2"
-                            android:rowCount="2">
-
-                            <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content" android:layout_columnWeight="1" android:orientation="vertical" android:background="@color/background" android:padding="12dp" android:layout_margin="3dp">
-                                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="💧 수분" android:textSize="12sp" android:textColor="@color/text_secondary" />
-                                <TextView android:id="@+id/tv_score_moisture" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="--" android:textSize="22sp" android:textStyle="bold" android:textColor="@color/accent_moisture" android:layout_marginTop="2dp" />
-                            </LinearLayout>
-
-                            <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content" android:layout_columnWeight="1" android:orientation="vertical" android:background="@color/background" android:padding="12dp" android:layout_margin="3dp">
-                                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="✨ 유분" android:textSize="12sp" android:textColor="@color/text_secondary" />
-                                <TextView android:id="@+id/tv_score_oil" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="--" android:textSize="22sp" android:textStyle="bold" android:textColor="@color/accent_oil" android:layout_marginTop="2dp" />
-                            </LinearLayout>
-
-                            <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content" android:layout_columnWeight="1" android:orientation="vertical" android:background="@color/background" android:padding="12dp" android:layout_margin="3dp">
-                                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="🔴 트러블" android:textSize="12sp" android:textColor="@color/text_secondary" />
-                                <TextView android:id="@+id/tv_score_trouble" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="--" android:textSize="22sp" android:textStyle="bold" android:textColor="@color/accent_trouble" android:layout_marginTop="2dp" />
-                            </LinearLayout>
-
-                            <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content" android:layout_columnWeight="1" android:orientation="vertical" android:background="@color/background" android:padding="12dp" android:layout_margin="3dp">
-                                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="💜 탄력" android:textSize="12sp" android:textColor="@color/text_secondary" />
-                                <TextView android:id="@+id/tv_score_elasticity" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="--" android:textSize="22sp" android:textStyle="bold" android:textColor="@color/accent_elasticity" android:layout_marginTop="2dp" />
-                            </LinearLayout>
-                        </GridLayout>
-                    </LinearLayout>
-
-                    <!-- 빈 상태 -->
-                    <LinearLayout
-                        android:id="@+id/layout_diagnosis_empty"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:orientation="vertical"
-                        android:gravity="center"
-                        android:padding="28dp">
-
-                        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="📷" android:textSize="36sp" />
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="@string/home_no_diagnosis"
-                            android:textColor="@color/text_secondary"
-                            android:textSize="14sp"
-                            android:gravity="center"
-                            android:lineSpacingMultiplier="1.5"
-                            android:layout_marginTop="8dp" />
-                    </LinearLayout>
-                </LinearLayout>
-            </com.google.android.material.card.MaterialCardView>
-
-            <!-- ══ CARD 2: AI 맞춤 조언 ═══════════════════════ -->
-            <com.google.android.material.card.MaterialCardView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginHorizontal="16dp"
-                android:layout_marginBottom="8dp"
-                app:cardCornerRadius="16dp"
-                app:cardElevation="0dp"
-                app:cardBackgroundColor="@color/surface"
-                app:strokeWidth="0dp">
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    android:padding="16dp"
-                    android:gravity="center_vertical">
-
-                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="💡" android:textSize="24sp" android:layout_marginEnd="12dp" />
-
-                    <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:orientation="vertical">
-                        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="AI 맞춤 조언" android:textSize="12sp" android:textColor="@color/primary" android:textStyle="bold" />
-                        <TextView android:id="@+id/tv_ai_insight" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="최근 데이터가 없습니다. 분석을 시작해보세요!" android:textSize="14sp" android:textColor="@color/on_background" android:lineSpacingMultiplier="1.4" android:layout_marginTop="2dp" />
-                    </LinearLayout>
-                </LinearLayout>
-            </com.google.android.material.card.MaterialCardView>
-
-            <!-- ══ SECTION LABEL: 통계 및 관리 ═══════════════════════ -->
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="통계 및 관리"
-                android:textSize="13sp"
-                android:textAllCaps="true"
-                android:textColor="@color/text_secondary"
-                android:letterSpacing="0.06"
-                android:paddingHorizontal="20dp"
-                android:paddingTop="20dp"
-                android:paddingBottom="8dp" />
-
-            <!-- ══ CARD 3: 주간 트렌드 (미니 차트) ══════════════════════ -->
-            <com.google.android.material.card.MaterialCardView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginHorizontal="16dp"
-                android:layout_marginBottom="8dp"
-                app:cardCornerRadius="16dp"
-                app:cardElevation="0dp"
-                app:cardBackgroundColor="@color/surface"
-                app:strokeWidth="0dp">
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:padding="16dp">
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="주간 피부 트렌드"
-                        android:textSize="13sp"
-                        android:textStyle="bold"
-                        android:textColor="@color/on_background"
-                        android:layout_marginBottom="12dp" />
-
-                    <com.github.mikephil.charting.charts.LineChart
-                        android:id="@+id/mini_line_chart"
-                        android:layout_width="match_parent"
-                        android:layout_height="120dp" />
-                </LinearLayout>
-            </com.google.android.material.card.MaterialCardView>
-
-            <!-- ══ CARD 4: 오늘의 루틴 ══════════════════════════ -->
-            <com.google.android.material.card.MaterialCardView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginHorizontal="16dp"
-                android:layout_marginBottom="8dp"
-                app:cardCornerRadius="16dp"
-                app:cardElevation="0dp"
-                app:cardBackgroundColor="@color/surface"
-                app:strokeWidth="0dp">
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:padding="16dp">
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="오늘의 루틴"
-                        android:textSize="13sp"
-                        android:textStyle="bold"
-                        android:textColor="@color/on_background"
-                        android:layout_marginBottom="8dp" />
-
-                    <CheckBox android:layout_width="match_parent" android:layout_height="wrap_content" android:text="아침 세안 완료" android:textSize="14sp" />
-                    <CheckBox android:layout_width="match_parent" android:layout_height="wrap_content" android:text="선크림 바르기" android:textSize="14sp" />
-                    <CheckBox android:layout_width="match_parent" android:layout_height="wrap_content" android:text="물 2L 마시기" android:textSize="14sp" />
-                </LinearLayout>
-            </com.google.android.material.card.MaterialCardView>
-
-            <!-- ══ CARD 5: 최근 사진 비교 ══════════════════════════ -->
-            <com.google.android.material.card.MaterialCardView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginHorizontal="16dp"
-                android:layout_marginBottom="20dp"
-                app:cardCornerRadius="16dp"
-                app:cardElevation="0dp"
-                app:cardBackgroundColor="@color/surface"
-                app:strokeWidth="0dp">
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:padding="16dp">
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="시각적 변화"
-                        android:textSize="13sp"
-                        android:textStyle="bold"
-                        android:textColor="@color/on_background"
-                        android:layout_marginBottom="12dp" />
-
-                    <LinearLayout
-                        android:id="@+id/layout_recent_photos"
-                        android:layout_width="match_parent"
-                        android:layout_height="100dp"
-                        android:orientation="horizontal"
-                        android:gravity="center_vertical" />
-                </LinearLayout>
-            </com.google.android.material.card.MaterialCardView>
-
-            <!-- ══ 피부 진단 시작 버튼 ══════════════════════════ -->
-            <Button
-                android:id="@+id/btn_quick_scan"
-                android:layout_width="match_parent"
-                android:layout_height="54dp"
-                android:layout_marginHorizontal="16dp"
-                android:background="@drawable/bg_gradient_button"
-                android:text="@string/home_scan_btn"
-                android:textColor="@color/on_primary"
+                android:id="@+id/tv_avatar"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:gravity="center"
                 android:textSize="16sp"
                 android:textStyle="bold"
-                android:stateListAnimator="@null" />
+                android:textColor="@color/primary"
+                android:background="@drawable/bg_avatar"
+                android:text="S" />
 
+            <TextView
+                android:id="@+id/tv_profile_name"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="2dp"
+                android:text="내 정보"
+                android:textSize="10sp"
+                android:textColor="#CCFFFFFF" />
         </LinearLayout>
-    </androidx.core.widget.NestedScrollView>
+    </LinearLayout>
 
-</androidx.coordinatorlayout.widget.CoordinatorLayout>
+    <!-- ══ 탭 레이아웃 (투명 → 그라데이션 배경 비침) ══════════════ -->
+    <com.google.android.material.tabs.TabLayout
+        android:id="@+id/tab_layout_home"
+        android:layout_width="match_parent"
+        android:layout_height="44dp"
+        android:background="@android:color/transparent"
+        app:tabSelectedTextColor="@color/on_primary"
+        app:tabTextColor="#AAFFFFFF"
+        app:tabIndicatorColor="@color/on_primary"
+        app:tabIndicatorHeight="3dp"
+        app:tabMode="fixed"
+        app:tabGravity="fill" />
+
+    <!-- ══ ViewPager2: 투명 배경으로 아래 그라데이션 비침 ══════════ -->
+    <androidx.viewpager2.widget.ViewPager2
+        android:id="@+id/viewpager_home"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:background="@android:color/transparent" />
+
+</LinearLayout>
