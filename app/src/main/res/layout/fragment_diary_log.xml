@@ -75,7 +75,7 @@
         android:paddingTop="4dp"
         android:paddingBottom="2dp"
         android:text="1 / 1"
-        android:textSize="11sp"
+        android:textSize="13sp"
         android:textColor="@color/text_hint" />
 
     <!-- ── 콘텐츠 영역 ──────────────────────────────────────── -->
@@ -148,7 +148,7 @@
                                         android:background="@color/accent_moisture" android:layout_marginEnd="10dp" />
                                     <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content"
                                         android:layout_weight="1" android:orientation="vertical">
-                                        <TextView android:text="수분" android:textSize="11sp" android:textColor="@color/text_secondary"
+                                        <TextView android:text="수분" android:textSize="13sp" android:textColor="@color/text_secondary"
                                             android:layout_width="wrap_content" android:layout_height="wrap_content"/>
                                         <LinearLayout android:layout_width="wrap_content" android:layout_height="wrap_content"
                                             android:orientation="horizontal" android:gravity="center_vertical">
@@ -157,7 +157,7 @@
                                                 android:layout_marginEnd="3dp" android:visibility="gone"/>
                                             <TextView android:id="@+id/tv_val_moisture" android:layout_width="wrap_content"
                                                 android:layout_height="wrap_content" android:text="--"
-                                                android:textSize="20sp" android:textStyle="bold" android:textColor="@color/on_background"/>
+                                                android:textSize="22sp" android:textStyle="bold" android:textColor="@color/on_background"/>
                                         </LinearLayout>
                                     </LinearLayout>
                                 </LinearLayout>
@@ -171,7 +171,7 @@
                                         android:background="@color/accent_oil" android:layout_marginEnd="10dp" />
                                     <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content"
                                         android:layout_weight="1" android:orientation="vertical">
-                                        <TextView android:text="건조함" android:textSize="11sp" android:textColor="@color/text_secondary"
+                                        <TextView android:text="건조함" android:textSize="13sp" android:textColor="@color/text_secondary"
                                             android:layout_width="wrap_content" android:layout_height="wrap_content"/>
                                         <LinearLayout android:layout_width="wrap_content" android:layout_height="wrap_content"
                                             android:orientation="horizontal" android:gravity="center_vertical">
@@ -180,7 +180,7 @@
                                                 android:layout_marginEnd="3dp" android:visibility="gone"/>
                                             <TextView android:id="@+id/tv_val_dryness" android:layout_width="wrap_content"
                                                 android:layout_height="wrap_content" android:text="--"
-                                                android:textSize="20sp" android:textStyle="bold" android:textColor="@color/on_background"/>
+                                                android:textSize="22sp" android:textStyle="bold" android:textColor="@color/on_background"/>
                                         </LinearLayout>
                                     </LinearLayout>
                                 </LinearLayout>
@@ -194,7 +194,7 @@
                                         android:background="@color/accent_trouble" android:layout_marginEnd="10dp" />
                                     <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content"
                                         android:layout_weight="1" android:orientation="vertical">
-                                        <TextView android:text="여드름" android:textSize="11sp" android:textColor="@color/text_secondary"
+                                        <TextView android:text="여드름" android:textSize="13sp" android:textColor="@color/text_secondary"
                                             android:layout_width="wrap_content" android:layout_height="wrap_content"/>
                                         <LinearLayout android:layout_width="wrap_content" android:layout_height="wrap_content"
                                             android:orientation="horizontal" android:gravity="center_vertical">
@@ -203,7 +203,7 @@
                                                 android:layout_marginEnd="3dp" android:visibility="gone"/>
                                             <TextView android:id="@+id/tv_val_acne" android:layout_width="wrap_content"
                                                 android:layout_height="wrap_content" android:text="--"
-                                                android:textSize="20sp" android:textStyle="bold" android:textColor="@color/on_background"/>
+                                                android:textSize="22sp" android:textStyle="bold" android:textColor="@color/on_background"/>
                                         </LinearLayout>
                                     </LinearLayout>
                                 </LinearLayout>
@@ -217,7 +217,7 @@
                                         android:background="#4CAF50" android:layout_marginEnd="10dp" />
                                     <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content"
                                         android:layout_weight="1" android:orientation="vertical">
-                                        <TextView android:text="모공" android:textSize="11sp" android:textColor="@color/text_secondary"
+                                        <TextView android:text="모공" android:textSize="13sp" android:textColor="@color/text_secondary"
                                             android:layout_width="wrap_content" android:layout_height="wrap_content"/>
                                         <LinearLayout android:layout_width="wrap_content" android:layout_height="wrap_content"
                                             android:orientation="horizontal" android:gravity="center_vertical">
@@ -226,7 +226,7 @@
                                                 android:layout_marginEnd="3dp" android:visibility="gone"/>
                                             <TextView android:id="@+id/tv_val_pore" android:layout_width="wrap_content"
                                                 android:layout_height="wrap_content" android:text="--"
-                                                android:textSize="20sp" android:textStyle="bold" android:textColor="@color/on_background"/>
+                                                android:textSize="22sp" android:textStyle="bold" android:textColor="@color/on_background"/>
                                         </LinearLayout>
                                     </LinearLayout>
                                 </LinearLayout>
@@ -240,7 +240,7 @@
                                         android:background="@color/accent_elasticity" android:layout_marginEnd="10dp" />
                                     <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content"
                                         android:layout_weight="1" android:orientation="vertical">
-                                        <TextView android:text="탄력" android:textSize="11sp" android:textColor="@color/text_secondary"
+                                        <TextView android:text="탄력" android:textSize="13sp" android:textColor="@color/text_secondary"
                                             android:layout_width="wrap_content" android:layout_height="wrap_content"/>
                                         <LinearLayout android:layout_width="wrap_content" android:layout_height="wrap_content"
                                             android:orientation="horizontal" android:gravity="center_vertical">
@@ -249,7 +249,7 @@
                                                 android:layout_marginEnd="3dp" android:visibility="gone"/>
                                             <TextView android:id="@+id/tv_val_elasticity" android:layout_width="wrap_content"
                                                 android:layout_height="wrap_content" android:text="--"
-                                                android:textSize="20sp" android:textStyle="bold" android:textColor="@color/on_background"/>
+                                                android:textSize="22sp" android:textStyle="bold" android:textColor="@color/on_background"/>
                                         </LinearLayout>
                                     </LinearLayout>
                                 </LinearLayout>
@@ -280,7 +280,7 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="진단 사진"
-                            android:textSize="12sp"
+                            android:textSize="14sp"
                             android:textColor="@color/text_secondary"
                             android:layout_marginBottom="8dp" />
 
@@ -356,7 +356,7 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="선택한 날짜가 ┆ 로 표시됩니다"
-                            android:textSize="11sp"
+                            android:textSize="13sp"
                             android:textColor="@color/text_hint"
                             android:layout_marginBottom="10dp" />
 
@@ -376,7 +376,7 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="기간 평균"
-                            android:textSize="12sp"
+                            android:textSize="14sp"
                             android:textColor="@color/text_secondary"
                             android:layout_marginBottom="8dp" />
 
@@ -388,7 +388,7 @@
                             <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content"
                                 android:layout_weight="1" android:orientation="vertical" android:gravity="center">
                                 <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
-                                    android:text="수분" android:textSize="11sp" android:textColor="@color/text_secondary"/>
+                                    android:text="수분" android:textSize="13sp" android:textColor="@color/text_secondary"/>
                                 <TextView android:id="@+id/tv_avg_moisture" android:layout_width="wrap_content"
                                     android:layout_height="wrap_content" android:text="-" android:textSize="16sp"
                                     android:textStyle="bold" android:textColor="@color/accent_moisture" android:layout_marginTop="2dp"/>
@@ -397,7 +397,7 @@
                             <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content"
                                 android:layout_weight="1" android:orientation="vertical" android:gravity="center">
                                 <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
-                                    android:text="탄력" android:textSize="11sp" android:textColor="@color/text_secondary"/>
+                                    android:text="탄력" android:textSize="13sp" android:textColor="@color/text_secondary"/>
                                 <TextView android:id="@+id/tv_avg_elasticity" android:layout_width="wrap_content"
                                     android:layout_height="wrap_content" android:text="-" android:textSize="16sp"
                                     android:textStyle="bold" android:textColor="@color/accent_elasticity" android:layout_marginTop="2dp"/>
@@ -406,7 +406,7 @@
                             <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content"
                                 android:layout_weight="1" android:orientation="vertical" android:gravity="center">
                                 <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
-                                    android:text="모공" android:textSize="11sp" android:textColor="@color/text_secondary"/>
+                                    android:text="모공" android:textSize="13sp" android:textColor="@color/text_secondary"/>
                                 <TextView android:id="@+id/tv_avg_pore" android:layout_width="wrap_content"
                                     android:layout_height="wrap_content" android:text="-" android:textSize="16sp"
                                     android:textStyle="bold" android:textColor="#4CAF50" android:layout_marginTop="2dp"/>
@@ -415,7 +415,7 @@
                             <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content"
                                 android:layout_weight="1" android:orientation="vertical" android:gravity="center">
                                 <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
-                                    android:text="여드름" android:textSize="11sp" android:textColor="@color/text_secondary"/>
+                                    android:text="여드름" android:textSize="13sp" android:textColor="@color/text_secondary"/>
                                 <TextView android:id="@+id/tv_avg_acne" android:layout_width="wrap_content"
                                     android:layout_height="wrap_content" android:text="-" android:textSize="16sp"
                                     android:textStyle="bold" android:textColor="@color/accent_trouble" android:layout_marginTop="2dp"/>
@@ -466,7 +466,7 @@
                                     android:layout_width="wrap_content"
                                     android:layout_height="wrap_content"
                                     android:text="식습관, 수면, 스트레스 등 피부에 영향을 준 것들을 기록해보세요"
-                                    android:textSize="11sp"
+                                    android:textSize="13sp"
                                     android:textColor="@color/text_hint"
                                     android:layout_marginTop="2dp" />
 
@@ -478,7 +478,7 @@
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:text="✓ 저장됨"
-                                android:textSize="11sp"
+                                android:textSize="13sp"
                                 android:textColor="@color/primary"
                                 android:visibility="gone" />
 
@@ -502,7 +502,7 @@
                                     android:layout_width="wrap_content"
                                     android:layout_height="wrap_content"
                                     android:text="😴 늦게 잠"
-                                    android:textSize="12sp"
+                                    android:textSize="14sp"
                                     style="@style/Widget.MaterialComponents.Chip.Action"
                                     android:layout_marginEnd="6dp" />
 
@@ -511,7 +511,7 @@
                                     android:layout_width="wrap_content"
                                     android:layout_height="wrap_content"
                                     android:text="🍕 자극적 음식"
-                                    android:textSize="12sp"
+                                    android:textSize="14sp"
                                     style="@style/Widget.MaterialComponents.Chip.Action"
                                     android:layout_marginEnd="6dp" />
 
@@ -520,7 +520,7 @@
                                     android:layout_width="wrap_content"
                                     android:layout_height="wrap_content"
                                     android:text="💧 물 많이 마심"
-                                    android:textSize="12sp"
+                                    android:textSize="14sp"
                                     style="@style/Widget.MaterialComponents.Chip.Action"
                                     android:layout_marginEnd="6dp" />
 
@@ -529,7 +529,7 @@
                                     android:layout_width="wrap_content"
                                     android:layout_height="wrap_content"
                                     android:text="😤 스트레스"
-                                    android:textSize="12sp"
+                                    android:textSize="14sp"
                                     style="@style/Widget.MaterialComponents.Chip.Action"
                                     android:layout_marginEnd="6dp" />
 
@@ -538,7 +538,7 @@
                                     android:layout_width="wrap_content"
                                     android:layout_height="wrap_content"
                                     android:text="🏃 운동함"
-                                    android:textSize="12sp"
+                                    android:textSize="14sp"
                                     style="@style/Widget.MaterialComponents.Chip.Action"
                                     android:layout_marginEnd="6dp" />
 
@@ -547,7 +547,7 @@
                                     android:layout_width="wrap_content"
                                     android:layout_height="wrap_content"
                                     android:text="🍺 음주"
-                                    android:textSize="12sp"
+                                    android:textSize="14sp"
                                     style="@style/Widget.MaterialComponents.Chip.Action" />
 
                             </LinearLayout>
