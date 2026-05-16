@@ -25,17 +25,19 @@ class FaceMapView @JvmOverloads constructor(
 
     // 얼굴 모델 이미지 위의 각 부위 중심 좌표 (이미지 기준 정규화 0~1)
     companion object {
+        // 좌표는 dummyhead.jpg 기준 정규화 (0.0~1.0, 좌상단 원점)
+        // x: 뷰어 기준 (left_cheek = 화면 왼쪽 = 인물의 오른쪽 볼)
         val PART_POSITIONS: Map<String, Pair<Float, Float>> = mapOf(
-            "forehead"    to Pair(0.50f, 0.20f),
-            "left_cheek"  to Pair(0.20f, 0.57f),
-            "right_cheek" to Pair(0.80f, 0.57f),
-            "nose"        to Pair(0.50f, 0.57f),
-            "left_jaw"    to Pair(0.28f, 0.76f),
-            "right_jaw"   to Pair(0.72f, 0.76f),
-            "mouth"       to Pair(0.50f, 0.70f),
-            "chin"        to Pair(0.50f, 0.83f),
-            "eye"         to Pair(0.50f, 0.42f),
-            "face"        to Pair(0.50f, 0.45f)
+            "forehead"    to Pair(0.50f, 0.22f),  // 이마 중앙
+            "left_cheek"  to Pair(0.31f, 0.56f),  // 왼볼 (뷰어 왼쪽)
+            "right_cheek" to Pair(0.69f, 0.56f),  // 오른볼 (뷰어 오른쪽)
+            "nose"        to Pair(0.50f, 0.54f),  // 코
+            "left_jaw"    to Pair(0.35f, 0.71f),  // 왼턱선
+            "right_jaw"   to Pair(0.65f, 0.71f),  // 오른턱선
+            "mouth"       to Pair(0.50f, 0.65f),  // 입가
+            "chin"        to Pair(0.50f, 0.77f),  // 턱 끝
+            "eye"         to Pair(0.50f, 0.41f),  // 눈가 (양눈 사이)
+            "face"        to Pair(0.50f, 0.48f)   // 얼굴 전반
         )
 
         fun worstStatus(statuses: List<String>): String {
