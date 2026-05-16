@@ -31,6 +31,9 @@ class CosmeticsFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        // 사용 가능한 모델 목록 → Logcat TAG:GeminiService 로 확인 가능
+        lifecycleScope.launch { GeminiRecommendService.listModels() }
+
         val adapter = CosmeticsPagerAdapter(this)
         binding.viewpagerCosmetics.adapter = adapter
 
@@ -44,14 +47,14 @@ class CosmeticsFragment : Fragment() {
                 AppDatabase.getInstance(requireContext()).diagnosisDao().getLatestDiagnosis()
             }
             if (latest != null) {
-                GeminiRecommendService.skinType      = latest.skinType
-                GeminiRecommendService.moistureScore = latest.moistureScore
-                GeminiRecommendService.oilScore      = latest.oilScore
-                GeminiRecommendService.troubleScore  = latest.troubleScore
+                GeminiRecommendService.skinType        = latest.skinType
+                GeminiRecommendService.moistureScore   = latest.moistureScore
+                GeminiRecommendService.poreScore       = latest.oilScore       // 모공 (구 유분)
+                GeminiRecommendService.acneScore       = latest.troubleScore   // 여드름 (구 트러블)
                 GeminiRecommendService.elasticityScore = latest.elasticityScore
 
                 binding.tvSkinTypeRecommend.text =
-                    "${latest.skinType} 피부 타입에 맞는 화장품을 AI가 추천해드려요 ✨"
+                    "${latest.skinType} 피부에 맞는 화장품을 AI가 추천해드려요 ✨"
             }
         }
     }

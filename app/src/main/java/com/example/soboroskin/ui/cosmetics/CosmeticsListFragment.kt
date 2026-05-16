@@ -1,9 +1,11 @@
 package com.example.soboroskin.ui.cosmetics
 
+import android.animation.ValueAnimator
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.animation.LinearInterpolator
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -14,6 +16,8 @@ class CosmeticsListFragment : Fragment() {
 
     private var _binding: FragmentCosmeticsListBinding? = null
     private val binding get() = _binding!!
+
+    private var shimmerAnimator: ValueAnimator? = null
 
     companion object {
         private const val ARG_TAB = "tab"
@@ -36,8 +40,12 @@ class CosmeticsListFragment : Fragment() {
         val tabIndex = arguments?.getInt(ARG_TAB) ?: 0
         val adapter  = CosmeticsAdapter()
 
+        // 스켈레톤 RecyclerView 세팅
+        binding.rvSkeleton.layoutManager = LinearLayoutManager(requireContext())
+        binding.rvSkeleton.adapter = SkeletonCosmeticsAdapter(count = 4)
+
         binding.rvCosmetics.layoutManager = LinearLayoutManager(requireContext())
-        binding.rvCosmetics.adapter       = adapter
+        binding.rvCosmetics.adapter = adapter
 
         loadRecommendations(tabIndex, adapter)
 
@@ -70,24 +78,48 @@ class CosmeticsListFragment : Fragment() {
     }
 
     private fun showLoading() {
-        binding.layoutLoading.visibility = View.VISIBLE
-        binding.rvCosmetics.visibility   = View.GONE
-        binding.layoutError.visibility   = View.GONE
+        binding.rvSkeleton.visibility  = View.VISIBLE
+        binding.rvCosmetics.visibility = View.GONE
+        binding.layoutError.visibility = View.GONE
+        startShimmer()
     }
 
     private fun showContent() {
-        binding.layoutLoading.visibility = View.GONE
-        binding.rvCosmetics.visibility   = View.VISIBLE
-        binding.layoutError.visibility   = View.GONE
+        stopShimmer()
+        binding.rvSkeleton.visibility  = View.GONE
+        binding.rvCosmetics.visibility = View.VISIBLE
+        binding.layoutError.visibility = View.GONE
     }
 
     private fun showError() {
-        binding.layoutLoading.visibility = View.GONE
-        binding.rvCosmetics.visibility   = View.GONE
-        binding.layoutError.visibility   = View.VISIBLE
+        stopShimmer()
+        binding.rvSkeleton.visibility  = View.GONE
+        binding.rvCosmetics.visibility = View.GONE
+        binding.layoutError.visibility = View.VISIBLE
+    }
+
+    private fun startShimmer() {
+        shimmerAnimator?.cancel()
+        shimmerAnimator = ValueAnimator.ofFloat(1f, 0.4f).apply {
+            duration = 700
+            repeatMode = ValueAnimator.REVERSE
+            repeatCount = ValueAnimator.INFINITE
+            interpolator = LinearInterpolator()
+            addUpdateListener { animator ->
+                _binding?.rvSkeleton?.alpha = animator.animatedValue as Float
+            }
+            start()
+        }
+    }
+
+    private fun stopShimmer() {
+        shimmerAnimator?.cancel()
+        shimmerAnimator = null
+        _binding?.rvSkeleton?.alpha = 1f
     }
 
     override fun onDestroyView() {
+        stopShimmer()
         super.onDestroyView()
         _binding = null
     }

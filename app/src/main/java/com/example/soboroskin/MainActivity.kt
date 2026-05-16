@@ -29,7 +29,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var binding: ActivityMainBinding
     private lateinit var navController: NavController
     private var isScanOpen = false
-    private var activeTabIndex = 0   // 0 = 홈, 1 = 기록
+    private var activeTabIndex = 0   // 0 = 홈, 1 = 화장품추천
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -49,9 +49,9 @@ class MainActivity : AppCompatActivity() {
                 setActiveTab(0)
             }
         }
-        binding.tabDiary.setOnClickListener {
+        binding.tabCosmetics.setOnClickListener {
             if (activeTabIndex != 1) {
-                navController.navigate(R.id.diaryFragment)
+                navController.navigate(R.id.cosmeticsFragment)
                 setActiveTab(1)
             }
         }
@@ -66,8 +66,8 @@ class MainActivity : AppCompatActivity() {
         val gray = ContextCompat.getColor(this, R.color.nav_unselected)
         binding.tabHomeIcon.setColorFilter(if (index == 0) mint else gray)
         binding.tabHomeLabel.setTextColor(if (index == 0) mint else gray)
-        binding.tabDiaryIcon.setColorFilter(if (index == 1) mint else gray)
-        binding.tabDiaryLabel.setTextColor(if (index == 1) mint else gray)
+        binding.tabCosmeticsIcon.setColorFilter(if (index == 1) mint else gray)
+        binding.tabCosmeticsLabel.setTextColor(if (index == 1) mint else gray)
     }
 
     fun openScanOverlay() {
@@ -146,8 +146,8 @@ class MainActivity : AppCompatActivity() {
 
     fun onDiagnosisSaved() {
         closeScanOverlay()
-        navController.navigate(R.id.diaryFragment)
-        setActiveTab(1)
+        navController.navigate(R.id.homeFragment)
+        setActiveTab(0)
     }
 
     // 뒤로가기 처리

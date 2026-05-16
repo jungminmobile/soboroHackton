@@ -13,15 +13,19 @@ import java.net.URL
 object GeminiRecommendService {
 
     private const val TAG = "GeminiService"
+    // gemini-2.5-flash-lite : 가장 가볍고 저렴한 모델
     private const val API_URL =
-        "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-lite:generateContent"
+        "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-lite:generateContent"
 
-    // ── 피부 프로필 ─────────────────────────────────────────────
-    var skinType: String = ""
-    var moistureScore: Int = 50
-    var oilScore: Int = 50
-    var troubleScore: Int = 50
-    var elasticityScore: Int = 50
+    // ── 피부 프로필 (새 지표) ────────────────────────────────────
+    var skinType:       String = ""
+    var moistureScore:  Int = 50   // 수분 0~100
+    var poreScore:      Int = 50   // 모공 0~100 (구 oilScore)
+    var acneScore:      Int = 30   // 여드름 0~100 (구 troubleScore)
+    var elasticityScore:Int = 60   // 탄력 0~100
+
+    // 건조함은 수분의 역수로 유도
+    private val drynessScore get() = (100 - moistureScore).coerceIn(0, 100)
 
     // 전체 캐시 (1번 호출로 모든 탭 채움)
     private var allProducts: List<CosmeticProduct>? = null
@@ -29,7 +33,7 @@ object GeminiRecommendService {
 
     fun clearCache() { allProducts = null }
 
-    /** 사용 가능한 모델 목록 조회 — Logcat에서 확인용 */
+    /** 사용 가능한 모델 목록 조회 — Logcat GeminiService 태그로 확인 */
     suspend fun listModels() = withContext(Dispatchers.IO) {
         try {
             val url  = URL("https://generativelanguage.googleapis.com/v1beta/models?key=${BuildConfig.GEMINI_API_KEY}")
@@ -50,7 +54,7 @@ object GeminiRecommendService {
                 }
             }
         } catch (e: Exception) {
-            Log.e(TAG, "ListModels failed", e)
+            Log.e(TAG, "listModels failed", e)
         }
     }
 
@@ -58,10 +62,8 @@ object GeminiRecommendService {
     suspend fun recommend(tabIndex: Int, forceRefresh: Boolean = false): List<CosmeticProduct> {
         if (forceRefresh) clearCache()
 
-        // 캐시 있으면 바로 필터링 반환
         allProducts?.let { return filterByTab(it, tabIndex) }
 
-        // 아직 로딩 중이면 잠깐 대기 (중복 호출 방지)
         if (isLoading) {
             repeat(20) {
                 kotlinx.coroutines.delay(300)
@@ -88,23 +90,27 @@ object GeminiRecommendService {
     }
 
     private suspend fun fetchAllProducts(): List<CosmeticProduct> = withContext(Dispatchers.IO) {
-        val skinInfo = if (skinType.isNotEmpty())
-            "피부 타입: $skinType / 수분도: $moistureScore/100 / 유분도: $oilScore/100 / 트러블: $troubleScore/100 / 탄력도: $elasticityScore/100"
-        else
-            "피부 타입: 복합성 / 수분도: 50 / 유분도: 50 / 트러블: 30 / 탄력도: 60"
 
+        // 피부 상태 요약 — 짧고 압축된 형식
+        val skinInfo = if (skinType.isNotEmpty()) {
+            "피부타입:$skinType 수분:$moistureScore 건조함:$drynessScore 탄력:$elasticityScore 모공:$poreScore 여드름:$acneScore (0~100점)"
+        } else {
+            "피부타입:복합성 수분:50 건조함:50 탄력:60 모공:40 여드름:30"
+        }
+
+        // ✅ 토큰 절약 포인트:
+        //   - 제품 수 12→8 (카테고리별 2개)
+        //   - imageUrl 필드 제거 (어차피 부정확)
+        //   - 프롬프트 간결화
+        //   - maxOutputTokens 2048→1200
         val prompt = """
-당신은 한국 스킨케어 전문가입니다. 아래 피부 분석을 바탕으로 실제 한국 화장품을 추천하세요.
-[$skinInfo]
-
-토너 3개, 세럼 3개, 크림 3개, 선크림 3개 — 총 12개를 추천하세요.
-올리브영에서 구매 가능한 실제 제품 우선. 각 카테고리별로 피부에 맞는 제품을 골라주세요.
-
-반드시 아래 JSON 배열 형식으로만 응답하고 다른 텍스트는 절대 포함하지 마세요:
-[{"brand":"브랜드명","name":"제품명","category":"토너 또는 세럼 또는 크림 또는 선크림","price":"가격(예:35,000원)","description":"제품 특징 1~2문장","whyRecommended":"이 피부에 맞는 이유 1문장","officialUrl":"올리브영 또는 공식 사이트 URL","imageUrl":"제품 이미지 URL"}]
+한국 스킨케어 전문가. 피부: [$skinInfo]
+올리브영 실제 제품으로 토너2·세럼2·크림2·선크림2 총8개 추천.
+JSON 배열만 출력, 다른 텍스트 없이.
+필드: brand,name,category(토너|세럼|크림|선크림),price(예:25000원),description(20자 이내),whyRecommended(20자 이내),officialUrl
 """.trimIndent()
 
-        Log.d(TAG, "Fetching all products for skin='$skinType'")
+        Log.d(TAG, "Skin: $skinInfo")
 
         val requestBody = JSONObject().apply {
             put("contents", JSONArray().apply {
@@ -115,17 +121,15 @@ object GeminiRecommendService {
                 })
             })
             put("generationConfig", JSONObject().apply {
-                put("temperature", 1.0)
-                put("maxOutputTokens", 2048)
+                put("temperature", 0.7)
+                put("maxOutputTokens", 2000)      // JSON 잘림 방지
             })
         }.toString()
 
-        // 503 과부하 시 최대 3회 재시도 (2초 간격)
         repeat(3) { attempt ->
             try {
-                val apiKey = BuildConfig.GEMINI_API_KEY
-                val url    = URL("$API_URL?key=$apiKey")
-                val conn   = (url.openConnection() as HttpURLConnection).apply {
+                val conn = (URL("$API_URL?key=${BuildConfig.GEMINI_API_KEY}").openConnection()
+                        as HttpURLConnection).apply {
                     requestMethod = "POST"
                     setRequestProperty("Content-Type", "application/json")
                     doOutput = true
@@ -139,32 +143,31 @@ object GeminiRecommendService {
                 val response = if (code == 200) conn.inputStream.bufferedReader().readText()
                                else conn.errorStream?.bufferedReader()?.readText() ?: ""
 
-                Log.d(TAG, "HTTP $code (attempt ${attempt + 1}) — ${response.take(200)}")
+                Log.d(TAG, "HTTP $code (attempt ${attempt + 1})")
 
                 when (code) {
                     200 -> {
                         val text = JSONObject(response)
-                            .getJSONArray("candidates")
-                            .getJSONObject(0)
+                            .getJSONArray("candidates").getJSONObject(0)
                             .getJSONObject("content")
-                            .getJSONArray("parts")
-                            .getJSONObject(0)
+                            .getJSONArray("parts").getJSONObject(0)
                             .getString("text")
+                        Log.d(TAG, "Raw response: ${text.take(500)}")
                         val products = parseProducts(extractJson(text))
-                        Log.d(TAG, "Parsed ${products.size} products total")
+                        Log.d(TAG, "Parsed ${products.size} products")
                         return@withContext products
                     }
                     503 -> {
-                        Log.w(TAG, "503 over capacity, retrying in 3s… (attempt ${attempt + 1}/3)")
+                        Log.w(TAG, "503 over capacity, retry ${attempt + 1}/3")
                         if (attempt < 2) kotlinx.coroutines.delay(3_000)
                     }
                     else -> {
-                        Log.e(TAG, "Non-retryable HTTP $code")
+                        Log.e(TAG, "HTTP $code: ${response.take(200)}")
                         return@withContext emptyList()
                     }
                 }
             } catch (e: Exception) {
-                Log.e(TAG, "Gemini REST call failed (attempt ${attempt + 1})", e)
+                Log.e(TAG, "Request failed (attempt ${attempt + 1})", e)
                 if (attempt < 2) kotlinx.coroutines.delay(2_000)
             }
         }
@@ -172,12 +175,20 @@ object GeminiRecommendService {
     }
 
     private fun extractJson(text: String): String {
-        val s = text.indexOf('[')
-        val e = text.lastIndexOf(']')
-        return if (s != -1 && e > s) text.substring(s, e + 1) else "[]"
+        // 마크다운 코드블록 제거
+        val stripped = text
+            .replace(Regex("`{3}json", RegexOption.IGNORE_CASE), "")
+            .replace(Regex("`{3}"), "")
+            .trim()
+        val s = stripped.indexOf('[')
+        val e = stripped.lastIndexOf(']')
+        val result = if (s != -1 && e > s) stripped.substring(s, e + 1) else "[]"
+        Log.d(TAG, "extractJson result (${result.length} chars): ${result.take(100)}")
+        return result
     }
 
     private fun parseProducts(json: String): List<CosmeticProduct> = try {
+        Log.d(TAG, "Parsing JSON (${json.length} chars): ${json.take(300)}")
         val arr = JSONArray(json)
         (0 until arr.length()).map { i ->
             val o = arr.getJSONObject(i)
@@ -189,11 +200,11 @@ object GeminiRecommendService {
                 description    = o.optString("description"),
                 whyRecommended = o.optString("whyRecommended"),
                 officialUrl    = o.optString("officialUrl"),
-                imageUrl       = o.optString("imageUrl")
+                imageUrl       = ""
             )
         }
     } catch (e: Exception) {
-        Log.e(TAG, "JSON parse failed", e)
+        Log.e(TAG, "JSON parse failed: ${e.message}\nJSON: ${json.take(300)}", e)
         emptyList()
     }
 }

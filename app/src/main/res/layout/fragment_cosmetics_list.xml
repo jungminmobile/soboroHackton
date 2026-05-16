@@ -3,7 +3,18 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/background">
+    android:background="@android:color/transparent">
+
+    <!-- 스켈레톤 로딩 -->
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/rv_skeleton"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:paddingHorizontal="16dp"
+        android:paddingTop="8dp"
+        android:paddingBottom="16dp"
+        android:clipToPadding="false"
+        android:visibility="visible" />
 
     <!-- 추천 목록 -->
     <androidx.recyclerview.widget.RecyclerView
@@ -15,30 +26,6 @@
         android:paddingBottom="16dp"
         android:clipToPadding="false"
         android:visibility="gone" />
-
-    <!-- 로딩 -->
-    <LinearLayout
-        android:id="@+id/layout_loading"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:orientation="vertical"
-        android:gravity="center"
-        android:visibility="visible">
-
-        <ProgressBar
-            android:id="@+id/progress_bar"
-            android:layout_width="48dp"
-            android:layout_height="48dp" />
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
-            android:text="AI가 피부에 맞는 화장품을 찾고 있어요..."
-            android:textSize="13sp"
-            android:textColor="@color/text_secondary" />
-
-    </LinearLayout>
 
     <!-- 에러 -->
     <LinearLayout

@@ -17,28 +17,6 @@
         android:layout_height="wrap_content"
         android:orientation="vertical">
 
-        <!-- 제품 이미지 (전폭) -->
-        <FrameLayout
-            android:layout_width="match_parent"
-            android:layout_height="180dp">
-
-            <ImageView
-                android:id="@+id/iv_product"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:scaleType="centerCrop"
-                android:background="@drawable/bg_cosmetic_placeholder" />
-
-            <TextView
-                android:id="@+id/tv_category_emoji"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center"
-                android:textSize="48sp"
-                android:text="🧴" />
-
-        </FrameLayout>
-
         <!-- 정보 영역 -->
         <LinearLayout
             android:layout_width="match_parent"
