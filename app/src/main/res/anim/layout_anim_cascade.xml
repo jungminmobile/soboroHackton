@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 아이템마다 12% 딜레이씩 순차 진입 (cascade 효과) -->
+<layoutAnimation xmlns:android="http://schemas.android.com/apk/res/android"
+    android:delay="12%"
+    android:animationOrder="normal"
+    android:animation="@anim/item_fall_down" />

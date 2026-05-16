@@ -4,11 +4,16 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.fragment.app.Fragment
+import com.example.soboroskin.R
 import com.example.soboroskin.databinding.FragmentLoginBinding
+import com.google.android.gms.auth.api.signin.GoogleSignIn
+import com.google.android.gms.auth.api.signin.GoogleSignInClient
+import com.google.android.gms.auth.api.signin.GoogleSignInOptions
+import com.google.android.gms.common.api.ApiException
 import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.auth.FirebaseAuthInvalidCredentialsException
-import com.google.firebase.auth.FirebaseAuthInvalidUserException
+import com.google.firebase.auth.GoogleAuthProvider
 
 class LoginFragment : Fragment() {
 
@@ -17,6 +22,22 @@ class LoginFragment : Fragment() {
 
     private val auth = FirebaseAuth.getInstance()
     private val authActivity get() = activity as? AuthActivity
+
+    private lateinit var googleSignInClient: GoogleSignInClient
+
+    // Google 로그인 런처
+    private val signInLauncher = registerForActivityResult(
+        ActivityResultContracts.StartActivityForResult()
+    ) { result ->
+        val task = GoogleSignIn.getSignedInAccountFromIntent(result.data)
+        try {
+            val account = task.getResult(ApiException::class.java)
+            firebaseAuthWithGoogle(account.idToken!!)
+        } catch (e: ApiException) {
+            setLoading(false)
+            showError("Google 로그인에 실패했어요. (${e.statusCode})")
+        }
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -29,35 +50,48 @@ class LoginFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        binding.btnLogin.setOnClickListener { attemptLogin() }
-        binding.tvGoSignup.setOnClickListener { authActivity?.showSignup() }
-        binding.btnDevSkip.setOnClickListener { authActivity?.goToMain() }
-    }
+        // GoogleSignInClient 초기화
+        val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+            .requestIdToken(getString(R.string.default_web_client_id))
+            .requestEmail()
+            .requestProfile()
+            .build()
+        googleSignInClient = GoogleSignIn.getClient(requireActivity(), gso)
 
-    private fun attemptLogin() {
-        val email    = binding.etEmail.text?.toString()?.trim() ?: ""
-        val password = binding.etPassword.text?.toString() ?: ""
-
-        if (email.isEmpty() || password.isEmpty()) {
-            showError("이메일과 비밀번호를 입력해주세요.")
-            return
+        binding.btnGoogleSignIn.setOnClickListener {
+            startGoogleSignIn()
         }
 
-        binding.btnLogin.isEnabled = false
-        hideError()
+        binding.btnDevSkip.setOnClickListener {
+            authActivity?.goToMain()
+        }
+    }
 
-        auth.signInWithEmailAndPassword(email, password)
-            .addOnSuccessListener { authActivity?.goToMain() }
+    private fun startGoogleSignIn() {
+        hideError()
+        setLoading(true)
+        // 매번 계정 선택 팝업이 뜨도록 로그아웃 후 재시작
+        googleSignInClient.signOut().addOnCompleteListener {
+            val signInIntent = googleSignInClient.signInIntent
+            signInLauncher.launch(signInIntent)
+        }
+    }
+
+    private fun firebaseAuthWithGoogle(idToken: String) {
+        val credential = GoogleAuthProvider.getCredential(idToken, null)
+        auth.signInWithCredential(credential)
+            .addOnSuccessListener {
+                authActivity?.goToMain()
+            }
             .addOnFailureListener { e ->
-                binding.btnLogin.isEnabled = true
-                showError(mapFirebaseError(e))
+                setLoading(false)
+                showError("인증에 실패했어요: ${e.localizedMessage}")
             }
     }
 
-    private fun mapFirebaseError(e: Exception): String = when (e) {
-        is FirebaseAuthInvalidUserException        -> "존재하지 않는 계정이에요."
-        is FirebaseAuthInvalidCredentialsException -> "이메일 또는 비밀번호가 틀렸어요."
-        else                                       -> "로그인에 실패했어요. 다시 시도해주세요."
+    private fun setLoading(isLoading: Boolean) {
+        binding.btnGoogleSignIn.isEnabled = !isLoading
+        binding.btnGoogleSignIn.alpha = if (isLoading) 0.6f else 1f
     }
 
     private fun showError(msg: String) {

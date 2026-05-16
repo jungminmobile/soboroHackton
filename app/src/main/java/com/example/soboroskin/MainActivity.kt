@@ -92,9 +92,16 @@ class MainActivity : AppCompatActivity() {
         )
 
         // 화면 교체
+        // addToBackStack → UI 뒤로가기 버튼 / 시스템 뒤로가기로 ScanFragment 복귀 가능
         supportFragmentManager.beginTransaction()
-            .setCustomAnimations(android.R.anim.slide_in_left, android.R.anim.slide_out_right)
+            .setCustomAnimations(
+                R.anim.screen_enter,
+                R.anim.screen_exit,
+                R.anim.screen_pop_enter,
+                R.anim.screen_pop_exit
+            )
             .replace(R.id.scan_fragment_container, resultFragment)
+            .addToBackStack("scan_result")
             .commit()
     }
 
@@ -105,7 +112,10 @@ class MainActivity : AppCompatActivity() {
             .setDuration(300)
             .withEndAction {
                 binding.scanOverlayContainer.visibility = View.GONE
-                // 오버레이가 닫힐 때 내부의 프래그먼트도 정리
+                // 오버레이 닫힐 때 백스택 + 프래그먼트 전체 정리
+                repeat(supportFragmentManager.backStackEntryCount) {
+                    supportFragmentManager.popBackStackImmediate()
+                }
                 supportFragmentManager.findFragmentById(R.id.scan_fragment_container)?.let { frag ->
                     supportFragmentManager.beginTransaction().remove(frag).commit()
                 }
@@ -121,7 +131,12 @@ class MainActivity : AppCompatActivity() {
     // 뒤로가기 처리
     override fun onBackPressed() {
         if (isScanOpen) {
-            closeScanOverlay()
+            // 결과 화면 등 백스택이 있으면 먼저 팝 (→ 카메라로 복귀)
+            if (supportFragmentManager.backStackEntryCount > 0) {
+                supportFragmentManager.popBackStack()
+            } else {
+                closeScanOverlay()
+            }
         } else {
             @Suppress("DEPRECATION")
             super.onBackPressed()

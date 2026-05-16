@@ -1,152 +1,123 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ScrollView
+<androidx.constraintlayout.widget.ConstraintLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/background"
-    android:fillViewport="true">
+    android:background="@color/background">
 
+    <!-- 상단 로고 영역 -->
     <LinearLayout
+        android:id="@+id/layout_logo"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:gravity="center_horizontal"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toTopOf="@id/layout_bottom"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
+
+        <!-- 앱 로고 아이콘 -->
+        <ImageView
+            android:layout_width="80dp"
+            android:layout_height="80dp"
+            android:src="@drawable/logo_app"
+            android:scaleType="fitCenter"
+            android:contentDescription="결담 로고" />
+
+        <!-- 앱 이름 -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="결담"
+            android:textSize="30sp"
+            android:textStyle="bold"
+            android:textColor="@color/on_background"
+            android:letterSpacing="-0.02"
+            android:layout_marginTop="16dp" />
+
+        <!-- 슬로건 -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="AI가 분석하는 나만의 피부 일기"
+
+            android:textSize="14sp"
+            android:textColor="@color/text_secondary"
+            android:layout_marginTop="8dp" />
+
+    </LinearLayout>
+
+    <!-- 하단 버튼 영역 -->
+    <LinearLayout
+        android:id="@+id/layout_bottom"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
         android:paddingHorizontal="28dp"
-        android:paddingTop="72dp"
-        android:paddingBottom="40dp">
+        android:paddingBottom="48dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
 
-        <!-- 로고 / 타이틀 -->
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="🌿"
-            android:textSize="48sp"
-            android:layout_gravity="center_horizontal" />
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="소보로 스킨"
-            android:textSize="28sp"
-            android:textStyle="bold"
-            android:textColor="@color/text_primary"
-            android:layout_gravity="center_horizontal"
-            android:layout_marginTop="12dp" />
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="피부 일기를 시작해보세요"
-            android:textSize="14sp"
-            android:textColor="@color/text_secondary"
-            android:layout_gravity="center_horizontal"
-            android:layout_marginTop="6dp" />
-
-        <!-- 이메일 -->
-        <com.google.android.material.textfield.TextInputLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="40dp"
-            android:hint="이메일"
-            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">
-
-            <com.google.android.material.textfield.TextInputEditText
-                android:id="@+id/et_email"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:inputType="textEmailAddress"
-                android:imeOptions="actionNext" />
-        </com.google.android.material.textfield.TextInputLayout>
-
-        <!-- 비밀번호 -->
-        <com.google.android.material.textfield.TextInputLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="12dp"
-            android:hint="비밀번호"
-            app:passwordToggleEnabled="true"
-            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
-            xmlns:app="http://schemas.android.com/apk/res-auto">
-
-            <com.google.android.material.textfield.TextInputEditText
-                android:id="@+id/et_password"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:inputType="textPassword"
-                android:imeOptions="actionDone" />
-        </com.google.android.material.textfield.TextInputLayout>
-
-        <!-- 오류 메시지 -->
+        <!-- 에러 메시지 -->
         <TextView
             android:id="@+id/tv_error"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
+            android:gravity="center"
             android:textSize="13sp"
             android:textColor="#E53935"
+            android:layout_marginBottom="12dp"
             android:visibility="gone" />
 
-        <!-- 로그인 버튼 -->
-        <Button
-            android:id="@+id/btn_login"
+        <!-- Google 로그인 버튼 -->
+        <LinearLayout
+            android:id="@+id/btn_google_sign_in"
             android:layout_width="match_parent"
             android:layout_height="52dp"
-            android:layout_marginTop="20dp"
-            android:text="로그인"
-            android:textSize="16sp"
-            android:textStyle="bold"
-            android:background="@drawable/bg_button_primary"
-            android:textColor="@color/on_primary" />
-
-        <!-- 회원가입 이동 -->
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
             android:orientation="horizontal"
             android:gravity="center"
-            android:layout_marginTop="16dp">
+            android:background="@drawable/bg_button_google"
+            android:clickable="true"
+            android:focusable="true"
+            android:elevation="2dp">
+
+            <ImageView
+                android:layout_width="20dp"
+                android:layout_height="20dp"
+                android:src="@drawable/ic_google"
+                android:contentDescription="Google" />
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="계정이 없으신가요?  "
-                android:textSize="13sp"
-                android:textColor="@color/text_secondary" />
-
-            <TextView
-                android:id="@+id/tv_go_signup"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="회원가입"
-                android:textSize="13sp"
+                android:text="Google로 계속하기"
+                android:textSize="15sp"
                 android:textStyle="bold"
-                android:textColor="@color/primary" />
+                android:textColor="#1A1A1A"
+                android:layout_marginStart="10dp" />
+
         </LinearLayout>
 
-        <!-- 개발자 옵션 구분선 -->
+        <!-- 구분선 + 개발자 옵션 -->
         <View
             android:layout_width="match_parent"
             android:layout_height="1dp"
             android:background="@color/divider"
-            android:layout_marginTop="40dp" />
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="개발자 옵션"
-            android:textSize="11sp"
-            android:textColor="@color/text_hint"
-            android:layout_gravity="center_horizontal"
-            android:layout_marginTop="8dp" />
+            android:layout_marginTop="32dp" />
 
         <Button
             android:id="@+id/btn_dev_skip"
             android:layout_width="match_parent"
             android:layout_height="44dp"
-            android:layout_marginTop="8dp"
+            android:layout_marginTop="12dp"
             android:text="건너뛰기 (개발자)"
-            android:textSize="14sp"
-            android:textColor="@color/text_secondary"
-            style="@style/Widget.MaterialComponents.Button.OutlinedButton" />
+            android:textSize="13sp"
+            android:textColor="@color/text_hint"
+            style="@style/Widget.MaterialComponents.Button.TextButton" />
 
     </LinearLayout>
-</ScrollView>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!-- Primary Brand Colors -->
-    <color name="primary">#1D9E75</color>
-    <color name="primary_dark">#157A5A</color>
-    <color name="primary_light">#E8F5F0</color>
-    <color name="primary_variant">#2DBF8C</color>
+    <!-- Primary Brand Colors (로고 기준 #6EBA93) -->
+    <color name="primary">#6EBA93</color>
+    <color name="primary_dark">#4A9972</color>
+    <color name="primary_light">#EAF6F0</color>
+    <color name="primary_variant">#83C9A4</color>
 
     <!-- Background Colors -->
     <color name="background">#F7F6F2</color>
@@ -38,11 +38,11 @@
     <color name="scan_overlay_background">#FAFAF8</color>
 
     <!-- Navigation -->
-    <color name="nav_selected">#1D9E75</color>
+    <color name="nav_selected">#6EBA93</color>
     <color name="nav_unselected">#9E9E9E</color>
 
     <!-- Onboarding -->
-    <color name="onboarding_dot_active">#1D9E75</color>
+    <color name="onboarding_dot_active">#6EBA93</color>
     <color name="onboarding_dot_inactive">#BDBDBD</color>
 
     <!-- Error -->

@@ -12,7 +12,20 @@
           "package_name": "com.example.soboroskin"
         }
       },
-      "oauth_client": [],
+      "oauth_client": [
+        {
+          "client_id": "104705691703-svh9kc1atjh1qe5nealdljn0lm2qa1qs.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.soboroskin",
+            "certificate_hash": "2c477acd908ea5c01665bb44aa1059401e393055"
+          }
+        },
+        {
+          "client_id": "104705691703-uctecsl72t9h7ehn2fqbv1hc561mumee.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
       "api_key": [
         {
           "current_key": "AIzaSyCENWGEQkzN7HoL69kQJkXDPOYL3mNvfBg"
@@ -20,7 +33,12 @@
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": []
+          "other_platform_oauth_client": [
+            {
+              "client_id": "104705691703-uctecsl72t9h7ehn2fqbv1hc561mumee.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
         }
       }
     }

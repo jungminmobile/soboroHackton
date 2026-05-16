@@ -46,7 +46,7 @@ class FaceMapView @JvmOverloads constructor(
         fun statusColor(status: String): Int = when (status) {
             "new"      -> Color.parseColor("#FF9800")
             "worsened" -> Color.parseColor("#E53935")
-            "improved" -> Color.parseColor("#1D9E75")
+            "improved" -> Color.parseColor("#6EBA93")
             "healed"   -> Color.parseColor("#4CAF50")
             else       -> Color.parseColor("#9E9E9E")
         }

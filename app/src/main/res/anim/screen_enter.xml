@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 새 화면 진입: 아래에서 살짝 올라오며 fade in, FastOutSlowIn -->
+<set xmlns:android="http://schemas.android.com/apk/res/android"
+    android:interpolator="@android:interpolator/fast_out_slow_in">
+    <translate
+        android:fromYDelta="5%"
+        android:toYDelta="0%"
+        android:duration="320" />
+    <alpha
+        android:fromAlpha="0.0"
+        android:toAlpha="1.0"
+        android:duration="280" />
+</set>

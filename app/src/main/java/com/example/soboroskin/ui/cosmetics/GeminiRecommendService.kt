@@ -14,7 +14,7 @@ object GeminiRecommendService {
 
     private const val TAG = "GeminiService"
     private const val API_URL =
-        "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent"
+        "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-lite:generateContent"
 
     // ── 피부 프로필 ─────────────────────────────────────────────
     var skinType: String = ""
@@ -115,9 +115,8 @@ object GeminiRecommendService {
                 })
             })
             put("generationConfig", JSONObject().apply {
-                put("thinkingConfig", JSONObject().apply {
-                    put("thinkingBudget", 0)
-                })
+                put("temperature", 1.0)
+                put("maxOutputTokens", 2048)
             })
         }.toString()
 

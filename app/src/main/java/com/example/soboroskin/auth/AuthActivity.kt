@@ -20,21 +20,10 @@ class AuthActivity : AppCompatActivity() {
         }
 
         if (savedInstanceState == null) {
-            showLogin()
+            supportFragmentManager.beginTransaction()
+                .replace(R.id.auth_container, LoginFragment())
+                .commit()
         }
-    }
-
-    fun showLogin() {
-        supportFragmentManager.beginTransaction()
-            .replace(R.id.auth_container, LoginFragment())
-            .commit()
-    }
-
-    fun showSignup() {
-        supportFragmentManager.beginTransaction()
-            .replace(R.id.auth_container, SignupFragment())
-            .addToBackStack(null)
-            .commit()
     }
 
     fun goToMain() {

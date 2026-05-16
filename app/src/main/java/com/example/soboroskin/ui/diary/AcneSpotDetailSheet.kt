@@ -155,14 +155,14 @@ class AcneSpotDetailSheet : BottomSheetDialogFragment() {
         val colorMap = mapOf(
             "new"      to Color.parseColor("#FF9800"),
             "worsened" to Color.parseColor("#E53935"),
-            "improved" to Color.parseColor("#1D9E75"),
+            "improved" to Color.parseColor("#6EBA93"),
             "existing" to Color.parseColor("#9E9E9E"),
             "healed"   to Color.parseColor("#4CAF50")
         )
         val circleColors = activeRecords.map { colorMap[it.changeType] ?: Color.GRAY }
 
         val dataSet = LineDataSet(entries, "감지 신뢰도 (%)").apply {
-            color = Color.parseColor("#1D9E75")
+            color = Color.parseColor("#6EBA93")
             lineWidth = 2f
             setCircleColors(circleColors)
             circleRadius = 5f
@@ -174,7 +174,7 @@ class AcneSpotDetailSheet : BottomSheetDialogFragment() {
             }
             mode = LineDataSet.Mode.CUBIC_BEZIER
             setDrawFilled(true)
-            fillColor = Color.parseColor("#1D9E75")
+            fillColor = Color.parseColor("#6EBA93")
             fillAlpha = 30
         }
 
@@ -240,7 +240,7 @@ class AcneSpotDetailSheet : BottomSheetDialogFragment() {
         healed                    -> "완치" to "#4CAF50"
         changeType == "new"       -> "신규" to "#FF9800"
         changeType == "worsened"  -> "악화" to "#E53935"
-        changeType == "improved"  -> "호전" to "#1D9E75"
+        changeType == "improved"  -> "호전" to "#6EBA93"
         changeType == "healed"    -> "완치" to "#4CAF50"
         else                      -> "유지" to "#757575"
     }
@@ -326,7 +326,7 @@ class AcneSpotDetailSheet : BottomSheetDialogFragment() {
         private fun changeDisplay(type: String): Pair<String, String> = when (type) {
             "new"      -> "신규 발견" to "#FF9800"
             "worsened" -> "↑ 악화"   to "#E53935"
-            "improved" -> "↓ 호전"   to "#1D9E75"
+            "improved" -> "↓ 호전"   to "#6EBA93"
             "healed"   -> "✓ 완치"   to "#4CAF50"
             else       -> "→ 유지"   to "#757575"
         }
@@ -364,7 +364,7 @@ class AcneSpotDetailSheet : BottomSheetDialogFragment() {
         private fun changeDisplay(type: String): Pair<String, String> = when (type) {
             "new"      -> "신규 발견" to "#FF9800"
             "worsened" -> "↑ 악화"   to "#E53935"
-            "improved" -> "↓ 호전"   to "#1D9E75"
+            "improved" -> "↓ 호전"   to "#6EBA93"
             "healed"   -> "✓ 완치"   to "#4CAF50"
             else       -> "→ 유지"   to "#757575"
         }
