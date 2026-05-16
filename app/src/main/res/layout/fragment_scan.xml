@@ -56,19 +56,22 @@
         app:layout_constraintEnd_toEndOf="parent"
         android:layout_marginTop="36dp" />
 
-    <!-- 🥚 수정된 부분: 가로를 260dp로 줄이고, 세로를 340dp로 늘려 계란형으로 변경 -->
+    <!-- 얼굴 가이드 타원: 화면 폭 83%, 화면 높이 54% 로 크게 -->
     <View
         android:id="@+id/scan_circle"
-        android:layout_width="260dp"
-        android:layout_height="340dp"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
         android:background="@drawable/bg_scan_circle"
+        app:layout_constraintWidth_percent="0.83"
+        app:layout_constraintHeight_percent="0.54"
+        app:layout_constraintDimensionRatio=""
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        android:layout_marginBottom="40dp" /> <!-- 세로가 길어져서 중앙 밸런스를 위해 마진을 40dp로 조절 -->
+        android:layout_marginBottom="60dp" />
 
-    <!-- Guide Text -->
+    <!-- Guide Text (oval 아래) -->
     <TextView
         android:id="@+id/tv_guide"
         android:layout_width="wrap_content"
@@ -79,7 +82,26 @@
         app:layout_constraintTop_toBottomOf="@id/scan_circle"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        android:layout_marginTop="16dp" />
+        android:layout_marginTop="12dp" />
+
+    <!-- 촬영 팁 (상단 플로팅) -->
+    <TextView
+        android:id="@+id/tv_shoot_tip"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:text="💡 역광이 아닌, 조명을 앞에 두고 촬영해주세요.\n스탠드 앞도 좋고, 불 켠 방에서 누워 찍어도 좋아요!"
+        android:textColor="#FFFFFF"
+        android:textSize="13sp"
+        android:lineSpacingExtra="3dp"
+        android:gravity="center"
+        android:paddingHorizontal="16dp"
+        android:paddingVertical="10dp"
+        android:background="#BB000000"
+        app:layout_constraintTop_toBottomOf="@id/btn_close"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginHorizontal="20dp"
+        android:layout_marginTop="8dp" />
 
     <!-- Permission Request View -->
     <LinearLayout
@@ -129,7 +151,7 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        android:layout_marginBottom="52dp">
+        android:layout_marginBottom="48dp">
 
         <!-- 갤러리 선택 -->
         <LinearLayout
@@ -137,18 +159,27 @@
             android:layout_height="wrap_content"
             android:orientation="vertical"
             android:gravity="center"
-            android:layout_marginEnd="32dp">
+            android:layout_marginEnd="40dp">
 
-            <com.google.android.material.floatingactionbutton.FloatingActionButton
+            <!-- 원형 배경 + 아이콘 직접 중앙 배치 -->
+            <FrameLayout
                 android:id="@+id/btn_gallery"
                 android:layout_width="52dp"
                 android:layout_height="52dp"
-                android:src="@android:drawable/ic_menu_gallery"
-                android:contentDescription="갤러리"
-                app:backgroundTint="#AA000000"
-                app:tint="@color/on_primary"
-                app:fabSize="mini"
-                app:elevation="4dp" />
+                android:background="@drawable/bg_cam_btn_dark"
+                android:clickable="true"
+                android:focusable="true"
+                android:foreground="?attr/selectableItemBackgroundBorderless">
+
+                <ImageView
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:layout_gravity="center"
+                    android:src="@android:drawable/ic_menu_gallery"
+                    app:tint="@color/on_primary"
+                    android:contentDescription="갤러리"
+                    android:scaleType="fitCenter" />
+            </FrameLayout>
 
             <TextView
                 android:layout_width="wrap_content"
@@ -166,16 +197,25 @@
             android:orientation="vertical"
             android:gravity="center">
 
-            <com.google.android.material.floatingactionbutton.FloatingActionButton
+            <!-- 흰 원 + 카메라 아이콘 중앙 배치 -->
+            <FrameLayout
                 android:id="@+id/btn_capture"
                 android:layout_width="72dp"
                 android:layout_height="72dp"
-                android:src="@android:drawable/ic_menu_camera"
-                android:contentDescription="@string/scan_capture"
-                app:backgroundTint="@color/on_primary"
-                app:tint="@color/primary"
-                app:fabSize="normal"
-                app:elevation="4dp" />
+                android:background="@drawable/bg_cam_btn_white"
+                android:clickable="true"
+                android:focusable="true"
+                android:foreground="?attr/selectableItemBackgroundBorderless">
+
+                <ImageView
+                    android:layout_width="32dp"
+                    android:layout_height="32dp"
+                    android:layout_gravity="center"
+                    android:src="@android:drawable/ic_menu_camera"
+                    app:tint="@color/primary"
+                    android:contentDescription="@string/scan_capture"
+                    android:scaleType="fitCenter" />
+            </FrameLayout>
 
             <TextView
                 android:layout_width="wrap_content"

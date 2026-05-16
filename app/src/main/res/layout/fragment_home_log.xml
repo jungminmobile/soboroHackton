@@ -1,93 +1,102 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout
+<FrameLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
     android:background="@android:color/transparent">
 
-    <!-- ── 날짜 네비게이션 바 ──────────────────────────────────── -->
+    <!-- ── 데이터 있을 때: 날짜 네비 + 스크롤 컨텐츠 ──────────── -->
     <LinearLayout
-        android:id="@+id/layout_date_nav"
+        android:id="@+id/layout_has_data"
         android:layout_width="match_parent"
-        android:layout_height="52dp"
-        android:orientation="horizontal"
-        android:gravity="center_vertical"
-        android:paddingStart="4dp"
-        android:paddingEnd="8dp"
-        android:background="@color/surface"
-        android:elevation="0dp">
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:visibility="gone">
 
-        <ImageButton
-            android:id="@+id/btn_prev"
-            android:layout_width="44dp"
-            android:layout_height="44dp"
-            android:background="?attr/selectableItemBackgroundBorderless"
-            android:src="@drawable/ic_diary_chevron_left"
-            android:contentDescription="이전"
-            android:tint="@color/on_background" />
-
-        <TextView
-            android:id="@+id/tv_date_nav"
-            android:layout_width="0dp"
+        <!-- 날짜 네비게이션 (왼쪽 붙은 작은 둥근 박스) -->
+        <LinearLayout
+            android:id="@+id/layout_date_nav"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:gravity="center"
-            android:text="2024.05.13  16:32"
-            android:textSize="15sp"
-            android:textStyle="bold"
-            android:textColor="@color/on_background" />
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:paddingHorizontal="16dp"
+            android:paddingTop="10dp"
+            android:paddingBottom="4dp">
 
-        <ImageButton
-            android:id="@+id/btn_next"
-            android:layout_width="44dp"
-            android:layout_height="44dp"
-            android:background="?attr/selectableItemBackgroundBorderless"
-            android:src="@drawable/ic_diary_chevron_right"
-            android:contentDescription="다음"
-            android:tint="@color/on_background" />
+            <!-- 둥근 날짜 박스 (왼쪽 정렬, wrap_content) -->
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="32dp"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:background="@drawable/bg_date_nav_box"
+                android:elevation="3dp"
+                android:paddingStart="2dp"
+                android:paddingEnd="2dp">
 
-        <View
-            android:layout_width="1dp"
-            android:layout_height="24dp"
-            android:background="@color/divider"
-            android:layout_marginHorizontal="4dp" />
+                <ImageButton
+                    android:id="@+id/btn_prev"
+                    android:layout_width="28dp"
+                    android:layout_height="28dp"
+                    android:background="?attr/selectableItemBackgroundBorderless"
+                    android:src="@drawable/ic_diary_chevron_left"
+                    android:contentDescription="이전"
+                    android:tint="@color/on_background" />
 
-        <ImageButton
-            android:id="@+id/btn_delete_entry"
-            android:layout_width="44dp"
-            android:layout_height="44dp"
-            android:background="?attr/selectableItemBackgroundBorderless"
-            android:src="@drawable/ic_diary_delete"
-            android:contentDescription="삭제"
-            android:tint="@color/text_secondary" />
+                <TextView
+                    android:id="@+id/tv_date_nav"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textSize="14sp"
+                    android:textStyle="bold"
+                    android:textColor="@color/on_background"
+                    android:paddingHorizontal="4dp" />
 
-    </LinearLayout>
+                <ImageButton
+                    android:id="@+id/btn_next"
+                    android:layout_width="28dp"
+                    android:layout_height="28dp"
+                    android:background="?attr/selectableItemBackgroundBorderless"
+                    android:src="@drawable/ic_diary_chevron_right"
+                    android:contentDescription="다음"
+                    android:tint="@color/on_background" />
 
-    <!-- ── 진단 번호 카운터 ──────────────────────────────────── -->
-    <TextView
-        android:id="@+id/tv_entry_counter"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:gravity="end"
-        android:paddingEnd="16dp"
-        android:paddingTop="4dp"
-        android:paddingBottom="2dp"
-        android:text="1 / 1"
-        android:textSize="13sp"
-        android:textColor="@color/text_hint" />
+                <View
+                    android:layout_width="1dp"
+                    android:layout_height="16dp"
+                    android:background="@color/divider"
+                    android:layout_marginHorizontal="2dp" />
 
-    <!-- ── 콘텐츠 영역 ──────────────────────────────────────── -->
-    <FrameLayout
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1">
+                <ImageButton
+                    android:id="@+id/btn_delete_entry"
+                    android:layout_width="28dp"
+                    android:layout_height="28dp"
+                    android:background="?attr/selectableItemBackgroundBorderless"
+                    android:src="@drawable/ic_diary_delete"
+                    android:contentDescription="삭제"
+                    android:tint="@color/text_secondary" />
 
+            </LinearLayout>
+
+            <!-- 카운터 (박스 오른쪽에 작게) -->
+            <TextView
+                android:id="@+id/tv_entry_counter"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textSize="10sp"
+                android:textColor="@color/text_hint"
+                android:layout_marginStart="8dp" />
+
+        </LinearLayout>
+
+        <!-- 스크롤 컨텐츠 -->
         <androidx.core.widget.NestedScrollView
             android:id="@+id/scroll_content"
             android:layout_width="match_parent"
-            android:layout_height="match_parent">
+            android:layout_height="0dp"
+            android:layout_weight="1">
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -98,13 +107,15 @@
                 android:paddingBottom="100dp">
 
                 <!-- ── 피부 분석 카드 (오각형 + 점수) ──────── -->
-                <androidx.cardview.widget.CardView
+                <com.google.android.material.card.MaterialCardView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="4dp"
+                    android:layout_marginBottom="8dp"
                     app:cardCornerRadius="16dp"
                     app:cardElevation="0dp"
-                    app:cardBackgroundColor="@color/surface">
+                    app:cardBackgroundColor="@color/surface"
+                    app:strokeWidth="0dp">
 
                     <LinearLayout
                         android:layout_width="match_parent"
@@ -116,9 +127,9 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="피부 분석"
-                            android:textSize="14sp"
+                            android:textSize="19sp"
                             android:textStyle="bold"
-                            android:textColor="@color/on_background"
+                            android:textColor="@color/black"
                             android:layout_marginBottom="8dp" />
 
                         <LinearLayout
@@ -148,16 +159,16 @@
                                         android:background="@color/accent_moisture" android:layout_marginEnd="10dp" />
                                     <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content"
                                         android:layout_weight="1" android:orientation="vertical">
-                                        <TextView android:text="수분" android:textSize="13sp" android:textColor="@color/text_secondary"
+                                        <TextView android:text="수분" android:textSize="11sp" android:textColor="@color/text_secondary"
                                             android:layout_width="wrap_content" android:layout_height="wrap_content"/>
                                         <LinearLayout android:layout_width="wrap_content" android:layout_height="wrap_content"
                                             android:orientation="horizontal" android:gravity="center_vertical">
-                                            <TextView android:id="@+id/tv_delta_moisture" android:layout_width="wrap_content"
-                                                android:layout_height="wrap_content" android:textSize="10sp"
-                                                android:layout_marginEnd="3dp" android:visibility="gone"/>
                                             <TextView android:id="@+id/tv_val_moisture" android:layout_width="wrap_content"
                                                 android:layout_height="wrap_content" android:text="--"
-                                                android:textSize="22sp" android:textStyle="bold" android:textColor="@color/on_background"/>
+                                                android:textSize="20sp" android:textStyle="bold" android:textColor="@color/on_background"/>
+                                            <TextView android:id="@+id/tv_delta_moisture" android:layout_width="wrap_content"
+                                                android:layout_height="wrap_content" android:textSize="10sp"
+                                                android:layout_marginStart="3dp" android:visibility="gone"/>
                                         </LinearLayout>
                                     </LinearLayout>
                                 </LinearLayout>
@@ -171,16 +182,16 @@
                                         android:background="@color/accent_oil" android:layout_marginEnd="10dp" />
                                     <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content"
                                         android:layout_weight="1" android:orientation="vertical">
-                                        <TextView android:text="건조함" android:textSize="13sp" android:textColor="@color/text_secondary"
+                                        <TextView android:text="건조함" android:textSize="11sp" android:textColor="@color/text_secondary"
                                             android:layout_width="wrap_content" android:layout_height="wrap_content"/>
                                         <LinearLayout android:layout_width="wrap_content" android:layout_height="wrap_content"
                                             android:orientation="horizontal" android:gravity="center_vertical">
-                                            <TextView android:id="@+id/tv_delta_dryness" android:layout_width="wrap_content"
-                                                android:layout_height="wrap_content" android:textSize="10sp"
-                                                android:layout_marginEnd="3dp" android:visibility="gone"/>
                                             <TextView android:id="@+id/tv_val_dryness" android:layout_width="wrap_content"
                                                 android:layout_height="wrap_content" android:text="--"
-                                                android:textSize="22sp" android:textStyle="bold" android:textColor="@color/on_background"/>
+                                                android:textSize="20sp" android:textStyle="bold" android:textColor="@color/on_background"/>
+                                            <TextView android:id="@+id/tv_delta_dryness" android:layout_width="wrap_content"
+                                                android:layout_height="wrap_content" android:textSize="10sp"
+                                                android:layout_marginStart="3dp" android:visibility="gone"/>
                                         </LinearLayout>
                                     </LinearLayout>
                                 </LinearLayout>
@@ -194,16 +205,16 @@
                                         android:background="@color/accent_trouble" android:layout_marginEnd="10dp" />
                                     <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content"
                                         android:layout_weight="1" android:orientation="vertical">
-                                        <TextView android:text="트러블" android:textSize="13sp" android:textColor="@color/text_secondary"
+                                        <TextView android:text="트러블" android:textSize="11sp" android:textColor="@color/text_secondary"
                                             android:layout_width="wrap_content" android:layout_height="wrap_content"/>
                                         <LinearLayout android:layout_width="wrap_content" android:layout_height="wrap_content"
                                             android:orientation="horizontal" android:gravity="center_vertical">
-                                            <TextView android:id="@+id/tv_delta_acne" android:layout_width="wrap_content"
-                                                android:layout_height="wrap_content" android:textSize="10sp"
-                                                android:layout_marginEnd="3dp" android:visibility="gone"/>
                                             <TextView android:id="@+id/tv_val_acne" android:layout_width="wrap_content"
                                                 android:layout_height="wrap_content" android:text="--"
-                                                android:textSize="22sp" android:textStyle="bold" android:textColor="@color/on_background"/>
+                                                android:textSize="20sp" android:textStyle="bold" android:textColor="@color/on_background"/>
+                                            <TextView android:id="@+id/tv_delta_acne" android:layout_width="wrap_content"
+                                                android:layout_height="wrap_content" android:textSize="10sp"
+                                                android:layout_marginStart="3dp" android:visibility="gone"/>
                                         </LinearLayout>
                                     </LinearLayout>
                                 </LinearLayout>
@@ -217,16 +228,16 @@
                                         android:background="#4CAF50" android:layout_marginEnd="10dp" />
                                     <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content"
                                         android:layout_weight="1" android:orientation="vertical">
-                                        <TextView android:text="모공" android:textSize="13sp" android:textColor="@color/text_secondary"
+                                        <TextView android:text="모공" android:textSize="11sp" android:textColor="@color/text_secondary"
                                             android:layout_width="wrap_content" android:layout_height="wrap_content"/>
                                         <LinearLayout android:layout_width="wrap_content" android:layout_height="wrap_content"
                                             android:orientation="horizontal" android:gravity="center_vertical">
-                                            <TextView android:id="@+id/tv_delta_pore" android:layout_width="wrap_content"
-                                                android:layout_height="wrap_content" android:textSize="10sp"
-                                                android:layout_marginEnd="3dp" android:visibility="gone"/>
                                             <TextView android:id="@+id/tv_val_pore" android:layout_width="wrap_content"
                                                 android:layout_height="wrap_content" android:text="--"
-                                                android:textSize="22sp" android:textStyle="bold" android:textColor="@color/on_background"/>
+                                                android:textSize="20sp" android:textStyle="bold" android:textColor="@color/on_background"/>
+                                            <TextView android:id="@+id/tv_delta_pore" android:layout_width="wrap_content"
+                                                android:layout_height="wrap_content" android:textSize="10sp"
+                                                android:layout_marginStart="3dp" android:visibility="gone"/>
                                         </LinearLayout>
                                     </LinearLayout>
                                 </LinearLayout>
@@ -240,16 +251,16 @@
                                         android:background="@color/accent_elasticity" android:layout_marginEnd="10dp" />
                                     <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content"
                                         android:layout_weight="1" android:orientation="vertical">
-                                        <TextView android:text="탄력" android:textSize="13sp" android:textColor="@color/text_secondary"
+                                        <TextView android:text="탄력" android:textSize="11sp" android:textColor="@color/text_secondary"
                                             android:layout_width="wrap_content" android:layout_height="wrap_content"/>
                                         <LinearLayout android:layout_width="wrap_content" android:layout_height="wrap_content"
                                             android:orientation="horizontal" android:gravity="center_vertical">
-                                            <TextView android:id="@+id/tv_delta_elasticity" android:layout_width="wrap_content"
-                                                android:layout_height="wrap_content" android:textSize="10sp"
-                                                android:layout_marginEnd="3dp" android:visibility="gone"/>
                                             <TextView android:id="@+id/tv_val_elasticity" android:layout_width="wrap_content"
                                                 android:layout_height="wrap_content" android:text="--"
-                                                android:textSize="22sp" android:textStyle="bold" android:textColor="@color/on_background"/>
+                                                android:textSize="20sp" android:textStyle="bold" android:textColor="@color/on_background"/>
+                                            <TextView android:id="@+id/tv_delta_elasticity" android:layout_width="wrap_content"
+                                                android:layout_height="wrap_content" android:textSize="10sp"
+                                                android:layout_marginStart="3dp" android:visibility="gone"/>
                                         </LinearLayout>
                                     </LinearLayout>
                                 </LinearLayout>
@@ -257,84 +268,134 @@
                             </LinearLayout>
                         </LinearLayout>
                     </LinearLayout>
-                </androidx.cardview.widget.CardView>
+                </com.google.android.material.card.MaterialCardView>
 
-                <!-- ── 사진 카드 (메모 제거, 사진만) ──────── -->
-                <androidx.cardview.widget.CardView
+                <!-- ── 진단 사진 보러가기 버튼 ───────────────────── -->
+                <!-- iv_photo는 Kotlin 참조용으로만 유지 (gone) -->
+                <ImageView
+                    android:id="@+id/iv_photo"
+                    android:layout_width="0dp"
+                    android:layout_height="0dp"
+                    android:visibility="gone" />
+
+                <com.google.android.material.card.MaterialCardView
                     android:id="@+id/card_photo_notes"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="12dp"
+                    android:layout_marginBottom="8dp"
                     android:visibility="gone"
                     app:cardCornerRadius="16dp"
                     app:cardElevation="0dp"
-                    app:cardBackgroundColor="@color/surface">
+                    app:cardBackgroundColor="@color/surface"
+                    app:strokeWidth="0dp"
+                    android:clickable="true"
+                    android:focusable="true">
 
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:orientation="vertical"
-                        android:padding="16dp">
+                        android:orientation="horizontal"
+                        android:gravity="center_vertical"
+                        android:padding="14dp">
 
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="진단 사진"
-                            android:textSize="14sp"
-                            android:textColor="@color/text_secondary"
-                            android:layout_marginBottom="8dp" />
+                            android:text="📷"
+                            android:textSize="22sp"
+                            android:layout_marginEnd="10dp" />
 
-                        <ImageView
-                            android:id="@+id/iv_photo"
-                            android:layout_width="match_parent"
-                            android:layout_height="180dp"
-                            android:scaleType="centerCrop"
-                            android:background="@drawable/bg_card_rounded" />
+                        <LinearLayout
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:orientation="vertical">
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="진단 사진 보러가기"
+                                android:textSize="15sp"
+                                android:textStyle="bold"
+                                android:textColor="@color/on_background" />
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="사진 탭에서 확인할 수 있어요"
+                                android:textSize="15sp"
+                                android:textColor="@color/text_secondary"
+                                android:layout_marginTop="2dp" />
+                        </LinearLayout>
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="›"
+                            android:textSize="22sp"
+                            android:textColor="@color/text_secondary" />
 
                     </LinearLayout>
-                </androidx.cardview.widget.CardView>
+                </com.google.android.material.card.MaterialCardView>
 
-                <!-- ── 기간 선택 칩 ──────────────────────────── -->
-                <com.google.android.material.chip.ChipGroup
-                    android:id="@+id/chip_group_period"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="20dp"
-                    app:singleSelection="true"
-                    app:selectionRequired="true">
-
-                    <com.google.android.material.chip.Chip
-                        android:id="@+id/chip_7days"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="7일"
-                        style="@style/Widget.MaterialComponents.Chip.Choice" />
-
-                    <com.google.android.material.chip.Chip
-                        android:id="@+id/chip_30days"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="30일"
-                        style="@style/Widget.MaterialComponents.Chip.Choice"
-                        android:checked="true" />
-
-                    <com.google.android.material.chip.Chip
-                        android:id="@+id/chip_90days"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="3개월"
-                        style="@style/Widget.MaterialComponents.Chip.Choice" />
-
-                </com.google.android.material.chip.ChipGroup>
-
-                <!-- ── 변화 그래프 카드 ──────────────────────── -->
-                <androidx.cardview.widget.CardView
+                <!-- ── 기간 칩 + 변화 그래프 ──────────────────── -->
+                <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
                     android:layout_marginTop="8dp"
+                    android:layout_marginBottom="4dp">
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="피부 변화 추이"
+                        android:textSize="19sp"
+                        android:textStyle="bold"
+                        android:textColor="@color/on_background" />
+
+                    <com.google.android.material.chip.ChipGroup
+                        android:id="@+id/chip_group_period"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        app:singleSelection="true"
+                        app:selectionRequired="true">
+
+                        <com.google.android.material.chip.Chip
+                            android:id="@+id/chip_7days"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="7일"
+                            style="@style/Widget.MaterialComponents.Chip.Choice" />
+
+                        <com.google.android.material.chip.Chip
+                            android:id="@+id/chip_30days"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="30일"
+                            style="@style/Widget.MaterialComponents.Chip.Choice"
+                            android:checked="true" />
+
+                        <com.google.android.material.chip.Chip
+                            android:id="@+id/chip_90days"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="3개월"
+                            style="@style/Widget.MaterialComponents.Chip.Choice" />
+
+                    </com.google.android.material.chip.ChipGroup>
+                </LinearLayout>
+
+                <com.google.android.material.card.MaterialCardView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="8dp"
                     app:cardCornerRadius="16dp"
                     app:cardElevation="0dp"
-                    app:cardBackgroundColor="@color/surface">
+                    app:cardBackgroundColor="@color/surface"
+                    app:strokeWidth="0dp">
 
                     <LinearLayout
                         android:layout_width="match_parent"
@@ -343,27 +404,17 @@
                         android:padding="16dp">
 
                         <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="피부 변화 그래프"
-                            android:textSize="14sp"
-                            android:textStyle="bold"
-                            android:textColor="@color/on_background"
-                            android:layout_marginBottom="4dp" />
-
-                        <TextView
-                            android:id="@+id/tv_chart_hint"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="선택한 날짜가 ┆ 로 표시됩니다"
-                            android:textSize="13sp"
+                            android:textSize="15sp"
                             android:textColor="@color/text_hint"
-                            android:layout_marginBottom="10dp" />
+                            android:layout_marginBottom="8dp" />
 
                         <com.github.mikephil.charting.charts.LineChart
                             android:id="@+id/line_chart"
                             android:layout_width="match_parent"
-                            android:layout_height="200dp" />
+                            android:layout_height="180dp" />
 
                         <View
                             android:layout_width="match_parent"
@@ -388,7 +439,7 @@
                             <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content"
                                 android:layout_weight="1" android:orientation="vertical" android:gravity="center">
                                 <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
-                                    android:text="수분" android:textSize="13sp" android:textColor="@color/text_secondary"/>
+                                    android:text="수분" android:textSize="15sp" android:textColor="@color/text_secondary"/>
                                 <TextView android:id="@+id/tv_avg_moisture" android:layout_width="wrap_content"
                                     android:layout_height="wrap_content" android:text="-" android:textSize="16sp"
                                     android:textStyle="bold" android:textColor="@color/accent_moisture" android:layout_marginTop="2dp"/>
@@ -397,7 +448,7 @@
                             <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content"
                                 android:layout_weight="1" android:orientation="vertical" android:gravity="center">
                                 <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
-                                    android:text="탄력" android:textSize="13sp" android:textColor="@color/text_secondary"/>
+                                    android:text="탄력" android:textSize="15sp" android:textColor="@color/text_secondary"/>
                                 <TextView android:id="@+id/tv_avg_elasticity" android:layout_width="wrap_content"
                                     android:layout_height="wrap_content" android:text="-" android:textSize="16sp"
                                     android:textStyle="bold" android:textColor="@color/accent_elasticity" android:layout_marginTop="2dp"/>
@@ -406,7 +457,7 @@
                             <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content"
                                 android:layout_weight="1" android:orientation="vertical" android:gravity="center">
                                 <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
-                                    android:text="모공" android:textSize="13sp" android:textColor="@color/text_secondary"/>
+                                    android:text="모공" android:textSize="15sp" android:textColor="@color/text_secondary"/>
                                 <TextView android:id="@+id/tv_avg_pore" android:layout_width="wrap_content"
                                     android:layout_height="wrap_content" android:text="-" android:textSize="16sp"
                                     android:textStyle="bold" android:textColor="#4CAF50" android:layout_marginTop="2dp"/>
@@ -415,7 +466,7 @@
                             <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content"
                                 android:layout_weight="1" android:orientation="vertical" android:gravity="center">
                                 <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
-                                    android:text="트러블" android:textSize="13sp" android:textColor="@color/text_secondary"/>
+                                    android:text="트러블" android:textSize="15sp" android:textColor="@color/text_secondary"/>
                                 <TextView android:id="@+id/tv_avg_acne" android:layout_width="wrap_content"
                                     android:layout_height="wrap_content" android:text="-" android:textSize="16sp"
                                     android:textStyle="bold" android:textColor="@color/accent_trouble" android:layout_marginTop="2dp"/>
@@ -423,16 +474,17 @@
 
                         </LinearLayout>
                     </LinearLayout>
-                </androidx.cardview.widget.CardView>
+                </com.google.android.material.card.MaterialCardView>
 
                 <!-- ── 피부 일기 카드 ─────────────────────────── -->
-                <androidx.cardview.widget.CardView
+                <com.google.android.material.card.MaterialCardView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="12dp"
+                    android:layout_marginBottom="8dp"
                     app:cardCornerRadius="16dp"
                     app:cardElevation="0dp"
-                    app:cardBackgroundColor="@color/surface">
+                    app:cardBackgroundColor="@color/surface"
+                    app:strokeWidth="0dp">
 
                     <LinearLayout
                         android:layout_width="match_parent"
@@ -440,7 +492,6 @@
                         android:orientation="vertical"
                         android:padding="16dp">
 
-                        <!-- 헤더 -->
                         <LinearLayout
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
@@ -458,33 +509,30 @@
                                     android:layout_width="wrap_content"
                                     android:layout_height="wrap_content"
                                     android:text="✏️  피부 일기"
-                                    android:textSize="14sp"
+                                    android:textSize="15sp"
                                     android:textStyle="bold"
                                     android:textColor="@color/on_background" />
 
                                 <TextView
                                     android:layout_width="wrap_content"
                                     android:layout_height="wrap_content"
-                                    android:text="식습관, 수면, 스트레스 등 피부에 영향을 준 것들을 기록해보세요"
-                                    android:textSize="13sp"
+                                    android:text="식습관, 수면, 스트레스 등을 기록해보세요"
+                                    android:textSize="15sp"
                                     android:textColor="@color/text_hint"
                                     android:layout_marginTop="2dp" />
-
                             </LinearLayout>
 
-                            <!-- 저장 상태 표시 -->
                             <TextView
                                 android:id="@+id/tv_journal_saved"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:text="✓ 저장됨"
-                                android:textSize="13sp"
+                                android:textSize="15sp"
                                 android:textColor="@color/primary"
                                 android:visibility="gone" />
 
                         </LinearLayout>
 
-                        <!-- 빠른 태그 버튼 (자주 쓰는 항목) -->
                         <HorizontalScrollView
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
@@ -553,7 +601,6 @@
                             </LinearLayout>
                         </HorizontalScrollView>
 
-                        <!-- 텍스트 입력 -->
                         <com.google.android.material.textfield.TextInputLayout
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
@@ -574,13 +621,12 @@
                                 android:minLines="3"
                                 android:maxLines="8"
                                 android:gravity="top|start"
-                                android:textSize="13sp"
+                                android:textSize="15sp"
                                 android:textColor="@color/on_background"
                                 android:lineSpacingMultiplier="1.5" />
 
                         </com.google.android.material.textfield.TextInputLayout>
 
-                        <!-- 저장 버튼 -->
                         <LinearLayout
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
@@ -593,7 +639,7 @@
                                 android:layout_width="wrap_content"
                                 android:layout_height="36dp"
                                 android:text="저장"
-                                android:textSize="13sp"
+                                android:textSize="15sp"
                                 android:paddingHorizontal="24dp"
                                 style="@style/Widget.MaterialComponents.Button"
                                 app:backgroundTint="@color/primary" />
@@ -601,40 +647,63 @@
                         </LinearLayout>
 
                     </LinearLayout>
-                </androidx.cardview.widget.CardView>
+                </com.google.android.material.card.MaterialCardView>
+
+                <!-- ── 진단 시작 버튼 ──────────────────────────── -->
+                <Button
+                    android:id="@+id/btn_quick_scan"
+                    android:layout_width="match_parent"
+                    android:layout_height="54dp"
+                    android:background="@drawable/bg_gradient_button"
+                    android:text="@string/home_scan_btn"
+                    android:textColor="@color/on_primary"
+                    android:textSize="16sp"
+                    android:textStyle="bold"
+                    android:stateListAnimator="@null" />
 
             </LinearLayout>
         </androidx.core.widget.NestedScrollView>
+    </LinearLayout>
 
-        <!-- 빈 상태 -->
-        <LinearLayout
-            android:id="@+id/layout_empty"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:orientation="vertical"
+    <!-- ── 빈 상태 ────────────────────────────────────────────── -->
+    <LinearLayout
+        android:id="@+id/layout_empty"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:gravity="center"
+        android:visibility="visible"
+        android:padding="32dp">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="📋"
+            android:textSize="48sp" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/home_no_diagnosis"
+            android:textColor="@color/text_secondary"
+            android:textSize="14sp"
             android:gravity="center"
-            android:visibility="gone"
-            android:padding="32dp">
+            android:lineSpacingMultiplier="1.5"
+            android:layout_marginTop="12dp" />
 
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="📋"
-                android:textSize="48sp" />
+        <Button
+            android:id="@+id/btn_quick_scan_empty"
+            android:layout_width="wrap_content"
+            android:layout_height="48dp"
+            android:layout_marginTop="24dp"
+            android:background="@drawable/bg_gradient_button"
+            android:text="@string/home_scan_btn"
+            android:textColor="@color/on_primary"
+            android:textSize="15sp"
+            android:textStyle="bold"
+            android:paddingHorizontal="32dp"
+            android:stateListAnimator="@null" />
 
-            <TextView
-                android:id="@+id/tv_empty_msg"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/diary_no_record"
-                android:textColor="@color/text_secondary"
-                android:textSize="14sp"
-                android:gravity="center"
-                android:lineSpacingMultiplier="1.5"
-                android:layout_marginTop="12dp" />
+    </LinearLayout>
 
-        </LinearLayout>
-
-    </FrameLayout>
-
-</LinearLayout>
+</FrameLayout>

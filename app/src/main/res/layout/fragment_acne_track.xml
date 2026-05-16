@@ -5,117 +5,104 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:background="@color/background">
+    android:background="@android:color/transparent">
 
-    <!-- 요약 카드 -->
+    <!-- 요약 카드 (탭 버튼 역할) -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
         android:paddingHorizontal="16dp"
         android:paddingTop="12dp"
-        android:paddingBottom="4dp">
+        android:paddingBottom="8dp">
 
-        <androidx.cardview.widget.CardView
+        <!-- 현재 트러블 버튼 -->
+        <com.google.android.material.card.MaterialCardView
+            android:id="@+id/card_active"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:layout_marginEnd="6dp"
+            android:clickable="true"
+            android:focusable="true"
             app:cardCornerRadius="12dp"
-            app:cardElevation="1dp"
-            app:cardBackgroundColor="@color/surface">
+            app:cardElevation="0dp"
+            app:cardBackgroundColor="@color/surface"
+            app:strokeColor="@color/primary"
+            app:strokeWidth="2dp">
+
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
                 android:gravity="center"
-                android:padding="10dp">
+                android:padding="12dp">
+
                 <TextView
                     android:id="@+id/tv_active_count"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="0"
-                    android:textSize="20sp"
+                    android:textSize="22sp"
                     android:textStyle="bold"
                     android:textColor="#E53935" />
+
                 <TextView
+                    android:id="@+id/tv_active_label"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="현재 트러블"
-                    android:textSize="11sp"
-                    android:textColor="@color/text_secondary" />
+                    android:textSize="12sp"
+                    android:textStyle="bold"
+                    android:textColor="@color/primary"
+                    android:layout_marginTop="2dp" />
             </LinearLayout>
-        </androidx.cardview.widget.CardView>
+        </com.google.android.material.card.MaterialCardView>
 
-        <androidx.cardview.widget.CardView
+        <!-- 완치된 트러블 버튼 -->
+        <com.google.android.material.card.MaterialCardView
+            android:id="@+id/card_healed"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:layout_marginStart="6dp"
+            android:clickable="true"
+            android:focusable="true"
             app:cardCornerRadius="12dp"
-            app:cardElevation="1dp"
-            app:cardBackgroundColor="@color/surface">
+            app:cardElevation="0dp"
+            app:cardBackgroundColor="@color/surface"
+            app:strokeColor="@color/primary"
+            app:strokeWidth="0dp">
+
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
                 android:gravity="center"
-                android:padding="10dp">
+                android:padding="12dp">
+
                 <TextView
                     android:id="@+id/tv_healed_count"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="0"
-                    android:textSize="20sp"
+                    android:textSize="22sp"
                     android:textStyle="bold"
                     android:textColor="@color/primary" />
+
                 <TextView
+                    android:id="@+id/tv_healed_label"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="완치된 트러블"
-                    android:textSize="11sp"
-                    android:textColor="@color/text_secondary" />
+                    android:textSize="12sp"
+                    android:textStyle="bold"
+                    android:textColor="@color/text_secondary"
+                    android:layout_marginTop="2dp" />
             </LinearLayout>
-        </androidx.cardview.widget.CardView>
+        </com.google.android.material.card.MaterialCardView>
+
     </LinearLayout>
-
-    <!-- 필터 칩 -->
-    <HorizontalScrollView
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:paddingHorizontal="12dp"
-        android:paddingVertical="6dp"
-        android:scrollbars="none">
-
-        <com.google.android.material.chip.ChipGroup
-            android:id="@+id/chip_group_filter"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            app:singleSelection="true">
-
-            <com.google.android.material.chip.Chip
-                android:id="@+id/chip_all"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="전체"
-                android:checked="true"
-                style="@style/Widget.MaterialComponents.Chip.Filter" />
-
-            <com.google.android.material.chip.Chip
-                android:id="@+id/chip_active"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="현재 활성"
-                style="@style/Widget.MaterialComponents.Chip.Filter" />
-
-            <com.google.android.material.chip.Chip
-                android:id="@+id/chip_healed"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="완치"
-                style="@style/Widget.MaterialComponents.Chip.Filter" />
-        </com.google.android.material.chip.ChipGroup>
-    </HorizontalScrollView>
 
     <!-- 얼굴 다이어그램 카드 -->
     <ScrollView
@@ -136,7 +123,7 @@
                 android:layout_marginHorizontal="16dp"
                 android:layout_marginTop="4dp"
                 app:cardCornerRadius="16dp"
-                app:cardElevation="2dp"
+                app:cardElevation="0dp"
                 app:cardBackgroundColor="@color/surface">
 
                 <com.example.soboroskin.ui.diary.FaceMapView

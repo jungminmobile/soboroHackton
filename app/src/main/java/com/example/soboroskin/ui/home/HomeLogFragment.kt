@@ -1,4 +1,4 @@
-package com.example.soboroskin.ui.diary
+package com.example.soboroskin.ui.home
 
 import android.graphics.Color
 import android.os.Bundle
@@ -12,11 +12,15 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
+import android.app.Dialog
+import android.view.WindowManager
+import android.widget.ImageView
 import com.bumptech.glide.Glide
+import com.example.soboroskin.MainActivity
 import com.example.soboroskin.R
 import com.example.soboroskin.data.db.AppDatabase
 import com.example.soboroskin.data.model.DiagnosisEntity
-import com.example.soboroskin.databinding.FragmentDiaryLogBinding
+import com.example.soboroskin.databinding.FragmentHomeLogBinding
 import com.github.mikephil.charting.components.LimitLine
 import com.github.mikephil.charting.components.XAxis
 import com.github.mikephil.charting.data.Entry
@@ -33,22 +37,22 @@ import java.util.Date
 import java.util.Locale
 import java.util.concurrent.TimeUnit
 import kotlin.math.abs
+import kotlin.math.roundToInt
 
-class DiaryLogFragment : Fragment() {
+class HomeLogFragment : Fragment() {
 
-    private var _binding: FragmentDiaryLogBinding? = null
+    private var _binding: FragmentHomeLogBinding? = null
     private val binding get() = _binding!!
 
     private var allEntries: List<DiagnosisEntity> = emptyList()
     private var currentIndex: Int = 0
     private var firstLoad: Boolean = true
 
-    // 차트용
     private var chartFilteredEntries: List<DiagnosisEntity> = emptyList()
     private var dayRange: Int = 30
     private var suppressChipListener = false
 
-    private val dateFmt  = SimpleDateFormat("yyyy.MM.dd  HH:mm", Locale.getDefault())
+    private val dateFmt  = SimpleDateFormat("yy.MM.dd HH:mm", Locale.getDefault())
     private val chartFmt = SimpleDateFormat("MM/dd", Locale.getDefault())
 
     // ── Lifecycle ─────────────────────────────────────────────────────
@@ -57,7 +61,7 @@ class DiaryLogFragment : Fragment() {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        _binding = FragmentDiaryLogBinding.inflate(inflater, container, false)
+        _binding = FragmentHomeLogBinding.inflate(inflater, container, false)
         return binding.root
     }
 
@@ -76,7 +80,7 @@ class DiaryLogFragment : Fragment() {
         _binding = null
     }
 
-    // ── 네비게이션 버튼 ────────────────────────────────────────────────
+    // ── 네비게이션 버튼 ────────────────────────────────────────────
 
     private fun setupNavButtons() {
         binding.btnPrev.setOnClickListener {
@@ -94,9 +98,15 @@ class DiaryLogFragment : Fragment() {
             }
         }
         binding.btnDeleteEntry.setOnClickListener { showDeleteConfirmDialog() }
+        binding.btnQuickScan.setOnClickListener {
+            (activity as? MainActivity)?.openScanOverlay()
+        }
+        binding.btnQuickScanEmpty.setOnClickListener {
+            (activity as? MainActivity)?.openScanOverlay()
+        }
     }
 
-    // ── 데이터 관찰 ────────────────────────────────────────────────────
+    // ── 데이터 관찰 ────────────────────────────────────────────────
 
     private fun observeEntries() {
         viewLifecycleOwner.lifecycleScope.launch {
@@ -123,17 +133,17 @@ class DiaryLogFragment : Fragment() {
         }
     }
 
-    // ── 항목 표시 ──────────────────────────────────────────────────────
+    // ── 항목 표시 ──────────────────────────────────────────────────
+
+    private fun to10Scale(score: Int): Int = (score / 10f).roundToInt()
 
     private fun showEntry(index: Int) {
         val entry     = allEntries.getOrNull(index) ?: return
-        val prevEntry = allEntries.getOrNull(index + 1)   // 더 오래된 기록
+        val prevEntry = allEntries.getOrNull(index + 1)
 
-        // 날짜 + 카운터
         binding.tvDateNav.text      = dateFmt.format(Date(entry.date))
         binding.tvEntryCounter.text = "${index + 1} / ${allEntries.size}"
 
-        // 네비게이션 활성/비활성
         val canGoPrev = index < allEntries.size - 1
         val canGoNext = index > 0
         binding.btnPrev.alpha     = if (canGoPrev) 1f else 0.25f
@@ -141,35 +151,33 @@ class DiaryLogFragment : Fragment() {
         binding.btnNext.alpha     = if (canGoNext) 1f else 0.25f
         binding.btnNext.isEnabled = canGoNext
 
-        // ── 5개 점수 ──
         val moisture   = entry.moistureScore
         val dryness    = (100 - moisture).coerceIn(0, 100)
         val acne       = entry.troubleScore
         val pore       = entry.oilScore
         val elasticity = entry.elasticityScore
 
-        // 오각형: 수분(0) 건조함(1) 트러블(2) 모공(3) 탄력(4)
+        // 오각형 차트도 10단계로 딱딱 떨어지게 보이고 싶다면 10점 만점 변환값 사용
         binding.pentagonChart.scores = floatArrayOf(
-            moisture.toFloat(),
-            dryness.toFloat(),
-            acne.toFloat(),
-            pore.toFloat(),
-            elasticity.toFloat()
+            to10Scale(moisture) * 10f,
+            to10Scale(dryness) * 10f,
+            to10Scale(acne) * 10f,
+            to10Scale(pore) * 10f,
+            to10Scale(elasticity) * 10f
         )
 
-        binding.tvValMoisture.text   = "${moisture}점"
-        binding.tvValDryness.text    = "${dryness}점"
-        binding.tvValAcne.text       = "${acne}점"
-        binding.tvValPore.text       = "${pore}점"
-        binding.tvValElasticity.text = "${elasticity}점"
+        binding.tvValMoisture.text   = "${to10Scale(moisture)}점"
+        binding.tvValDryness.text    = "${to10Scale(dryness)}점"
+        binding.tvValAcne.text       = "${to10Scale(acne)}점"
+        binding.tvValPore.text       = "${to10Scale(pore)}점"
+        binding.tvValElasticity.text = "${to10Scale(elasticity)}점"
 
-        // 이전 대비 변화량
         if (prevEntry != null) {
-            showDelta(binding.tvDeltaMoisture,   moisture   - prevEntry.moistureScore)
-            showDelta(binding.tvDeltaDryness,    dryness    - (100 - prevEntry.moistureScore))
-            showDelta(binding.tvDeltaAcne,       acne       - prevEntry.troubleScore)
-            showDelta(binding.tvDeltaPore,       pore       - prevEntry.oilScore)
-            showDelta(binding.tvDeltaElasticity, elasticity - prevEntry.elasticityScore)
+            showDelta(binding.tvDeltaMoisture,   to10Scale(moisture)   - to10Scale(prevEntry.moistureScore))
+            showDelta(binding.tvDeltaDryness,    to10Scale(dryness)    - to10Scale(100 - prevEntry.moistureScore))
+            showDelta(binding.tvDeltaAcne,       to10Scale(acne)       - to10Scale(prevEntry.troubleScore))
+            showDelta(binding.tvDeltaPore,       to10Scale(pore)       - to10Scale(prevEntry.oilScore))
+            showDelta(binding.tvDeltaElasticity, to10Scale(elasticity) - to10Scale(prevEntry.elasticityScore))
         } else {
             listOf(
                 binding.tvDeltaMoisture, binding.tvDeltaDryness,
@@ -177,29 +185,50 @@ class DiaryLogFragment : Fragment() {
             ).forEach { it.visibility = View.GONE }
         }
 
-        // ── 사진 카드 ──
+        // 사진 있으면 "보러가기" 카드 표시 → 클릭 시 사진 팝업
         if (entry.photoPath.isNotEmpty()) {
             binding.cardPhotoNotes.visibility = View.VISIBLE
-            Glide.with(this).load(entry.photoPath).centerCrop().into(binding.ivPhoto)
+            binding.cardPhotoNotes.setOnClickListener {
+                showPhotoDialog(entry.photoPath)
+            }
         } else {
             binding.cardPhotoNotes.visibility = View.GONE
         }
 
-        // ── 피부 일기 로드 (같은 텍스트면 커서 리셋 방지) ──
         val currentJournal = binding.etJournal.text?.toString() ?: ""
         if (currentJournal != entry.notes) {
             binding.etJournal.setText(entry.notes)
         }
         binding.tvJournalSaved.visibility = View.GONE
 
-        // 헤더 보이기
-        binding.layoutDateNav.visibility  = View.VISIBLE
-        binding.tvEntryCounter.visibility = View.VISIBLE
-        binding.scrollContent.visibility  = View.VISIBLE
-        binding.layoutEmpty.visibility    = View.GONE
+        binding.layoutHasData.visibility = View.VISIBLE
+        binding.layoutEmpty.visibility   = View.GONE
 
-        // 차트: 선택 날짜 하이라이트 갱신
         updateChart()
+    }
+
+    private fun showPhotoDialog(photoPath: String) {
+        val dialog = Dialog(requireContext(), android.R.style.Theme_Black_NoTitleBar)
+
+        val imageView = ImageView(requireContext()).apply {
+            scaleType = ImageView.ScaleType.FIT_CENTER
+            setBackgroundColor(android.graphics.Color.parseColor("#CC000000"))
+            setOnClickListener { dialog.dismiss() }
+        }
+
+        Glide.with(this)
+            .load(photoPath)
+            .into(imageView)
+
+        dialog.setContentView(imageView)
+        dialog.window?.apply {
+            setLayout(
+                WindowManager.LayoutParams.MATCH_PARENT,
+                WindowManager.LayoutParams.MATCH_PARENT
+            )
+            setBackgroundDrawableResource(android.R.color.transparent)
+        }
+        dialog.show()
     }
 
     private fun showDelta(tv: TextView, delta: Int) {
@@ -211,7 +240,7 @@ class DiaryLogFragment : Fragment() {
         )
     }
 
-    // ── 변화 그래프 ────────────────────────────────────────────────────
+    // ── 변화 그래프 ────────────────────────────────────────────────
 
     private fun setupChart() {
         binding.lineChart.apply {
@@ -236,8 +265,8 @@ class DiaryLogFragment : Fragment() {
             axisLeft.apply {
                 setDrawGridLines(true)
                 axisMinimum = 0f
-                axisMaximum = 100f
-                granularity = 25f
+                axisMaximum = 10f
+                granularity = 1f
                 textSize = 10f
             }
         }
@@ -262,7 +291,7 @@ class DiaryLogFragment : Fragment() {
         val cutoff = System.currentTimeMillis() - TimeUnit.DAYS.toMillis(dayRange.toLong())
         chartFilteredEntries = allEntries
             .filter { it.date >= cutoff }
-            .sortedBy { it.date }   // 오래된 것 → 최신 순 (차트 왼→오른쪽)
+            .sortedBy { it.date }
 
         val chart = binding.lineChart
 
@@ -291,16 +320,15 @@ class DiaryLogFragment : Fragment() {
             }
 
         val lineData = LineData(
-            makeSet(chartFilteredEntries.mapIndexed { i, e -> Entry(i.toFloat(), e.moistureScore.toFloat()) },   "수분",   "#4FC3F7"),
-            makeSet(chartFilteredEntries.mapIndexed { i, e -> Entry(i.toFloat(), e.elasticityScore.toFloat()) }, "탄력",   "#BA68C8"),
-            makeSet(chartFilteredEntries.mapIndexed { i, e -> Entry(i.toFloat(), e.oilScore.toFloat()) },        "모공",   "#4CAF50"),
-            makeSet(chartFilteredEntries.mapIndexed { i, e -> Entry(i.toFloat(), e.troubleScore.toFloat()) },    "트러블", "#EF5350")
+            makeSet(chartFilteredEntries.mapIndexed { i, e -> Entry(i.toFloat(), to10Scale(e.moistureScore).toFloat()) },   "수분",   "#4FC3F7"),
+            makeSet(chartFilteredEntries.mapIndexed { i, e -> Entry(i.toFloat(), to10Scale(e.elasticityScore).toFloat()) }, "탄력",   "#BA68C8"),
+            makeSet(chartFilteredEntries.mapIndexed { i, e -> Entry(i.toFloat(), to10Scale(e.oilScore).toFloat()) },        "모공",   "#4CAF50"),
+            makeSet(chartFilteredEntries.mapIndexed { i, e -> Entry(i.toFloat(), to10Scale(e.troubleScore).toFloat()) },    "트러블", "#EF5350")
         )
 
         chart.xAxis.valueFormatter = IndexAxisValueFormatter(labels)
         chart.data = lineData
 
-        // ── 선택 날짜 세로 표시선 ──
         chart.xAxis.removeAllLimitLines()
         val selectedEntry = allEntries.getOrNull(currentIndex)
         if (selectedEntry != null) {
@@ -316,9 +344,7 @@ class DiaryLogFragment : Fragment() {
                     textSize      = 9f
                 }
                 chart.xAxis.addLimitLine(ll)
-            }
-            // 선택 항목이 현재 기간 밖이면 칩을 자동 전환
-            else {
+            } else {
                 autoSwitchPeriod(selectedEntry.date)
             }
         }
@@ -327,7 +353,6 @@ class DiaryLogFragment : Fragment() {
         updateAverages(chartFilteredEntries)
     }
 
-    /** 선택 기록이 현재 기간에 없으면 해당 기간으로 자동 전환 */
     private fun autoSwitchPeriod(entryDate: Long) {
         val now = System.currentTimeMillis()
         val idealRange = when {
@@ -344,7 +369,7 @@ class DiaryLogFragment : Fragment() {
                 90 -> binding.chip90days.isChecked = true
             }
             suppressChipListener = false
-            updateChart()   // 기간 변경 후 다시 그리기
+            updateChart()
         }
     }
 
@@ -357,13 +382,13 @@ class DiaryLogFragment : Fragment() {
             binding.tvAvgAcne.text       = "-"
             return
         }
-        binding.tvAvgMoisture.text   = "${entries.map { it.moistureScore }.average().toInt()}점"
-        binding.tvAvgElasticity.text = "${entries.map { it.elasticityScore }.average().toInt()}점"
-        binding.tvAvgPore.text       = "${entries.map { it.oilScore }.average().toInt()}점"
-        binding.tvAvgAcne.text       = "${entries.map { it.troubleScore }.average().toInt()}점"
+        binding.tvAvgMoisture.text   = "${to10Scale(entries.map { it.moistureScore }.average().toInt())}점"
+        binding.tvAvgElasticity.text = "${to10Scale(entries.map { it.elasticityScore }.average().toInt())}점"
+        binding.tvAvgPore.text       = "${to10Scale(entries.map { it.oilScore }.average().toInt())}점"
+        binding.tvAvgAcne.text       = "${to10Scale(entries.map { it.troubleScore }.average().toInt())}점"
     }
 
-    // ── 피부 일기 ─────────────────────────────────────────────────────
+    // ── 피부 일기 ─────────────────────────────────────────────────
 
     private fun setupJournal() {
         val tagChips = listOf(
@@ -423,16 +448,14 @@ class DiaryLogFragment : Fragment() {
         }
     }
 
-    // ── 빈 상태 ────────────────────────────────────────────────────────
+    // ── 빈 상태 ────────────────────────────────────────────────────
 
     private fun showEmpty() {
-        binding.layoutDateNav.visibility  = View.GONE
-        binding.tvEntryCounter.visibility = View.GONE
-        binding.scrollContent.visibility  = View.GONE
-        binding.layoutEmpty.visibility    = View.VISIBLE
+        binding.layoutHasData.visibility = View.GONE
+        binding.layoutEmpty.visibility   = View.VISIBLE
     }
 
-    // ── 삭제 ──────────────────────────────────────────────────────────
+    // ── 삭제 ──────────────────────────────────────────────────────
 
     private fun showDeleteConfirmDialog() {
         AlertDialog.Builder(requireContext())

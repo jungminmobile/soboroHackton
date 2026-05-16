@@ -20,6 +20,7 @@ import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.*
 import java.util.concurrent.TimeUnit
+import kotlin.math.roundToInt
 
 class DiaryChartFragment : Fragment() {
 
@@ -67,8 +68,8 @@ class DiaryChartFragment : Fragment() {
             axisLeft.apply {
                 setDrawGridLines(true)
                 axisMinimum = 0f
-                axisMaximum = 100f
-                granularity = 20f
+                axisMaximum = 10f
+                granularity = 1f
             }
         }
     }
@@ -122,10 +123,10 @@ class DiaryChartFragment : Fragment() {
         val sdf = SimpleDateFormat("MM/dd", Locale.getDefault())
         val labels = filtered.map { sdf.format(Date(it.date)) }
 
-        val moistureEntries   = filtered.mapIndexed { i, e -> Entry(i.toFloat(), e.moistureScore.toFloat()) }
-        val oilEntries        = filtered.mapIndexed { i, e -> Entry(i.toFloat(), e.oilScore.toFloat()) }
-        val troubleEntries    = filtered.mapIndexed { i, e -> Entry(i.toFloat(), e.troubleScore.toFloat()) }
-        val elasticityEntries = filtered.mapIndexed { i, e -> Entry(i.toFloat(), e.elasticityScore.toFloat()) }
+        val moistureEntries   = filtered.mapIndexed { i, e -> Entry(i.toFloat(), (e.moistureScore / 10f).roundToInt().toFloat()) }
+        val oilEntries        = filtered.mapIndexed { i, e -> Entry(i.toFloat(), (e.oilScore / 10f).roundToInt().toFloat()) }
+        val troubleEntries    = filtered.mapIndexed { i, e -> Entry(i.toFloat(), (e.troubleScore / 10f).roundToInt().toFloat()) }
+        val elasticityEntries = filtered.mapIndexed { i, e -> Entry(i.toFloat(), (e.elasticityScore / 10f).roundToInt().toFloat()) }
 
         fun makeDataSet(entries: List<Entry>, label: String, color: Int): LineDataSet =
             LineDataSet(entries, label).apply {
@@ -160,10 +161,10 @@ class DiaryChartFragment : Fragment() {
             binding.tvAvgElasticity.text = "-"
             return
         }
-        binding.tvAvgMoisture.text   = "${entries.map { it.moistureScore }.average().toInt()}점"
-        binding.tvAvgOil.text        = "${entries.map { it.oilScore }.average().toInt()}점"
-        binding.tvAvgTrouble.text    = "${entries.map { it.troubleScore }.average().toInt()}점"
-        binding.tvAvgElasticity.text = "${entries.map { it.elasticityScore }.average().toInt()}점"
+        binding.tvAvgMoisture.text   = "${((entries.map { it.moistureScore }.average()) / 10f).roundToInt()}점"
+        binding.tvAvgOil.text        = "${((entries.map { it.oilScore }.average()) / 10f).roundToInt()}점"
+        binding.tvAvgTrouble.text    = "${((entries.map { it.troubleScore }.average()) / 10f).roundToInt()}점"
+        binding.tvAvgElasticity.text = "${((entries.map { it.elasticityScore }.average()) / 10f).roundToInt()}점"
     }
 
     override fun onDestroyView() {

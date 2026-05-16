@@ -20,22 +20,27 @@ class FaceMapView @JvmOverloads constructor(
     data class RegionMarker(
         val partName: String,
         val count: Int,
-        val worstStatus: String  // "new" | "worsened" | "improved" | "existing" | "healed"
+        val worstStatus: String,
+        val cx: Float,
+        val cy: Float,
+        val spotIds: List<Long> = emptyList()   // 이 클러스터에 속한 스팟 ID 목록
     )
 
     // 얼굴 모델 이미지 위의 각 부위 중심 좌표 (이미지 기준 정규화 0~1)
     companion object {
+        // 좌표는 dummyhead.jpg 기준 정규화 (0.0~1.0, 좌상단 원점)
+        // x: 뷰어 기준 (left_cheek = 화면 왼쪽 = 인물의 오른쪽 볼)
         val PART_POSITIONS: Map<String, Pair<Float, Float>> = mapOf(
-            "forehead"    to Pair(0.50f, 0.20f),
-            "left_cheek"  to Pair(0.20f, 0.57f),
-            "right_cheek" to Pair(0.80f, 0.57f),
-            "nose"        to Pair(0.50f, 0.57f),
-            "left_jaw"    to Pair(0.28f, 0.76f),
-            "right_jaw"   to Pair(0.72f, 0.76f),
-            "mouth"       to Pair(0.50f, 0.70f),
-            "chin"        to Pair(0.50f, 0.83f),
-            "eye"         to Pair(0.50f, 0.42f),
-            "face"        to Pair(0.50f, 0.45f)
+            "forehead"    to Pair(0.50f, 0.22f),  // 이마 중앙
+            "left_cheek"  to Pair(0.31f, 0.56f),  // 왼볼 (뷰어 왼쪽)
+            "right_cheek" to Pair(0.69f, 0.56f),  // 오른볼 (뷰어 오른쪽)
+            "nose"        to Pair(0.50f, 0.54f),  // 코
+            "left_jaw"    to Pair(0.35f, 0.71f),  // 왼턱선
+            "right_jaw"   to Pair(0.65f, 0.71f),  // 오른턱선
+            "mouth"       to Pair(0.50f, 0.65f),  // 입가
+            "chin"        to Pair(0.50f, 0.77f),  // 턱 끝
+            "eye"         to Pair(0.50f, 0.41f),  // 눈가 (양눈 사이)
+            "face"        to Pair(0.50f, 0.48f)   // 얼굴 전반
         )
 
         fun worstStatus(statuses: List<String>): String {
@@ -98,7 +103,7 @@ class FaceMapView @JvmOverloads constructor(
     var highlightedPart: String? = null
         set(value) { field = value; invalidate() }
 
-    var onRegionClick: ((String) -> Unit)? = null
+    var onRegionClick: ((spotIds: List<Long>) -> Unit)? = null
 
     // ── Init ─────────────────────────────────────────────────────
     init {
@@ -129,10 +134,10 @@ class FaceMapView @JvmOverloads constructor(
             canvas.drawColor(Color.parseColor("#2A2A2A"))
         }
 
-        // 부위 배지 그리기
+        // 부위 배지 그리기 — 클러스터 중심 좌표 사용
         for (marker in regions) {
-            val (nx, ny) = PART_POSITIONS[marker.partName] ?: PART_POSITIONS["face"]!!
-            val px = nx * w; val py = ny * h
+            val px = marker.cx * w
+            val py = marker.cy * h
             drawBadge(canvas, marker, px, py)
         }
     }
@@ -169,13 +174,12 @@ class FaceMapView @JvmOverloads constructor(
             var closest: RegionMarker? = null
             var minDist = TOUCH_R
             for (marker in regions) {
-                val (nx, ny) = PART_POSITIONS[marker.partName] ?: PART_POSITIONS["face"]!!
-                val dist = sqrt(((tx - nx * w).let { it * it } + (ty - ny * h).let { it * it }).toDouble()).toFloat()
+                val dist = sqrt(((tx - marker.cx * w).let { it * it } + (ty - marker.cy * h).let { it * it }).toDouble()).toFloat()
                 if (dist < minDist) { minDist = dist; closest = marker }
             }
             closest?.let {
                 highlightedPart = it.partName
-                onRegionClick?.invoke(it.partName)
+                onRegionClick?.invoke(it.spotIds)
                 performClick()
             }
         }

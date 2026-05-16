@@ -12,8 +12,7 @@
     <FrameLayout
         android:id="@+id/nav_host_container"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:paddingBottom="64dp">
+        android:layout_height="match_parent">
 
         <androidx.fragment.app.FragmentContainerView
             android:id="@+id/nav_host_fragment"
@@ -37,17 +36,101 @@
             android:layout_height="match_parent" />
     </FrameLayout>
 
-    <!-- Bottom Navigation Bar -->
-    <com.google.android.material.bottomnavigation.BottomNavigationView
-        android:id="@+id/bottom_nav"
-        android:layout_width="match_parent"
-        android:layout_height="64dp"
-        android:layout_gravity="bottom"
-        android:background="@color/surface"
-        app:elevation="@dimen/bottom_nav_elevation"
-        app:menu="@menu/bottom_nav_menu"
-        app:itemTextColor="@color/nav_selector"
-        app:itemIconTint="@color/nav_selector"
-        app:labelVisibilityMode="labeled" />
+    <!-- ── Floating Pill Navigation Bar ───────────────────────── -->
+    <LinearLayout
+        android:id="@+id/bottom_tab_bar"
+        android:layout_width="wrap_content"
+        android:layout_height="60dp"
+        android:layout_gravity="bottom|center_horizontal"
+        android:layout_marginBottom="24dp"
+        android:background="@drawable/bg_floating_nav"
+        android:elevation="20dp"
+        android:outlineProvider="background"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:paddingHorizontal="6dp">
+
+        <!-- 홈 tab -->
+        <LinearLayout
+            android:id="@+id/tab_home"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:orientation="vertical"
+            android:gravity="center"
+            android:paddingHorizontal="24dp"
+            android:clickable="true"
+            android:focusable="true"
+            android:background="?attr/selectableItemBackgroundBorderless">
+
+            <ImageView
+                android:id="@+id/tab_home_icon"
+                android:layout_width="22dp"
+                android:layout_height="22dp"
+                android:src="@drawable/ic_home"
+                app:tint="@color/primary" />
+
+            <TextView
+                android:id="@+id/tab_home_label"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="홈"
+                android:textSize="10sp"
+                android:textStyle="bold"
+                android:textColor="@color/primary"
+                android:layout_marginTop="2dp" />
+        </LinearLayout>
+
+        <!-- 스캔 FAB (center gradient circle) -->
+        <FrameLayout
+            android:id="@+id/tab_scan_fab"
+            android:layout_width="44dp"
+            android:layout_height="44dp"
+            android:layout_gravity="center_vertical"
+            android:layout_marginHorizontal="6dp"
+            android:background="@drawable/bg_tab_scan_fab"
+            android:clickable="true"
+            android:focusable="true"
+            android:elevation="4dp">
+
+            <ImageView
+                android:layout_width="22dp"
+                android:layout_height="22dp"
+                android:layout_gravity="center"
+                android:src="@drawable/ic_scan"
+                app:tint="@color/on_primary"
+                android:contentDescription="스캔" />
+        </FrameLayout>
+
+        <!-- 기록 tab -->
+        <LinearLayout
+            android:id="@+id/tab_diary"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:orientation="vertical"
+            android:gravity="center"
+            android:paddingHorizontal="24dp"
+            android:clickable="true"
+            android:focusable="true"
+            android:background="?attr/selectableItemBackgroundBorderless">
+
+            <ImageView
+                android:id="@+id/tab_diary_icon"
+                android:layout_width="22dp"
+                android:layout_height="22dp"
+                android:src="@drawable/ic_diary"
+                app:tint="@color/nav_unselected" />
+
+            <TextView
+                android:id="@+id/tab_diary_label"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="기록"
+                android:textSize="10sp"
+                android:textStyle="bold"
+                android:textColor="@color/nav_unselected"
+                android:layout_marginTop="2dp" />
+        </LinearLayout>
+
+    </LinearLayout>
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

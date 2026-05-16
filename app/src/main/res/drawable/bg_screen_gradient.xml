@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <!-- Layer 1: 좌측 민트 → 우측 라벤더 (수평 그라데이션) -->
+    <item>
+        <shape android:shape="rectangle">
+            <gradient
+                android:startColor="#A8D8A8"
+                android:endColor="#C4A8D4"
+                android:angle="0"
+                android:type="linear" />
+        </shape>
+    </item>
+
+    <!-- Layer 2: 상단 투명 → 하단 연회색 오버레이 (위 25% 컬러, 아래 75% 회색) -->
+    <item>
+        <shape android:shape="rectangle">
+            <gradient
+                android:startColor="#00F2F2F7"
+                android:centerColor="#CCF2F2F7"
+                android:endColor="#F2F2F7"
+                android:angle="270"
+                android:type="linear" />
+        </shape>
+    </item>
+
+</layer-list>

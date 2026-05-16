@@ -29,7 +29,7 @@ class AcneDetector(private val context: Context) {
 
     private var interpreter: Interpreter? = null
     var confThreshold = 0.04f
-    private val iouThreshold = 0.5f  // Python: model.predict(..., iou=0.5)
+    private val iouThreshold = 0.3f  // 겹침 기준 강화 (기존 0.5)
 
     private var inputW = 640
     private var inputH = 640
@@ -249,13 +249,38 @@ class AcneDetector(private val context: Context) {
             kept.add(best)
             sorted.removeAll { iou(best.bbox, it.bbox) >= iouThreshold }
         }
+        return suppressContained(kept)
+    }
+
+    /**
+     * 두 박스의 교차 면적이 더 작은 박스 면적의 80% 이상이면
+     * 더 작은 박스를 제거 (거의 포함된 중복 박스 제거).
+     */
+    private fun suppressContained(
+        dets: List<AcneDetection>,
+        overlapRatio: Float = 0.50f
+    ): List<AcneDetection> {
+        val sorted = dets.sortedByDescending { it.bbox.width() * it.bbox.height() }
+        val kept = mutableListOf<AcneDetection>()
+        for (candidate in sorted) {
+            val areaC = candidate.bbox.width() * candidate.bbox.height()
+            val dominated = kept.any { big ->
+                val inter = intersection(big.bbox, candidate.bbox)
+                areaC > 0f && inter / areaC >= overlapRatio
+            }
+            if (!dominated) kept.add(candidate)
+        }
         return kept
     }
 
-    private fun iou(a: RectF, b: RectF): Float {
+    private fun intersection(a: RectF, b: RectF): Float {
         val ix1 = maxOf(a.left, b.left); val iy1 = maxOf(a.top, b.top)
         val ix2 = minOf(a.right, b.right); val iy2 = minOf(a.bottom, b.bottom)
-        val inter = maxOf(0f, ix2 - ix1) * maxOf(0f, iy2 - iy1)
+        return maxOf(0f, ix2 - ix1) * maxOf(0f, iy2 - iy1)
+    }
+
+    private fun iou(a: RectF, b: RectF): Float {
+        val inter = intersection(a, b)
         val union = a.width() * a.height() + b.width() * b.height() - inter
         return if (union > 0f) inter / union else 0f
     }
