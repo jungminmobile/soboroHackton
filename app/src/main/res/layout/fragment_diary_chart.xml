@@ -10,7 +10,8 @@
         android:layout_height="wrap_content"
         android:orientation="vertical"
         android:paddingHorizontal="16dp"
-        android:paddingVertical="16dp">
+        android:paddingTop="16dp"
+        android:paddingBottom="100dp">
 
         <!-- Chart Period Selector -->
         <com.google.android.material.chip.ChipGroup

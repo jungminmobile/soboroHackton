@@ -95,7 +95,7 @@
                 android:orientation="vertical"
                 android:paddingHorizontal="16dp"
                 android:paddingTop="4dp"
-                android:paddingBottom="32dp">
+                android:paddingBottom="100dp">
 
                 <!-- ── 피부 분석 카드 (오각형 + 점수) ──────── -->
                 <androidx.cardview.widget.CardView
