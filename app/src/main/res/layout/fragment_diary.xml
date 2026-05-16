@@ -39,7 +39,11 @@
         app:tabIndicatorColor="@color/primary"
         app:tabIndicatorHeight="3dp"
         app:tabMode="fixed"
-        app:tabGravity="fill" />
+        app:tabGravity="fill"
+        app:tabPaddingStart="0dp"
+        app:tabPaddingEnd="0dp"
+        app:tabMaxWidth="0dp"
+        app:tabTextAppearance="@style/CustomTabText" />
 
     <!-- ViewPager2 -->
     <androidx.viewpager2.widget.ViewPager2

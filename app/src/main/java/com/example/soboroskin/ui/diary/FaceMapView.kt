@@ -20,7 +20,10 @@ class FaceMapView @JvmOverloads constructor(
     data class RegionMarker(
         val partName: String,
         val count: Int,
-        val worstStatus: String  // "new" | "worsened" | "improved" | "existing" | "healed"
+        val worstStatus: String,
+        val cx: Float,
+        val cy: Float,
+        val spotIds: List<Long> = emptyList()   // 이 클러스터에 속한 스팟 ID 목록
     )
 
     // 얼굴 모델 이미지 위의 각 부위 중심 좌표 (이미지 기준 정규화 0~1)
@@ -100,7 +103,7 @@ class FaceMapView @JvmOverloads constructor(
     var highlightedPart: String? = null
         set(value) { field = value; invalidate() }
 
-    var onRegionClick: ((String) -> Unit)? = null
+    var onRegionClick: ((spotIds: List<Long>) -> Unit)? = null
 
     // ── Init ─────────────────────────────────────────────────────
     init {
@@ -131,10 +134,10 @@ class FaceMapView @JvmOverloads constructor(
             canvas.drawColor(Color.parseColor("#2A2A2A"))
         }
 
-        // 부위 배지 그리기
+        // 부위 배지 그리기 — 클러스터 중심 좌표 사용
         for (marker in regions) {
-            val (nx, ny) = PART_POSITIONS[marker.partName] ?: PART_POSITIONS["face"]!!
-            val px = nx * w; val py = ny * h
+            val px = marker.cx * w
+            val py = marker.cy * h
             drawBadge(canvas, marker, px, py)
         }
     }
@@ -171,13 +174,12 @@ class FaceMapView @JvmOverloads constructor(
             var closest: RegionMarker? = null
             var minDist = TOUCH_R
             for (marker in regions) {
-                val (nx, ny) = PART_POSITIONS[marker.partName] ?: PART_POSITIONS["face"]!!
-                val dist = sqrt(((tx - nx * w).let { it * it } + (ty - ny * h).let { it * it }).toDouble()).toFloat()
+                val dist = sqrt(((tx - marker.cx * w).let { it * it } + (ty - marker.cy * h).let { it * it }).toDouble()).toFloat()
                 if (dist < minDist) { minDist = dist; closest = marker }
             }
             closest?.let {
                 highlightedPart = it.partName
-                onRegionClick?.invoke(it.partName)
+                onRegionClick?.invoke(it.spotIds)
                 performClick()
             }
         }

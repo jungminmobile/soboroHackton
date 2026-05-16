@@ -127,9 +127,9 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="피부 분석"
-                            android:textSize="15sp"
+                            android:textSize="19sp"
                             android:textStyle="bold"
-                            android:textColor="@color/primary"
+                            android:textColor="@color/black"
                             android:layout_marginBottom="8dp" />
 
                         <LinearLayout
@@ -159,16 +159,16 @@
                                         android:background="@color/accent_moisture" android:layout_marginEnd="10dp" />
                                     <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content"
                                         android:layout_weight="1" android:orientation="vertical">
-                                        <TextView android:text="수분" android:textSize="15sp" android:textColor="@color/text_secondary"
+                                        <TextView android:text="수분" android:textSize="11sp" android:textColor="@color/text_secondary"
                                             android:layout_width="wrap_content" android:layout_height="wrap_content"/>
                                         <LinearLayout android:layout_width="wrap_content" android:layout_height="wrap_content"
                                             android:orientation="horizontal" android:gravity="center_vertical">
-                                            <TextView android:id="@+id/tv_delta_moisture" android:layout_width="wrap_content"
-                                                android:layout_height="wrap_content" android:textSize="10sp"
-                                                android:layout_marginEnd="3dp" android:visibility="gone"/>
                                             <TextView android:id="@+id/tv_val_moisture" android:layout_width="wrap_content"
                                                 android:layout_height="wrap_content" android:text="--"
-                                                android:textSize="22sp" android:textStyle="bold" android:textColor="@color/on_background"/>
+                                                android:textSize="20sp" android:textStyle="bold" android:textColor="@color/on_background"/>
+                                            <TextView android:id="@+id/tv_delta_moisture" android:layout_width="wrap_content"
+                                                android:layout_height="wrap_content" android:textSize="10sp"
+                                                android:layout_marginStart="3dp" android:visibility="gone"/>
                                         </LinearLayout>
                                     </LinearLayout>
                                 </LinearLayout>
@@ -182,39 +182,39 @@
                                         android:background="@color/accent_oil" android:layout_marginEnd="10dp" />
                                     <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content"
                                         android:layout_weight="1" android:orientation="vertical">
-                                        <TextView android:text="건조함" android:textSize="15sp" android:textColor="@color/text_secondary"
+                                        <TextView android:text="건조함" android:textSize="11sp" android:textColor="@color/text_secondary"
                                             android:layout_width="wrap_content" android:layout_height="wrap_content"/>
                                         <LinearLayout android:layout_width="wrap_content" android:layout_height="wrap_content"
                                             android:orientation="horizontal" android:gravity="center_vertical">
-                                            <TextView android:id="@+id/tv_delta_dryness" android:layout_width="wrap_content"
-                                                android:layout_height="wrap_content" android:textSize="10sp"
-                                                android:layout_marginEnd="3dp" android:visibility="gone"/>
                                             <TextView android:id="@+id/tv_val_dryness" android:layout_width="wrap_content"
                                                 android:layout_height="wrap_content" android:text="--"
-                                                android:textSize="22sp" android:textStyle="bold" android:textColor="@color/on_background"/>
+                                                android:textSize="20sp" android:textStyle="bold" android:textColor="@color/on_background"/>
+                                            <TextView android:id="@+id/tv_delta_dryness" android:layout_width="wrap_content"
+                                                android:layout_height="wrap_content" android:textSize="10sp"
+                                                android:layout_marginStart="3dp" android:visibility="gone"/>
                                         </LinearLayout>
                                     </LinearLayout>
                                 </LinearLayout>
 
                                 <View android:layout_width="match_parent" android:layout_height="0.5dp" android:background="@color/divider"/>
 
-                                <!-- 여드름 -->
+                                <!-- 트러블 -->
                                 <LinearLayout android:layout_width="match_parent" android:layout_height="0dp"
                                     android:layout_weight="1" android:orientation="horizontal" android:gravity="center_vertical">
                                     <View android:layout_width="3dp" android:layout_height="28dp"
                                         android:background="@color/accent_trouble" android:layout_marginEnd="10dp" />
                                     <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content"
                                         android:layout_weight="1" android:orientation="vertical">
-                                        <TextView android:text="여드름" android:textSize="15sp" android:textColor="@color/text_secondary"
+                                        <TextView android:text="트러블" android:textSize="11sp" android:textColor="@color/text_secondary"
                                             android:layout_width="wrap_content" android:layout_height="wrap_content"/>
                                         <LinearLayout android:layout_width="wrap_content" android:layout_height="wrap_content"
                                             android:orientation="horizontal" android:gravity="center_vertical">
-                                            <TextView android:id="@+id/tv_delta_acne" android:layout_width="wrap_content"
-                                                android:layout_height="wrap_content" android:textSize="10sp"
-                                                android:layout_marginEnd="3dp" android:visibility="gone"/>
                                             <TextView android:id="@+id/tv_val_acne" android:layout_width="wrap_content"
                                                 android:layout_height="wrap_content" android:text="--"
-                                                android:textSize="22sp" android:textStyle="bold" android:textColor="@color/on_background"/>
+                                                android:textSize="20sp" android:textStyle="bold" android:textColor="@color/on_background"/>
+                                            <TextView android:id="@+id/tv_delta_acne" android:layout_width="wrap_content"
+                                                android:layout_height="wrap_content" android:textSize="10sp"
+                                                android:layout_marginStart="3dp" android:visibility="gone"/>
                                         </LinearLayout>
                                     </LinearLayout>
                                 </LinearLayout>
@@ -228,16 +228,16 @@
                                         android:background="#4CAF50" android:layout_marginEnd="10dp" />
                                     <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content"
                                         android:layout_weight="1" android:orientation="vertical">
-                                        <TextView android:text="모공" android:textSize="15sp" android:textColor="@color/text_secondary"
+                                        <TextView android:text="모공" android:textSize="11sp" android:textColor="@color/text_secondary"
                                             android:layout_width="wrap_content" android:layout_height="wrap_content"/>
                                         <LinearLayout android:layout_width="wrap_content" android:layout_height="wrap_content"
                                             android:orientation="horizontal" android:gravity="center_vertical">
-                                            <TextView android:id="@+id/tv_delta_pore" android:layout_width="wrap_content"
-                                                android:layout_height="wrap_content" android:textSize="10sp"
-                                                android:layout_marginEnd="3dp" android:visibility="gone"/>
                                             <TextView android:id="@+id/tv_val_pore" android:layout_width="wrap_content"
                                                 android:layout_height="wrap_content" android:text="--"
-                                                android:textSize="22sp" android:textStyle="bold" android:textColor="@color/on_background"/>
+                                                android:textSize="20sp" android:textStyle="bold" android:textColor="@color/on_background"/>
+                                            <TextView android:id="@+id/tv_delta_pore" android:layout_width="wrap_content"
+                                                android:layout_height="wrap_content" android:textSize="10sp"
+                                                android:layout_marginStart="3dp" android:visibility="gone"/>
                                         </LinearLayout>
                                     </LinearLayout>
                                 </LinearLayout>
@@ -251,16 +251,16 @@
                                         android:background="@color/accent_elasticity" android:layout_marginEnd="10dp" />
                                     <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content"
                                         android:layout_weight="1" android:orientation="vertical">
-                                        <TextView android:text="탄력" android:textSize="15sp" android:textColor="@color/text_secondary"
+                                        <TextView android:text="탄력" android:textSize="11sp" android:textColor="@color/text_secondary"
                                             android:layout_width="wrap_content" android:layout_height="wrap_content"/>
                                         <LinearLayout android:layout_width="wrap_content" android:layout_height="wrap_content"
                                             android:orientation="horizontal" android:gravity="center_vertical">
-                                            <TextView android:id="@+id/tv_delta_elasticity" android:layout_width="wrap_content"
-                                                android:layout_height="wrap_content" android:textSize="10sp"
-                                                android:layout_marginEnd="3dp" android:visibility="gone"/>
                                             <TextView android:id="@+id/tv_val_elasticity" android:layout_width="wrap_content"
                                                 android:layout_height="wrap_content" android:text="--"
-                                                android:textSize="22sp" android:textStyle="bold" android:textColor="@color/on_background"/>
+                                                android:textSize="20sp" android:textStyle="bold" android:textColor="@color/on_background"/>
+                                            <TextView android:id="@+id/tv_delta_elasticity" android:layout_width="wrap_content"
+                                                android:layout_height="wrap_content" android:textSize="10sp"
+                                                android:layout_marginStart="3dp" android:visibility="gone"/>
                                         </LinearLayout>
                                     </LinearLayout>
                                 </LinearLayout>
@@ -352,10 +352,9 @@
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
                         android:text="피부 변화 추이"
-                        android:textSize="14sp"
-                        android:textAllCaps="true"
-                        android:textColor="@color/text_secondary"
-                        android:letterSpacing="0.06" />
+                        android:textSize="19sp"
+                        android:textStyle="bold"
+                        android:textColor="@color/on_background" />
 
                     <com.google.android.material.chip.ChipGroup
                         android:id="@+id/chip_group_period"
@@ -467,7 +466,7 @@
                             <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content"
                                 android:layout_weight="1" android:orientation="vertical" android:gravity="center">
                                 <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
-                                    android:text="여드름" android:textSize="15sp" android:textColor="@color/text_secondary"/>
+                                    android:text="트러블" android:textSize="15sp" android:textColor="@color/text_secondary"/>
                                 <TextView android:id="@+id/tv_avg_acne" android:layout_width="wrap_content"
                                     android:layout_height="wrap_content" android:text="-" android:textSize="16sp"
                                     android:textStyle="bold" android:textColor="@color/accent_trouble" android:layout_marginTop="2dp"/>

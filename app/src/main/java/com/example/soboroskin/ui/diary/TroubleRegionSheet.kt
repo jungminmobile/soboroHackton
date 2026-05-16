@@ -28,10 +28,10 @@ class TroubleRegionSheet : BottomSheetDialogFragment() {
 
     companion object {
         const val TAG = "TroubleRegionSheet"
-        private const val ARG_PART = "partName"
+        private const val ARG_IDS = "spotIds"
 
-        fun newInstance(partName: String) = TroubleRegionSheet().apply {
-            arguments = Bundle().also { it.putString(ARG_PART, partName) }
+        fun newInstance(spotIds: List<Long>) = TroubleRegionSheet().apply {
+            arguments = Bundle().also { it.putLongArray(ARG_IDS, spotIds.toLongArray()) }
         }
     }
 
@@ -41,30 +41,23 @@ class TroubleRegionSheet : BottomSheetDialogFragment() {
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        val partName = arguments?.getString(ARG_PART) ?: return
+        val spotIds = arguments?.getLongArray(ARG_IDS)?.toList() ?: return
         val db = AppDatabase.getInstance(requireContext())
 
         binding.rvRegionSpots.layoutManager = LinearLayoutManager(requireContext())
 
         viewLifecycleOwner.lifecycleScope.launch {
-            val spots: List<AcneSpotEntity> = withContext(Dispatchers.IO) {
-                db.acneSpotDao().getAllSpots().filter {
-                    FaceMapView.normalizePartNamePublic(it.partName) == partName
-                }
-            }
-
             val items: List<SpotItem> = withContext(Dispatchers.IO) {
-                spots.map { spot ->
-                    val records = db.acneSpotRecordDao().getRecordsForSpot(spot.id)
-                    val latest = records.lastOrNull()
-                    SpotItem(spot, latest, records.size)
+                spotIds.mapNotNull { id ->
+                    val spot = db.acneSpotDao().getAllSpots().find { it.id == id } ?: return@mapNotNull null
+                    val records = db.acneSpotRecordDao().getRecordsForSpot(id)
+                    SpotItem(spot, records.lastOrNull(), records.size)
                 }
             }
 
-            // 헤더 업데이트
-            val title = FaceMapView.partKorean(partName)
-            binding.tvRegionTitle.text = title
-            binding.tvRegionCount.text = "${items.size}개"
+            // 부위명 없이 개수만 표시
+            binding.tvRegionTitle.visibility = android.view.View.GONE
+            binding.tvRegionCount.text = "트러블 ${items.size}개"
 
             val worstStatus = FaceMapView.worstStatus(
                 items.map { it.latest?.changeType ?: if (it.spot.isHealed) "healed" else "existing" }
@@ -72,11 +65,9 @@ class TroubleRegionSheet : BottomSheetDialogFragment() {
             val dotColor = FaceMapView.statusColor(worstStatus)
             (binding.viewRegionColor.background as? GradientDrawable)?.setColor(dotColor)
                 ?: run {
-                    val dot = GradientDrawable().apply {
-                        shape = GradientDrawable.OVAL
-                        setColor(dotColor)
+                    binding.viewRegionColor.background = GradientDrawable().apply {
+                        shape = GradientDrawable.OVAL; setColor(dotColor)
                     }
-                    binding.viewRegionColor.background = dot
                 }
 
             binding.rvRegionSpots.adapter = RegionSpotAdapter(items) { spotId ->

@@ -75,6 +75,7 @@
                 android:layout_height="wrap_content"
                 android:text="홈"
                 android:textSize="10sp"
+                android:textStyle="bold"
                 android:textColor="@color/primary"
                 android:layout_marginTop="2dp" />
         </LinearLayout>
@@ -125,6 +126,7 @@
                 android:layout_height="wrap_content"
                 android:text="기록"
                 android:textSize="10sp"
+                android:textStyle="bold"
                 android:textColor="@color/nav_unselected"
                 android:layout_marginTop="2dp" />
         </LinearLayout>

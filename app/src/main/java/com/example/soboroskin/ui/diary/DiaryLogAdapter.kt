@@ -12,6 +12,7 @@ import com.example.soboroskin.databinding.ItemDiaryLogAiBinding
 import com.example.soboroskin.databinding.ItemDiarySeparatorBinding
 import java.text.SimpleDateFormat
 import java.util.*
+import kotlin.math.roundToInt
 
 // ── 리스트 아이템 타입 ──────────────────────────────────────────
 sealed class DiaryListItem {
@@ -69,10 +70,10 @@ class DiaryLogAdapter(
             binding.tvDate.text     = sdf.format(Date(entity.date))
             binding.tvSkinType.text = entity.skinType
 
-            binding.tvScoreMoisture.text   = "💧${entity.moistureScore}"
-            binding.tvScoreOil.text        = "✨${entity.oilScore}"
-            binding.tvScoreTrouble.text    = "🔴${entity.troubleScore}"
-            binding.tvScoreElasticity.text = "💜${entity.elasticityScore}"
+            binding.tvScoreMoisture.text   = "💧${(entity.moistureScore / 10f).roundToInt()}"
+            binding.tvScoreOil.text        = "✨${(entity.oilScore / 10f).roundToInt()}"
+            binding.tvScoreTrouble.text    = "🔴${(entity.troubleScore / 10f).roundToInt()}"
+            binding.tvScoreElasticity.text = "💜${(entity.elasticityScore / 10f).roundToInt()}"
 
             if (entity.notes.isNotEmpty()) {
                 binding.tvNotes.visibility = View.VISIBLE

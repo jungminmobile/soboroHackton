@@ -37,6 +37,7 @@ import java.util.Date
 import java.util.Locale
 import java.util.concurrent.TimeUnit
 import kotlin.math.abs
+import kotlin.math.roundToInt
 
 class HomeLogFragment : Fragment() {
 
@@ -134,6 +135,8 @@ class HomeLogFragment : Fragment() {
 
     // ── 항목 표시 ──────────────────────────────────────────────────
 
+    private fun to10Scale(score: Int): Int = (score / 10f).roundToInt()
+
     private fun showEntry(index: Int) {
         val entry     = allEntries.getOrNull(index) ?: return
         val prevEntry = allEntries.getOrNull(index + 1)
@@ -154,26 +157,27 @@ class HomeLogFragment : Fragment() {
         val pore       = entry.oilScore
         val elasticity = entry.elasticityScore
 
+        // 오각형 차트도 10단계로 딱딱 떨어지게 보이고 싶다면 10점 만점 변환값 사용
         binding.pentagonChart.scores = floatArrayOf(
-            moisture.toFloat(),
-            dryness.toFloat(),
-            acne.toFloat(),
-            pore.toFloat(),
-            elasticity.toFloat()
+            to10Scale(moisture) * 10f,
+            to10Scale(dryness) * 10f,
+            to10Scale(acne) * 10f,
+            to10Scale(pore) * 10f,
+            to10Scale(elasticity) * 10f
         )
 
-        binding.tvValMoisture.text   = "${moisture}점"
-        binding.tvValDryness.text    = "${dryness}점"
-        binding.tvValAcne.text       = "${acne}점"
-        binding.tvValPore.text       = "${pore}점"
-        binding.tvValElasticity.text = "${elasticity}점"
+        binding.tvValMoisture.text   = "${to10Scale(moisture)}점"
+        binding.tvValDryness.text    = "${to10Scale(dryness)}점"
+        binding.tvValAcne.text       = "${to10Scale(acne)}점"
+        binding.tvValPore.text       = "${to10Scale(pore)}점"
+        binding.tvValElasticity.text = "${to10Scale(elasticity)}점"
 
         if (prevEntry != null) {
-            showDelta(binding.tvDeltaMoisture,   moisture   - prevEntry.moistureScore)
-            showDelta(binding.tvDeltaDryness,    dryness    - (100 - prevEntry.moistureScore))
-            showDelta(binding.tvDeltaAcne,       acne       - prevEntry.troubleScore)
-            showDelta(binding.tvDeltaPore,       pore       - prevEntry.oilScore)
-            showDelta(binding.tvDeltaElasticity, elasticity - prevEntry.elasticityScore)
+            showDelta(binding.tvDeltaMoisture,   to10Scale(moisture)   - to10Scale(prevEntry.moistureScore))
+            showDelta(binding.tvDeltaDryness,    to10Scale(dryness)    - to10Scale(100 - prevEntry.moistureScore))
+            showDelta(binding.tvDeltaAcne,       to10Scale(acne)       - to10Scale(prevEntry.troubleScore))
+            showDelta(binding.tvDeltaPore,       to10Scale(pore)       - to10Scale(prevEntry.oilScore))
+            showDelta(binding.tvDeltaElasticity, to10Scale(elasticity) - to10Scale(prevEntry.elasticityScore))
         } else {
             listOf(
                 binding.tvDeltaMoisture, binding.tvDeltaDryness,
@@ -261,8 +265,8 @@ class HomeLogFragment : Fragment() {
             axisLeft.apply {
                 setDrawGridLines(true)
                 axisMinimum = 0f
-                axisMaximum = 100f
-                granularity = 25f
+                axisMaximum = 10f
+                granularity = 1f
                 textSize = 10f
             }
         }
@@ -316,10 +320,10 @@ class HomeLogFragment : Fragment() {
             }
 
         val lineData = LineData(
-            makeSet(chartFilteredEntries.mapIndexed { i, e -> Entry(i.toFloat(), e.moistureScore.toFloat()) },   "수분",   "#4FC3F7"),
-            makeSet(chartFilteredEntries.mapIndexed { i, e -> Entry(i.toFloat(), e.elasticityScore.toFloat()) }, "탄력",   "#BA68C8"),
-            makeSet(chartFilteredEntries.mapIndexed { i, e -> Entry(i.toFloat(), e.oilScore.toFloat()) },        "모공",   "#4CAF50"),
-            makeSet(chartFilteredEntries.mapIndexed { i, e -> Entry(i.toFloat(), e.troubleScore.toFloat()) },    "여드름", "#EF5350")
+            makeSet(chartFilteredEntries.mapIndexed { i, e -> Entry(i.toFloat(), to10Scale(e.moistureScore).toFloat()) },   "수분",   "#4FC3F7"),
+            makeSet(chartFilteredEntries.mapIndexed { i, e -> Entry(i.toFloat(), to10Scale(e.elasticityScore).toFloat()) }, "탄력",   "#BA68C8"),
+            makeSet(chartFilteredEntries.mapIndexed { i, e -> Entry(i.toFloat(), to10Scale(e.oilScore).toFloat()) },        "모공",   "#4CAF50"),
+            makeSet(chartFilteredEntries.mapIndexed { i, e -> Entry(i.toFloat(), to10Scale(e.troubleScore).toFloat()) },    "트러블", "#EF5350")
         )
 
         chart.xAxis.valueFormatter = IndexAxisValueFormatter(labels)
@@ -378,10 +382,10 @@ class HomeLogFragment : Fragment() {
             binding.tvAvgAcne.text       = "-"
             return
         }
-        binding.tvAvgMoisture.text   = "${entries.map { it.moistureScore }.average().toInt()}점"
-        binding.tvAvgElasticity.text = "${entries.map { it.elasticityScore }.average().toInt()}점"
-        binding.tvAvgPore.text       = "${entries.map { it.oilScore }.average().toInt()}점"
-        binding.tvAvgAcne.text       = "${entries.map { it.troubleScore }.average().toInt()}점"
+        binding.tvAvgMoisture.text   = "${to10Scale(entries.map { it.moistureScore }.average().toInt())}점"
+        binding.tvAvgElasticity.text = "${to10Scale(entries.map { it.elasticityScore }.average().toInt())}점"
+        binding.tvAvgPore.text       = "${to10Scale(entries.map { it.oilScore }.average().toInt())}점"
+        binding.tvAvgAcne.text       = "${to10Scale(entries.map { it.troubleScore }.average().toInt())}점"
     }
 
     // ── 피부 일기 ─────────────────────────────────────────────────

@@ -148,7 +148,7 @@ class DiaryLogFragment : Fragment() {
         val pore       = entry.oilScore
         val elasticity = entry.elasticityScore
 
-        // 오각형: 수분(0) 건조함(1) 여드름(2) 모공(3) 탄력(4)
+        // 오각형: 수분(0) 건조함(1) 트러블(2) 모공(3) 탄력(4)
         binding.pentagonChart.scores = floatArrayOf(
             moisture.toFloat(),
             dryness.toFloat(),
@@ -294,7 +294,7 @@ class DiaryLogFragment : Fragment() {
             makeSet(chartFilteredEntries.mapIndexed { i, e -> Entry(i.toFloat(), e.moistureScore.toFloat()) },   "수분",   "#4FC3F7"),
             makeSet(chartFilteredEntries.mapIndexed { i, e -> Entry(i.toFloat(), e.elasticityScore.toFloat()) }, "탄력",   "#BA68C8"),
             makeSet(chartFilteredEntries.mapIndexed { i, e -> Entry(i.toFloat(), e.oilScore.toFloat()) },        "모공",   "#4CAF50"),
-            makeSet(chartFilteredEntries.mapIndexed { i, e -> Entry(i.toFloat(), e.troubleScore.toFloat()) },    "여드름", "#EF5350")
+            makeSet(chartFilteredEntries.mapIndexed { i, e -> Entry(i.toFloat(), e.troubleScore.toFloat()) },    "트러블", "#EF5350")
         )
 
         chart.xAxis.valueFormatter = IndexAxisValueFormatter(labels)

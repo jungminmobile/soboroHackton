@@ -14,7 +14,7 @@ import kotlin.math.sin
 /**
  * 피부 5항목 오각형 레이더 차트
  * 꼭짓점 순서 (위에서 시계 방향):
- *   0: 수분, 1: 건조함, 2: 여드름, 3: 모공, 4: 탄력
+ *   0: 수분, 1: 건조함, 2: 트러블, 3: 모공, 4: 탄력
  */
 class PentagonChartView @JvmOverloads constructor(
     context: Context,
@@ -34,7 +34,7 @@ class PentagonChartView @JvmOverloads constructor(
             invalidate()
         }
 
-    val labels = arrayOf("수분", "건조함", "여드름", "모공", "탄력")
+    val labels = arrayOf("수분", "건조함", "트러블", "모공", "탄력")
 
     // ─── Paints ─────────────────────────────────────────────────────
     private val gridPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {

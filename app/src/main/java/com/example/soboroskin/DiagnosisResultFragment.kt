@@ -17,6 +17,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.io.File
+import kotlin.math.roundToInt
 
 class DiagnosisResultFragment : Fragment(R.layout.fragment_diagnosis_result) {
 
@@ -150,22 +151,22 @@ class DiagnosisResultFragment : Fragment(R.layout.fragment_diagnosis_result) {
     private fun updateUI(view: View, results: Map<String, Float>) {
         // 1. 수분
         val moisture = results["moisture"] ?: 0f
-        view.findViewById<TextView>(R.id.txtMoistureValue).text = "${moisture.toInt()}%"
+        view.findViewById<TextView>(R.id.txtMoistureValue).text = "${(moisture / 10f).roundToInt()}점"
         view.findViewById<ProgressBar>(R.id.pbMoisture).progress = moisture.toInt()
 
         // 2. 건조함
         val dryness = results["dryness"] ?: 0f
-        view.findViewById<TextView>(R.id.txtDrynessValue).text = "${dryness.toInt()}%"
+        view.findViewById<TextView>(R.id.txtDrynessValue).text = "${(dryness / 10f).roundToInt()}점"
         view.findViewById<ProgressBar>(R.id.pbDryness).progress = dryness.toInt()
 
         // 3. 탄력
         val elasticity = results["elasticity"] ?: 0f
-        view.findViewById<TextView>(R.id.txtElasticityValue).text = String.format("%.1f", elasticity)
+        view.findViewById<TextView>(R.id.txtElasticityValue).text = "${elasticity.roundToInt()}점"
         view.findViewById<ProgressBar>(R.id.pbElasticity).progress = (elasticity * 10).toInt()
 
         // 4. 모공
         val pore = results["pore"] ?: 0f
-        view.findViewById<TextView>(R.id.txtPoreValue).text = String.format("%.1f", pore)
+        view.findViewById<TextView>(R.id.txtPoreValue).text = "${pore.roundToInt()}점"
         view.findViewById<ProgressBar>(R.id.pbPore).progress = (pore * 10).toInt()
     }
 }
